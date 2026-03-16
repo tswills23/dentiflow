@@ -1,0 +1,28 @@
+{
+  "name": "dentiflow-speed-to-lead",
+  "version": "1.0.0",
+  "description": "DentiFlow AI-powered speed-to-lead pipeline for dental practices",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.0",
+    "twilio": "^5.4.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "pg": "^8.20.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
