@@ -16,6 +16,7 @@ export interface IngestRecord {
   phone: string;
   email?: string;
   lastVisitDate?: string; // ISO date string
+  location?: string;      // Office location (e.g. "Downtown", "Northside")
 }
 
 function normalizePhone(raw: string): string | null {
@@ -59,6 +60,7 @@ export async function ingestPatients(
             patient_type: 'existing_patient' as const,
             last_visit_date: record.lastVisitDate || null,
             recall_eligible: true,
+            location: record.location || null,
           })
           .select()
           .single();
@@ -99,14 +101,18 @@ export async function ingestPatients(
       const lastVisit = record.lastVisitDate || existing.last_visit_date;
       await createSequence(practiceId, existing.id, lastVisit, phone);
 
-      // Update patient last_visit_date if provided
+      // Update patient fields if provided
+      const patientUpdates: Record<string, unknown> = { recall_eligible: true };
       if (record.lastVisitDate && record.lastVisitDate !== existing.last_visit_date) {
+        patientUpdates.last_visit_date = record.lastVisitDate;
+      }
+      if (record.location) {
+        patientUpdates.location = record.location;
+      }
+      if (Object.keys(patientUpdates).length > 1) {
         await supabase
           .from('patients')
-          .update({
-            last_visit_date: record.lastVisitDate,
-            recall_eligible: true,
-          })
+          .update(patientUpdates)
           .eq('id', existing.id);
       }
 

@@ -1,0 +1,5 @@
+{
+  "message_type": "reply_cost_question",
+  "scenario": "Patient replied: 'How much is this going to cost? I dont have insurance anymore'",
+  "message": "Great question, [Name] -- I'd rather have someone from my team walk you through the specifics so nothing gets missed. Do you prefer a quick call or a text with the details?"
+}

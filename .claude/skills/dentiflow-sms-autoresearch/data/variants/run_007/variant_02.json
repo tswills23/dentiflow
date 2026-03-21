@@ -1,0 +1,5 @@
+{
+  "message_type": "day_0_opener",
+  "scenario": "Patient: David, 15 months overdue, last saw Dr. Rivera, patient had periodontal concerns flagged on last visit",
+  "message": "Hi David, this is Dr. Rivera from [Practice Name]. I was thinking about you and just wanted to check in. How have you been doing lately?"
+}

@@ -18,6 +18,7 @@ import type {
   AvailableSlot,
   TimePreferences,
 } from '../../types/recall';
+import { notifyEscalation } from '../execution/staffNotifier';
 import type { Practice, Patient } from '../../types/database';
 
 // =============================================================================
@@ -150,6 +151,15 @@ export async function handleRecallReply(
   }
 
   // 9. Handle terminal-specific side effects
+  if (transition.nextStage === 'S7_HANDOFF' && transition.action === 'handoff_urgent') {
+    await notifyEscalation(
+      practice,
+      patient,
+      'Emergency detected during recall',
+      messageBody
+    );
+  }
+
   if (transition.nextStage === 'EXIT_OPT_OUT') {
     await supabase
       .from('patients')
@@ -214,7 +224,9 @@ async function executeAction(
   classification: ReturnType<typeof classifyIntent>
 ): Promise<{ replyText: string; updatedFields: Record<string, unknown> }> {
   const firstName = patient.first_name || 'there';
-  const practiceName = practice.name;
+  const practiceName = patient.location
+    ? `${practice.name} ${patient.location}`
+    : practice.name;
   const updatedFields: Record<string, unknown> = {};
 
   switch (action) {

@@ -1,0 +1,5 @@
+{
+  "message_type": "reply_reschedule",
+  "scenario": "Patient replied: 'I booked for Tuesday but something came up, can I move it?'",
+  "message": "Hi [Name], of course -- no problem at all. What works better for you? I'll have the team get you moved right away."
+}

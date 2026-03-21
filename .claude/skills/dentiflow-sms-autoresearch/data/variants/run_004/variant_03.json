@@ -1,0 +1,5 @@
+{
+  "message_type": "day_0_opener",
+  "scenario": "Patient: Linda, 24 months overdue, last saw Dr. Kim, long-time patient of 8 years, just fell off schedule",
+  "message": "Hi Linda, this is Dr. [Last Name] from [Practice Name]. It's been a while and I just wanted to check in on you. How have you been?"
+}

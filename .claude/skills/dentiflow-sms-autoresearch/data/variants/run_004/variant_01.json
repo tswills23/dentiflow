@@ -1,0 +1,5 @@
+{
+  "message_type": "reply_yes",
+  "scenario": "Patient replied: 'Yeah I can come in next week, what times do you have?'",
+  "message": "Hi [Name], that's great to hear. I'll have my team reach out today to lock in a time that works for you. Looking forward to seeing you."
+}

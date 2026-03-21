@@ -1,0 +1,5 @@
+{
+  "message_type": "day_0_opener",
+  "scenario": "Patient: Robert, 13 months overdue, last saw Dr. Garcia, new-ish patient with only 2 prior visits",
+  "message": "Hi Robert, this is Dr. Garcia from [Practice Name]. Just wanted to check in \u2014 how have you been doing?"
+}

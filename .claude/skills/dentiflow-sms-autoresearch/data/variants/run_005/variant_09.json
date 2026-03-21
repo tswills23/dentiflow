@@ -1,0 +1,5 @@
+{
+  "message_type": "day_3_offer",
+  "scenario": "Patient: Sarah, 36 months overdue, opened both messages, no reply, longest gap in batch",
+  "message": "Hi [Name], this is Dr. [Last Name] from [Practice Name]. I'd like to cover your first visit back -- no cost, no catch. It's my call and I want to make it easy. Does this week or next work better for you?"
+}

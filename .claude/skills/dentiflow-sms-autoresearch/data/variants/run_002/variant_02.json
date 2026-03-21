@@ -1,0 +1,5 @@
+{
+  "message_type": "day_1_followup",
+  "scenario": "Patient: Linda, 24 months overdue, did not reply to Day 0, message was delivered and opened",
+  "message": "Hi [Name], this is Dr. [Last Name] from [Practice Name]. Just wanted to follow up \u2014 teeth can change quietly over time, even when nothing feels off. What does your schedule look like this week or next?"
+}

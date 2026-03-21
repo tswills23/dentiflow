@@ -1,0 +1,5 @@
+{
+  "message_type": "day_0_opener",
+  "scenario": "Patient: Sarah, 36 months overdue, last saw Dr. Johnson, was a regular quarterly patient before gap",
+  "message": "Hi [Name], this is Dr. [Last Name] from [Practice Name]. I was thinking about you and just wanted to say hello. How have you been?"
+}

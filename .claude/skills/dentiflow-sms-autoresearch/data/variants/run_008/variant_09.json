@@ -1,0 +1,5 @@
+{
+  "message_type": "reply_stop",
+  "scenario": "Patient replied: 'STOP'",
+  "message": "Got it -- I've removed you from these messages. If you ever want to come in, you're always welcome to call us directly. Take care."
+}

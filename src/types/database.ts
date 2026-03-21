@@ -83,6 +83,7 @@ export interface Patient {
   tags: string[];
   metadata: Record<string, unknown>;
   notes: string | null;
+  location: string | null;
   // Recall fields
   recall_eligible: boolean;
   recall_opt_out: boolean;

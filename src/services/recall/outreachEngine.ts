@@ -140,10 +140,15 @@ async function sendOutreachSMS(
     seq.sequence_day as SequenceDay,
     patient.phone
   );
+  // Include location in practice name if available (e.g. "Bright Dental Downtown")
+  const displayName = patient.location
+    ? `${practice.name} ${patient.location}`
+    : practice.name;
+
   const messageBody = renderTemplate(
     template,
     patient.first_name || 'there',
-    practice.name,
+    displayName,
     seq.months_overdue
   );
 

@@ -1,0 +1,5 @@
+{
+  "message_type": "reply_why_texting",
+  "scenario": "Patient replied: 'Who is this? Why are you texting me?'",
+  "message": "Sorry for the confusion -- this is Dr. [Last Name] from [Practice Name]. I like to personally check in with my patients from time to time. Nothing urgent at all. Would you ever want to come in and catch up?"
+}
