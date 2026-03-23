@@ -16,6 +16,28 @@ Helps Trevor draft LinkedIn posts targeting PPO dental practice owners. Three mo
 
 All output is draft-only. Trevor reviews every post before manually publishing to LinkedIn.
 
+## Strategy
+
+### Phase 1: Volume (Current -- posts 1-100)
+
+- **Cadence:** 1 post per day, 5 days per week (Mon-Fri)
+- **Goal:** Hit 100 published posts. No strategy pivots until then.
+- **Post types:** Rotate through all 8 types evenly. Do not weight any type more heavily during this phase.
+- **Format:** Text-only. No images, videos, or carousels during Phase 1. Format experimentation begins in Phase 2 after identifying which topics/post types are worth producing in richer formats.
+- **No premature optimization.** Do not change post type ratios, hook styles, or topic mix based on early engagement data. The point is to generate enough signal to make data-driven decisions later.
+- **Track everything:** Log every published post and its engagement data in `data/engagement/posts.jsonl` and `data/engagement/engagement.jsonl`.
+- **Current count:** 3 of 100 (as of 2026-03-21)
+
+### Phase 2: Optimize (starts after post 100)
+
+- Run the **100-post milestone review** (see Review mode below)
+- Identify the top 10% of posts (10 posts) by engagement rate
+- Analyze what they have in common: post type, hook style, topic, length, day of week
+- Refocus the post type rotation and topic mix based on what worked
+- Identify and retire patterns from the bottom 10%
+
+---
+
 ## Quick Start
 
 ```
@@ -81,6 +103,8 @@ All output is draft-only. Trevor reviews every post before manually publishing t
 **Command:** `/linkedin-content-agent draft [post-type] [topic]`
 
 **Post types:** `problem_awareness`, `framework`, `contrarian`, `playbook`, `story`, `build_in_public`, `actionable`, `myth_busting`
+
+**Cadence:** During Phase 1, generate drafts in weekly batches of 5 (Mon-Fri). Rotate through all 8 post types evenly across batches.
 
 **Step-by-step workflow:**
 
@@ -226,7 +250,29 @@ Analyze all engagement data and produce a monthly content review:
    - New topic angles based on high-engagement areas
    - Specific posts worth repurposing or expanding into longer content
 
+**Important:** During Phase 1 (posts 1-100), monthly reviews are for tracking progress only. Do NOT recommend strategy changes until the 100-post milestone is reached.
+
 Save the review to `data/engagement/monthly_reviews/YYYY-MM_review.md`
+
+### 100-Post Milestone Review
+
+When post count in `data/engagement/posts.jsonl` reaches 100, run this special analysis:
+
+1. Rank all 100 posts by engagement rate
+2. **Top 10% analysis (top 10 posts):**
+   - What post types appear most? Least?
+   - What hook styles appear most?
+   - What topics/themes cluster together?
+   - Average word count vs overall average?
+   - Which days of the week performed best?
+3. **Bottom 10% analysis (bottom 10 posts):**
+   - What patterns should be retired or reduced?
+4. **Recommendations for Phase 2:**
+   - New weighted post type rotation (e.g., 30% contrarian, 25% framework, etc.)
+   - Hook styles to prioritize
+   - Topics to double down on
+   - Topics/approaches to drop
+5. Save to `data/engagement/monthly_reviews/100-post-milestone-review.md`
 
 ---
 

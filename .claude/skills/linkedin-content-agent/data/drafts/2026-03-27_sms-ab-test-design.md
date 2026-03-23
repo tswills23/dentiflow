@@ -1,6 +1,6 @@
 ---
 date: 2026-03-27
-post_day: thursday
+post_day: friday
 post_time: 12:00 PM
 post_type: build_in_public
 topic: 500-patient SMS recall A/B test design
@@ -8,12 +8,12 @@ hook_style: bold_promise
 word_count: 320
 source_docs: [14, 12]
 status: draft
-sequence: week2_post2
+sequence: week2_post5
 ---
 
-We're about to run a 500-patient SMS recall test.
+I'm about to run a 500-patient SMS recall test.
 
-Here's exactly how we designed it. And why.
+Here's exactly how I designed it. And why.
 
 500 patients. All 12+ months overdue. Split into two groups of 250.
 
@@ -29,13 +29,11 @@ Same doctor voice. Same Day 1 follow-up. Same Day 3 offer. Same reply handling.
 
 The only difference is the first message.
 
-Here's why this matters.
-
-Most dental recall is built on gut feel. Someone on the team writes a message that "sounds good" and blasts it to the whole list.
+What I keep seeing in practices is recall built entirely on gut feel. Someone on the team writes a message that "sounds good" and blasts it to the whole list.
 
 No control group. No variable isolation. No way to know if it actually worked or if those patients would have come back anyway.
 
-We wanted to answer one specific question:
+I wanted to answer one specific question:
 
 Does giving the patient a reason for the outreach ("going through records") perform better than leading with empathy ("life gets busy")?
 

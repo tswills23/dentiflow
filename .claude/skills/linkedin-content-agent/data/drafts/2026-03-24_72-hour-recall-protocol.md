@@ -1,5 +1,5 @@
 ---
-date: 2026-03-25
+date: 2026-03-24
 post_day: tuesday
 post_time: 7:00 AM
 post_type: framework
@@ -8,18 +8,18 @@ hook_style: bold_claim
 word_count: 370
 source_docs: [12, 4]
 status: draft
-sequence: week2_post1
+sequence: week2_post2
 ---
 
 Most recall systems send one message and hope for the best.
 
 This one runs on 3 rules and a 72-hour clock.
 
-I built this after studying how recall actually breaks down inside dental practices. The problem is never the intent. The team wants to follow up.
+After watching enough practices run recall into the ground, a pattern kept showing up. The problem is never intent. Every team I've talked to wants to follow up.
 
 The problem is that human-led follow-up degrades under load. Every single time.
 
-Here's the full system.
+Here's what we built to fix it.
 
 Rule 1: Patient status determines who speaks.
 

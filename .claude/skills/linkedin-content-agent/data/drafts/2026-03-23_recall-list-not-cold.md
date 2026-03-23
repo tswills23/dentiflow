@@ -1,6 +1,6 @@
 ---
-date: 2026-03-21
-post_day: friday
+date: 2026-03-23
+post_day: monday
 post_time: 12:00 PM
 post_type: myth_busting
 topic: Your recall list isn't cold, it's uncontacted
@@ -8,7 +8,7 @@ hook_style: direct_contradiction
 word_count: 280
 source_docs: [4, 12]
 status: draft
-sequence: week1_post3
+sequence: week2_post1
 ---
 
 "Our recall list is dead. Those patients are gone."
@@ -31,7 +31,7 @@ They didn't leave because they're "gone." They left because life got busy and no
 
 "We tried recall and it didn't work" is usually code for "we sent one postcard in November and moved on with our lives."
 
-The data backs this up.
+The numbers I keep seeing back this up.
 
 Without a system: 5 to 8 percent reactivation.
 With a structured, multi-touch sequence: 25 to 35 percent.
