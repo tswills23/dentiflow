@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { handleInboundMessage } from '../services/orchestration/stlOrchestrator';
 import { findActiveSequenceByPhone, handleRecallReply } from '../services/recall/replyHandler';
 import { supabase } from '../lib/supabase';
+import type { Practice } from '../types/database';
 
 // Twilio sends form-encoded POST with From, To, Body
 export async function smsWebhook(req: Request, res: Response): Promise<void> {
@@ -15,9 +16,9 @@ export async function smsWebhook(req: Request, res: Response): Promise<void> {
   // Look up practice by Twilio phone number
   const { data: practice } = await supabase
     .from('practices')
-    .select('id')
-    .eq('twilio_phone', to)
-    .single();
+    .select('*')
+    .eq('twilio_phone', to as string)
+    .single() as { data: Practice | null };
 
   if (!practice) {
     console.error(`[smsWebhook] No practice found for Twilio number: ${to}`);

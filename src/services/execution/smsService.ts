@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import type { Patient } from '../../types/database';
 
 const SMS_LIVE_MODE = process.env.SMS_LIVE_MODE === 'true';
-const COOLDOWN_MS = 60_000; // 60-second cooldown per number
+const COOLDOWN_MS = 10_000; // 10-second cooldown for testing (production: 60_000)
 
 let twilioClient: twilio.Twilio | null = null;
 
