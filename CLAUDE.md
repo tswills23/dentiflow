@@ -120,18 +120,16 @@ dentiflow/
 │
 ├── dashboard/                     ← React + Tailwind (white-label)
 │
-├── execution/                     ← Utility scripts
+├── execution/                     ← Migration runner scripts
 │   ├── run_migration.mjs
 │   ├── run_migration_003.mjs
 │   └── verify_migration.mjs
 │
-├── _archive/                      ← Old Python implementation (reference only)
-│   ├── assign_voice.py
-│   ├── run_migration.py
-│   ├── recall_templates_email.py
-│   └── booking_agent_python/
+├── scripts/                       ← Dev utility scripts (tunnels, diagnostics, imports)
 │
-└── .tmp/                          ← Intermediate/temp files
+├── worker/                        ← Cloudflare Worker (Retell voice agent middleware)
+│
+└── .tmp/                          ← Temporary/scratch files (gitignored)
 ```
 
 ## Tech Stack
