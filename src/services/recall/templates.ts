@@ -1,17 +1,26 @@
-// Recall SMS Template Bank
-// Ported from templates/recall_templates.py
-//
+// Recall SMS Template Bank — v2
 // 45 templates: 3 voices × 3 days × 5 variants
+//
 // Template selection is deterministic based on phone number hash.
 //
-// Content rules:
-// - Human, conversational tone
-// - No urgency language
-// - No incentives
-// - No emojis
-// - No insurance/treatment mentions
-// - Easy A/B closes (mornings/afternoons, this week/next week)
-// - SMS format: ≤320 chars, no subject line needed
+// Design principles:
+// 1. Radical brevity — target 1 SMS segment (160 chars), hard ceiling 320
+// 2. Open loops — Day 0 doctor/hygienist: unresolved question, NO CTA
+// 3. Authority without accusation — sender owns the concern
+// 4. Guilt removal + implication in one breath
+// 5. Specific > generic
+// 6. Sender as subject, not patient
+// 7. No dead-end conversations
+//
+// HIPAA compliance:
+// - General clinical pattern language only
+// - Reference scheduling data only
+// - No diagnoses, X-rays, treatment plans, clinical findings
+// - No banned words: exam, baseline, comprehensive, overdue, cleaning,
+//   hygiene visit, prophy, prophylaxis, periodontal
+// - No time-gap language: "it's been", "since your last"
+// - No guilt/shame, no emojis, no ALL CAPS
+// - Natural contractions (I'd, I'll, don't, it's)
 
 import { createHash } from 'crypto';
 import type {
@@ -23,216 +32,314 @@ import type {
 } from '../../types/recall';
 
 // =============================================================================
+// NO-SHOW RECOVERY TEMPLATES
+// 10 templates: 2 message days × 5 variants, office voice only
+// =============================================================================
+
+export type NoshowDay = 1 | 2;
+
+const NOSHOW_TEMPLATES: Record<NoshowDay, Record<TemplateVariant, RecallTemplate>> = {
+  // Message 1 — Sent 1 hour after missed appointment
+  // Tone: Understanding, zero guilt, assumes they intended to come
+  1: {
+    v1: {
+      subject: '',
+      body: `Hey {{First Name}}, we missed you today! No worries at all. Want me to get you rescheduled? I've got a few spots open this week.`,
+    },
+    v2: {
+      subject: '',
+      body: `Hey {{First Name}}, looks like we missed each other today. Totally fine. Want to grab another spot this week? I can check what's open.`,
+    },
+    v3: {
+      subject: '',
+      body: `Hey {{First Name}}, noticed you weren't able to make it in today. Life happens. Would you like me to find you another time this week?`,
+    },
+    v4: {
+      subject: '',
+      body: `Hey {{First Name}}, we had you down for today but looks like it didn't work out. No stress. Want me to look at what's open this week or next?`,
+    },
+    v5: {
+      subject: '',
+      body: `Hey {{First Name}}, hope everything's ok. We missed you today. If you'd like to reschedule, just let me know and I'll find you a spot.`,
+    },
+  },
+  // Message 2 — Sent 24 hours later if no reply
+  // Tone: Gentle follow-up, soft binary CTA
+  2: {
+    v1: {
+      subject: '',
+      body: `Hey {{First Name}}, just following up from yesterday. Would this week or next work better to reschedule?`,
+    },
+    v2: {
+      subject: '',
+      body: `Hey {{First Name}}, just a quick follow-up. Still have some openings if you'd like to rebook. Mornings or afternoons easier for you?`,
+    },
+    v3: {
+      subject: '',
+      body: `Hey {{First Name}}, wanted to circle back. Would you prefer to come in this week or next? Happy to work around your schedule.`,
+    },
+    v4: {
+      subject: '',
+      body: `Hey {{First Name}}, just checking in one more time. If you'd like to rebook, I can look at what we have open. This week or next?`,
+    },
+    v5: {
+      subject: '',
+      body: `Hey {{First Name}}, still have a spot with your name on it if you want it. Would earlier or later in the week work better?`,
+    },
+  },
+};
+
+export function selectNoshowTemplate(
+  noshowDay: NoshowDay,
+  patientPhone: string
+): RecallTemplate {
+  const hash = createHash('md5').update(patientPhone).digest('hex');
+  const hashInt = parseInt(hash.substring(0, 8), 16);
+  const variantNum = (hashInt % 5) + 1;
+  const variantId = `v${variantNum}` as TemplateVariant;
+
+  return NOSHOW_TEMPLATES[noshowDay][variantId];
+}
+
+export function getNoshowTemplateId(
+  noshowDay: NoshowDay,
+  patientPhone: string
+): string {
+  const hash = createHash('md5').update(patientPhone).digest('hex');
+  const hashInt = parseInt(hash.substring(0, 8), 16);
+  const variantNum = (hashInt % 5) + 1;
+  return `noshow_day${noshowDay}_v${variantNum}`;
+}
+
+// =============================================================================
 // TEMPLATE BANK
 // =============================================================================
 
 const TEMPLATES: TemplateBank = {
-  // Office Voice (< 6 months overdue)
+  // =========================================================================
+  // OFFICE VOICE (< 6 months overdue)
+  // Tone: Friendly, casual, "we" language. Soft CTA on Day 0 is fine.
+  // =========================================================================
   office: {
+    // Day 0 — Warm check-in + booking link
     0: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, it's been about {{Months}} months since your last visit at {{Practice Name}}. We have some open slots coming up. Would you like to get on the schedule?`,
+        body: `Hey {{First Name}}, quick note from {{Practice Name}}. We've got some openings and thought of you. Grab a time that works: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, just checking in from {{Practice Name}} - it's been {{Months}} months since we last saw you. We have availability this week and next. Would mornings or afternoons work better?`,
+        body: `Hey {{First Name}}, just a heads up from {{Practice Name}} — we've got a few spots open and wanted to see if you'd like to grab one: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, we noticed it's been about {{Months}} months since your last cleaning at {{Practice Name}}. Want to get back on the calendar? We have a few spots open.`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. We'd love to get you back on the schedule. Pick a time here: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, hope you're doing well! It's been {{Months}} months since your last hygiene visit at {{Practice Name}}. We'd love to see you soon. Any days work best for you?`,
+        body: `Hey {{First Name}}, hope things are good. We've got some availability at {{Practice Name}} and wanted to give you first dibs: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, it's been about {{Months}} months. We have some openings at {{Practice Name}} and wanted to reach out. Would you like to book your cleaning?`,
+        body: `Hey {{First Name}}, hello from {{Practice Name}}. Just wanted to reach out and see if you'd like to come by soon. Pick a time: {{Booking Link}}`,
       },
     },
+    // Day 1 — Gentle health frame + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, just following up from {{Practice Name}}. We still have a few openings if you'd like to get your cleaning scheduled. Would this week or next week work better?`,
+        body: `Hey {{First Name}}, {{Practice Name}} again. We like to stay ahead of things for our patients even when everything feels fine. Grab a spot here: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, wanted to circle back from {{Practice Name}}. We have some morning and afternoon times available. Would either work for you?`,
+        body: `Hey {{First Name}}, just a thought from {{Practice Name}} — sometimes the most important things are the ones you can't see yet. Pick a time: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, checking in again from {{Practice Name}}. Just want to make sure we can get you on the schedule before things fill up. Any preferred days?`,
+        body: `Hey {{First Name}}, we always like to make sure everything's looking good for our patients at {{Practice Name}}. Grab a time: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, following up from {{Practice Name}}. We'd love to get you in for your cleaning. Would earlier or later in the week be easier?`,
+        body: `Hey {{First Name}}, staying on top of things now helps avoid surprises later. We share that with all our patients at {{Practice Name}}. Pick a spot: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, just a quick follow-up from {{Practice Name}}. We have availability coming up and want to make scheduling easy for you. What days work best?`,
+        body: `Hey {{First Name}}, just want to make sure everything's in good shape for you. This is something we check for everyone at {{Practice Name}}. Grab a time: {{Booking Link}}`,
       },
     },
+    // Day 3 — Complimentary visit + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, last check-in from {{Practice Name}}. If you'd like to schedule your cleaning, just reply with a day that works and we'll get you set up.`,
+        body: `Hey {{First Name}}, we'd like to cover your first visit back at {{Practice Name}} — completely on us. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, one more note from {{Practice Name}}. We have openings this week and next if you'd like to come in. Just let us know and we'll make it easy.`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. Your next visit is on us, no cost. Pick a spot: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, final follow-up from {{Practice Name}}. We're here whenever you're ready to schedule. Just reply and we'll find a time that works.`,
+        body: `Hey {{First Name}}, we want to make coming back easy. Your first visit at {{Practice Name}} is covered. Pick a time: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, wrapping up from {{Practice Name}}. If now isn't a good time, no worries. When you're ready, just reach out and we'll get you in.`,
+        body: `Hey {{First Name}}, from {{Practice Name}} — your first visit back is completely covered. Pick a time here: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, last note from {{Practice Name}}. We have a few spots left this month. Would any of them work for your cleaning?`,
+        body: `Hey {{First Name}}, we'd really love to see you back at {{Practice Name}}. This one's on us. Grab a time: {{Booking Link}}`,
       },
     },
   },
 
-  // Hygienist Voice (6-12 months overdue)
+  // =========================================================================
+  // HYGIENIST VOICE (6-12 months overdue)
+  // Tone: Personal, "I" language, uses hygienist name. NO CTA on Day 0.
+  // =========================================================================
   hygienist: {
+    // Day 0 — Personal reach-out + open loop (NO CTA)
     0: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, this is Sarah from {{Practice Name}}. Even when everything feels fine, regular visits help keep things on track. Would mornings or afternoons work better to come in?`,
+        body: `Hey {{First Name}}, this is {{Hygienist Name}} from {{Practice Name}}. Your name came up on my schedule today and I wanted to reach out. Got a sec to chat?`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah here at {{Practice Name}}. I wanted to personally reach out and make this easy. Would this week or next week be better to get you back on the schedule?`,
+        body: `Hey {{First Name}}, it's {{Hygienist Name}} at {{Practice Name}}. Had something I wanted to mention to you. You around?`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, this is Sarah from {{Practice Name}}. We try to catch things early before they become bigger issues. Would earlier or later in the week work better to come in?`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} here from {{Practice Name}}. I was going through my patient list and wanted to check in with you. Got a minute?`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah here. I know life gets busy, but regular visits really do help long term. Would mornings or evenings be easier for you?`,
+        body: `Hey {{First Name}}, this is {{Hygienist Name}} at {{Practice Name}}. Just thinking about you today and wanted to reach out. Are you free to text for a sec?`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, this is Sarah at {{Practice Name}}. Just checking in to help you stay on track. Would this week or next week make more sense to come in?`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} from {{Practice Name}} here. Your chart came across my desk and I wanted to touch base. You around?`,
       },
     },
+    // Day 1 — Clinical implication (sender-as-subject) + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah from {{Practice Name}} again. Just wanted to follow up and see if we can find a time that works for you. Any preferred days?`,
+        body: `Hey {{First Name}}, it's {{Hygienist Name}} again. When it's been a while between visits I always like to take a look just to stay ahead of things. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah here. I have some openings coming up and wanted to make sure you have first pick. Would mornings or afternoons be better?`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} here. Honestly the longer it goes between visits the more I like to make sure everything's good. Pick a time: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, following up from {{Practice Name}}. I want to make this as easy as possible. Just let me know what days work and I'll find you a spot.`,
+        body: `Hey {{First Name}}, this is {{Hygienist Name}} at {{Practice Name}}. I'd feel better getting eyes on things just to make sure nothing's developing quietly. Grab a spot: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah again at {{Practice Name}}. Regular cleanings really do make a difference. Would this week or next week work for you?`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} from {{Practice Name}}. I always like to stay ahead of things for my patients and I'd love to get you in. Pick a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, checking back in from {{Practice Name}}. We have some nice time slots available. Would you prefer earlier or later in the day?`,
+        body: `Hey {{First Name}}, it's {{Hygienist Name}}. I don't like to let too much time go by without checking in on my patients. Grab a spot: {{Booking Link}}`,
       },
     },
+    // Day 3 — Barrier removal + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah from {{Practice Name}} one more time. I'm here whenever you're ready. Just reply with a time that works and I'll get you scheduled.`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} here. Last thing from me — I set aside a few spots for patients I haven't seen in a while. First visit back is on me: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, last note from Sarah at {{Practice Name}}. When you're ready to come in, just let me know. I'll make it easy.`,
+        body: `Hey {{First Name}}, it's {{Hygienist Name}}. I get it, getting back on the schedule is the hard part. I've got a couple no-cost spots open. Grab one: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, final check-in from {{Practice Name}}. No pressure at all. Whenever you're ready, just reply and we'll find a good time.`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} at {{Practice Name}}. I really don't want too much more time to go by. I've waived the cost for your visit back: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, wrapping up from Sarah at {{Practice Name}}. If now isn't the right time, I understand. We're here whenever works for you.`,
+        body: `Hey {{First Name}}, it's {{Hygienist Name}}. Your first visit back to {{Practice Name}} is on me. Pick a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, Sarah here one last time. Just know we have openings and I'm happy to help you get scheduled whenever you're ready.`,
+        body: `Hey {{First Name}}, {{Hygienist Name}} here. I'd really love to see you back. This one's on me, no cost. Grab a time: {{Booking Link}}`,
       },
     },
   },
 
-  // Doctor Voice (12+ months overdue)
+  // =========================================================================
+  // DOCTOR VOICE (12+ months overdue)
+  // Tone: Direct, authoritative, "I" language. NO CTA on Day 0.
+  // =========================================================================
   doctor: {
+    // Day 0 — Authority + open loop (NO CTA)
     0: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, this is Dr. Smith from {{Practice Name}}. I noticed it's been a while since I last saw you and wanted to personally check in. Would this week or next week make more sense to come back in?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} here. Your name came up when I was reviewing charts today and I wanted to reach out. Got a sec to text?`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith here at {{Practice Name}}. Even when things feel fine, it's important we keep an eye on things. Would mornings or afternoons work better to come in?`,
+        body: `Hey {{First Name}}, it's Dr. {{Doctor Name}} at {{Practice Name}}. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, this is Dr. Smith. I wanted to reach out directly and make scheduling simple. Would early in the week or later be better to get you back on the calendar?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} from {{Practice Name}}. Was going through my schedule this morning and your chart got flagged. Nothing urgent, just want to check in.`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith from {{Practice Name}}. Just checking in since I haven't seen you in some time. Would this week or next week be easier for a quick visit?`,
+        body: `Hey {{First Name}}, this is Dr. {{Doctor Name}}. Was reviewing some patient charts and yours came up. Wanted to reach out personally. Got a minute?`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, this is Dr. Smith. Happy to help you get back on track. Would mornings or evenings work better for you?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} here from {{Practice Name}}. Had something come up I wanted to touch base with you about. You free to text?`,
       },
     },
+    // Day 1 — Clinical implication (doctor-as-subject) + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith from {{Practice Name}} following up. I'd really like to see you soon. Would any day this week or next work for a visit?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. When it's been a while between visits I always like to take a look just to make sure nothing's developing quietly. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith here again. Just wanted to make sure scheduling isn't what's holding you back. Would mornings or afternoons be easier?`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. Honestly the longer it goes between visits the more I tend to find things that could've been caught earlier. I'd rather it be a quick easy visit: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, following up from Dr. Smith at {{Practice Name}}. Regular visits really help us stay ahead of any issues. What days work best for you?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. I'd feel better getting eyes on things. When it's been a while I just don't like to assume everything's fine. Pick a time: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith again. I have some openings coming up and wanted to offer them to you first. Would this week or next week be better?`,
+        body: `Hey {{First Name}}, it's Dr. {{Doctor Name}}. I always like to stay ahead of things for my patients and it's been long enough that I'd rather just take a look. Pick a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, checking back in from Dr. Smith at {{Practice Name}}. I want to make this easy for you. Just let me know a day that works.`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. The one thing I see often is things develop quietly. I'd rather catch something simple now than deal with something bigger later: {{Booking Link}}`,
       },
     },
+    // Day 3 — Doctor's personal offer + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith from {{Practice Name}} one last time. I'm here whenever you're ready. Just reply and we'll find a time that works for you.`,
+        body: `{{First Name}}, last thing from me. I set aside a few spots this month for patients I haven't seen in a while. First visit back is on me: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hi {{First Name}}, final note from Dr. Smith. When you're ready to come in, just let us know. We'll make it simple.`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} one more time. I get it, getting back on the schedule after a while is the hard part. I've got a couple no-cost spots open. Grab one: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hi {{First Name}}, last check-in from Dr. Smith at {{Practice Name}}. No pressure. Whenever you're ready, we're here to help.`,
+        body: `{{First Name}}, I really don't want too much more time to go by without at least taking a look. I've waived the cost for your visit back: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hi {{First Name}}, wrapping up from Dr. Smith. If now isn't the right time, I understand completely. We're here whenever works for you.`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. Your first visit back is on me. Pick a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hi {{First Name}}, Dr. Smith here one more time. Just know that we have availability and I'd love to see you back. Reach out whenever you're ready.`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. I'd really love to see you back at {{Practice Name}}. This one's on me: {{Booking Link}}`,
       },
     },
   },
@@ -260,13 +367,19 @@ export function renderTemplate(
   template: RecallTemplate,
   firstName: string,
   practiceName: string,
-  monthsOverdue: number
+  doctorName: string,
+  hygienistName: string,
+  bookingLink?: string
 ): string {
   let body = template.body;
 
   body = body.replace(/\{\{First Name\}\}/g, firstName);
   body = body.replace(/\{\{Practice Name\}\}/g, practiceName);
-  body = body.replace(/\{\{Months\}\}/g, String(Math.round(monthsOverdue)));
+  body = body.replace(/\{\{Doctor Name\}\}/g, doctorName);
+  body = body.replace(/\{\{Hygienist Name\}\}/g, hygienistName);
+  if (bookingLink) {
+    body = body.replace(/\{\{Booking Link\}\}/g, bookingLink);
+  }
 
   return body;
 }

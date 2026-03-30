@@ -46,6 +46,7 @@ export type RecallIntent =
   | 'asking_availability'
   | 'preferences'
   | 'booking_interest'
+  | 'booked_confirmation'
   | 'cost_question'
   | 'reschedule'
   | 'cancel'
@@ -150,6 +151,9 @@ export interface RecallSequence {
   defer_until: string | null;
   exit_reason: string | null;
   reply_count: number;
+  booking_link_token: string | null;
+  link_clicked_at: string | null;
+  link_followup_sent: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -198,3 +202,49 @@ export type TemplateBank = Record<
   RecallVoice,
   Record<SequenceDay, Record<TemplateVariant, RecallTemplate>>
 >;
+
+// =============================================================================
+// No-Show Recovery Types
+// =============================================================================
+
+export type NoshowSequenceStatus =
+  | 'message_1_pending'
+  | 'message_1_sent'
+  | 'message_2_sent'
+  | 'replied'
+  | 'rebooked'
+  | 'deferred'
+  | 'declined'
+  | 'opted_out'
+  | 'no_response';
+
+export interface NoshowSequence {
+  id: string;
+  practice_id: string;
+  patient_id: string;
+  appointment_id: string | null;
+  status: NoshowSequenceStatus;
+  message_count: number;
+  booking_stage: RecallStage;
+  reply_count: number;
+  offered_slots: AvailableSlot[] | null;
+  selected_slot: AvailableSlot | null;
+  patient_preferences: TimePreferences | null;
+  next_send_at: string | null;
+  last_sent_at: string | null;
+  defer_until: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoshowReplyResult {
+  sequenceId: string;
+  patientId: string;
+  intent: RecallIntent;
+  previousStage: RecallStage;
+  nextStage: RecallStage;
+  action: string;
+  replyText: string;
+  smsSent: boolean;
+  error?: string;
+}

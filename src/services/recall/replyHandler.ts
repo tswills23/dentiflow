@@ -229,7 +229,32 @@ async function executeAction(
     : practice.name;
   const updatedFields: Record<string, unknown> = {};
 
+  // Build booking link for this sequence if available
+  const bookingLinkUrl = sequence.booking_link_token
+    ? `${process.env.BACKEND_URL || 'https://dentiflow-stl-production.up.railway.app'}/r/${sequence.booking_link_token}`
+    : null;
+
   switch (action) {
+    case 'send_booking_link': {
+      if (bookingLinkUrl) {
+        return {
+          replyText: `That's great, ${firstName}! You can pick a time that works best for you right here: ${bookingLinkUrl}`,
+          updatedFields,
+        };
+      }
+      // Fallback if no booking link token
+      return {
+        replyText: `That's great, ${firstName}! Do you have a preference for days or times? For example, mornings or afternoons, or specific days of the week?`,
+        updatedFields,
+      };
+    }
+
+    case 'confirm_external_booking':
+      return {
+        replyText: `That's awesome, ${firstName}! We're looking forward to seeing you at ${practiceName}. See you soon!`,
+        updatedFields,
+      };
+
     case 'ask_preferences':
       return {
         replyText: `That's great, ${firstName}! Do you have a preference for days or times? For example, mornings or afternoons, or specific days of the week?`,

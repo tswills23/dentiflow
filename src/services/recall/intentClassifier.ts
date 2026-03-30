@@ -67,6 +67,14 @@ const BOOKING_INTEREST_KEYWORDS = [
   'i need', 'need to',
 ];
 
+const BOOKED_CONFIRMATION_KEYWORDS = [
+  'i booked', 'i scheduled', 'already booked', 'already scheduled',
+  'just booked', 'just scheduled', 'got one', 'got an appointment',
+  'made an appointment', 'booked one', 'booked it', 'scheduled it',
+  'all set', 'all done', 'took care of it', 'done', 'i did',
+  'booked online', 'scheduled online',
+];
+
 const ASKING_AVAILABILITY_KEYWORDS = [
   'what times', 'what time', 'available', 'availability',
   'do you have', 'any openings', 'any slots', 'what days',
@@ -279,6 +287,11 @@ export function classifyIntent(
   // 3. URGENT (pain, emergency)
   if (matchAny(textLower, URGENT_KEYWORDS)) {
     return { intent: 'urgent', confidence: 'high', matchedKeywords: getMatches(textLower, URGENT_KEYWORDS), rawText: text };
+  }
+
+  // 3b. BOOKED CONFIRMATION (patient says they booked via the link)
+  if (matchAny(textLower, BOOKED_CONFIRMATION_KEYWORDS)) {
+    return { intent: 'booked_confirmation', confidence: 'high', matchedKeywords: getMatches(textLower, BOOKED_CONFIRMATION_KEYWORDS), rawText: text };
   }
 
   // 4. STAGE-SPECIFIC: S4_AVAILABILITY

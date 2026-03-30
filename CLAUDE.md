@@ -75,10 +75,12 @@ dentiflow/
 ├── src/
 │   ├── server.ts                  ← Express server
 │   ├── routes/
-│   │   ├── smsWebhook.ts         ← Twilio inbound (routes recall vs STL)
+│   │   ├── smsWebhook.ts         ← Twilio inbound (routes review > noshow > recall > STL)
 │   │   ├── formWebhook.ts        ← Web form leads
 │   │   ├── missedCallWebhook.ts  ← Missed call leads
-│   │   └── recallRoutes.ts       ← Recall API endpoints
+│   │   ├── recallRoutes.ts       ← Recall API endpoints
+│   │   ├── noshowRoutes.ts       ← No-Show Recovery API endpoints
+│   │   └── pmsWebhookRoutes.ts   ← PMS appointment status webhooks
 │   ├── services/
 │   │   ├── orchestration/         ← Speed-to-Lead pipeline
 │   │   │   └── stlOrchestrator.ts
@@ -102,13 +104,25 @@ dentiflow/
 │   │   │   ├── slotSelector.ts
 │   │   │   ├── templates.ts
 │   │   │   └── voiceAssignment.ts
+│   │   ├── noshow/                ← No-Show Recovery services
+│   │   │   ├── noshowService.ts   ← Create sequence, send messages, find active
+│   │   │   ├── noshowReplyHandler.ts ← Reply handling → booking state machine at S3
+│   │   │   └── noshowCron.ts      ← Hourly cron for Message 1/2/exit/deferred
+│   │   ├── pms/                   ← PMS Integration (Dentrix Ascend, etc.)
+│   │   │   ├── adapterRegistry.ts ← Factory: getPmsAdapter(pmsType)
+│   │   │   ├── pmsEventProcessor.ts ← Core: idempotency, patient resolve, status dispatch
+│   │   │   ├── pmsSyncCron.ts     ← Hourly polling cron (for PMS without webhooks)
+│   │   │   └── adapters/
+│   │   │       ├── generic.ts     ← Generic webhook adapter (any PMS)
+│   │   │       └── dentrixAscend.ts ← Dentrix Ascend status mapping + polling stub
 │   │   ├── booking/               ← Booking adapters
 │   │   ├── serviceKnowledge.ts
 │   │   ├── anchorTemplates.ts
 │   │   └── templateFallback.ts
 │   ├── types/
 │   │   ├── database.ts            ← Supabase types
-│   │   └── recall.ts              ← Recall engine types
+│   │   ├── recall.ts              ← Recall engine types
+│   │   └── pms.ts                 ← PMS integration types
 │   └── lib/
 │       └── supabase.ts
 │
@@ -116,9 +130,33 @@ dentiflow/
 │   └── migrations/
 │       ├── 001_initial_schema.sql
 │       ├── 002_recall_schema.sql
-│       └── 003_patient_location.sql
+│       ├── 003_patient_location.sql
+│       ├── 004_multi_practice_users.sql  ← Multi-practice auth support
+│       ├── 005_reviews_referrals.sql     ← Reviews, feedback, referrals tables
+│       ├── 006_noshow_recovery.sql       ← No-show sequences table + metrics
+│       └── 007_pms_integration.sql      ← PMS integration config + sync log
 │
 ├── dashboard/                     ← React + Tailwind (white-label)
+│   └── src/
+│       ├── main.tsx               ← Entry point (BrowserRouter + AuthProvider)
+│       ├── App.tsx                ← Layout, routing, sidebar with practice switcher
+│       ├── contexts/
+│       │   └── AuthContext.tsx    ← Multi-practice auth state (user, profiles[], activePracticeId)
+│       ├── pages/
+│       │   ├── Login.tsx          ← Email/password login (Supabase Auth)
+│       │   ├── PracticeSelector.tsx ← Practice picker for multi-practice users
+│       │   ├── Dashboard.tsx      ← KPIs, activity feed, response speed
+│       │   ├── Leads.tsx          ← Patient leads table
+│       │   ├── Conversations.tsx  ← SMS thread interface
+│       │   └── Appointments.tsx   ← Appointment schedule
+│       ├── hooks/
+│       │   ├── useBranding.ts    ← Practice-specific theme/colors
+│       │   └── useRealtime.ts    ← Supabase real-time subscriptions
+│       ├── components/           ← Shared UI (StatCard, StatusBadge, etc.)
+│       ├── types/
+│       │   └── branding.ts       ← Branding config types
+│       └── lib/
+│           └── supabase.ts       ← Supabase client init
 │
 ├── execution/                     ← Migration runner scripts
 │   ├── run_migration.mjs
@@ -148,10 +186,12 @@ dentiflow/
 | Integration | Status | Notes |
 |------------|--------|-------|
 | Supabase | Live | Shared database for STL + Recall |
+| Supabase Auth | Live | Email/password login, multi-practice user support |
 | Twilio SMS | Built, A2P pending | Console.log fallback when SMS_LIVE_MODE=false |
 | Claude API | Live | STL responses |
-| Dashboard | Live | White-label branding per practice |
-| Dentrix Ascend | CSV import working | PMS CSV parser handles real exports (auto-header, combined names, locations) |
+| Dashboard | Live | White-label branding per practice, deployed to Vercel |
+| Dentrix Ascend | CSV + webhook built | CSV parser + PMS webhook endpoint (API polling stub until DADP enrollment) |
+| PMS Integration | Built | Generic webhook + Dentrix adapter, auto no-show/review triggers |
 | Google Sheets | Working | Via gcloud auth + Sheets API v4 for import review sheets |
 
 ## Speed-to-Lead Pipeline
@@ -187,6 +227,8 @@ Step 3+: Automatic (hourly cron — recallCron.ts)
     → Check deferred patients → re-activate if defer_until passed
 
 Patient Reply → POST /webhooks/sms → routing check
+    → Active review sequence? → reviewReplyHandler.ts
+    → Active noshow sequence? → noshowReplyHandler.ts
     → Active recall sequence? → replyHandler.ts
         → Classify intent (context-aware)
         → Navigate booking state machine (S0→S6)
@@ -195,6 +237,81 @@ Patient Reply → POST /webhooks/sms → routing check
         → Send SMS reply
     → No active sequence? → speed-to-lead pipeline (unchanged)
 ```
+
+## No-Show Recovery Pipeline
+
+```
+Step 1: Mark No-Show → POST /api/noshow/mark (or dashboard button)
+    → Update appointment status to 'no_show'
+    → Create noshow_sequence (status: message_1_pending)
+    → Schedule Message 1 for 1 hour from now
+
+Step 2: Automatic (hourly cron — noshowCron.ts at :05)
+    → message_1_pending + next_send_at passed → Send Message 1, status → message_1_sent
+    → message_1_sent + 24h + no reply → Send Message 2, status → message_2_sent
+    → message_2_sent + 24h + no reply → status → no_response (close sequence)
+    → deferred + defer_until passed → Reset to message_1_pending (one more attempt)
+
+Patient Reply → POST /webhooks/sms → noshow routing
+    → Enter booking state machine at S3_TIME_PREF (skip opening stages)
+    → "not right now" → defer 14 days (not 60 like recall)
+    → "cancel" / "not interested" → declined, exit
+    → "stop" → opt_out, permanent
+    → Concern ("scared", "can't afford") → S7_HANDOFF, staff notification
+    → Booking interest → slot selection → confirm → rebooked
+```
+
+## PMS Integration Pipeline
+
+```
+PMS (Dentrix Ascend / any) sends appointment status change
+    ├── Webhook push ──→ POST /webhooks/pms?practiceId=UUID
+    │                       ↓
+    │                   Verify auth (API key or HMAC-SHA256)
+    │                       ↓
+    │                   Normalize via PMS adapter (Dentrix/generic)
+    │                       ↓
+    │                   Idempotency check (pms_sync_log)
+    │                       ↓
+    │                   Resolve patient (PMS ID → phone → create)
+    │                       ↓
+    │                   Upsert appointment (booking_platform_id)
+    │                       ↓
+    │                   Status dispatch:
+    │                     "No Show"    → createNoshowSequence() → recovery SMS
+    │                     "Complete"   → createReviewSequence() → survey SMS
+    │                     "Cancelled"  → update appointment status
+    │                     "Rescheduled"→ close any active noshow sequence
+    │                     Other        → sync only (appointment status update)
+    │
+    └── Polling cron (10 * * * *) ──→ for PMS without webhooks
+                                        (stub until DADP API access approved)
+```
+
+- Auth: per-practice config in `pms_integrations` table (webhook_secret or webhook_api_key)
+- Idempotency: `pms_sync_log` table with UNIQUE(practice_id, pms_event_id)
+- Patient matching: pms_patient_id → phone → create new
+- Dashboard manual buttons remain as fallback (existing dedup prevents double sequences)
+- Auto-disable after 10 consecutive webhook errors
+
+## Authentication & Multi-Tenancy
+
+```
+Page load → Supabase session check
+  ├── No session → /login (all routes redirect)
+  └── Session found → fetch user_profiles (all rows for this auth_user_id)
+        ├── 1 profile → auto-select practice, show dashboard
+        └── N profiles → show PracticeSelector
+              └── User picks one → localStorage saves choice → dashboard
+                    └── Sidebar shows practice switcher dropdown
+```
+
+- **AuthContext** (`dashboard/src/contexts/AuthContext.tsx`) — single source of truth for auth state
+- **user_profiles** table links `auth.users.id` → `practices.id` (many-to-many via composite unique)
+- **RLS** on all 8 tables enforces `practice_id IN (SELECT practice_id FROM user_profiles WHERE auth_user_id = auth.uid())`
+- **Service role** bypasses RLS for backend operations (webhooks, cron jobs)
+- **No self-serve signup** — accounts created manually via Supabase dashboard
+- **Practice switching** reloads all data + branding for the selected practice
 
 ## Critical Rules
 

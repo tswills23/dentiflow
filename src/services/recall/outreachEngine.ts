@@ -4,13 +4,33 @@
 // Picks up all active sequences at Day 0 with no last_sent_at,
 // selects + renders template, sends SMS, logs everything.
 
+import { randomUUID } from 'crypto';
 import { supabase } from '../../lib/supabase';
 import { sendSMS } from '../execution/smsService';
 import { saveMessage } from '../execution/conversationStore';
 import { logAutomation } from '../execution/metricsTracker';
 import { selectTemplate, renderTemplate, getTemplateId } from './templates';
 import type { RecallSequence, OutreachResult, SequenceDay } from '../../types/recall';
-import type { Practice, Patient } from '../../types/database';
+import type { Practice, Patient, Provider } from '../../types/database';
+
+const BACKEND_URL = process.env.BACKEND_URL || 'https://dentiflow-stl-production.up.railway.app';
+
+// Extract doctor/hygienist display names from practice_config.providers
+function extractProviderNames(practice: Practice): { doctorName: string; hygienistName: string } {
+  const providers = practice.practice_config?.providers || [];
+
+  const doctor = providers.find((p: Provider) =>
+    /dentist|doctor|dds|dmd/i.test(p.title)
+  );
+  const hygienist = providers.find((p: Provider) =>
+    /hygienist|rdh/i.test(p.title)
+  );
+
+  const doctorName = doctor?.name || practice.owner_name || 'your dentist';
+  const hygienistName = hygienist?.name || 'your hygiene team';
+
+  return { doctorName, hygienistName };
+}
 
 export async function runDay0Outreach(practiceId: string): Promise<OutreachResult> {
   const result: OutreachResult = { sent: 0, skipped: 0, failed: 0, errors: [] };
@@ -129,6 +149,17 @@ async function sendOutreachSMS(
     return;
   }
 
+  // Generate booking link token (once per sequence, reused across days)
+  let bookingLinkToken = seq.booking_link_token;
+  if (!bookingLinkToken) {
+    bookingLinkToken = randomUUID();
+    await supabase
+      .from('recall_sequences')
+      .update({ booking_link_token: bookingLinkToken })
+      .eq('id', seq.id);
+  }
+  const bookingLink = `${BACKEND_URL}/r/${bookingLinkToken}`;
+
   // Select and render template
   const template = selectTemplate(
     seq.assigned_voice,
@@ -145,11 +176,15 @@ async function sendOutreachSMS(
     ? `${practice.name} ${patient.location}`
     : practice.name;
 
+  const { doctorName, hygienistName } = extractProviderNames(practice);
+
   const messageBody = renderTemplate(
     template,
     patient.first_name || 'there',
     displayName,
-    seq.months_overdue
+    doctorName,
+    hygienistName,
+    bookingLink
   );
 
   // Send SMS

@@ -31,6 +31,7 @@ type TransitionKey = `${RecallStage}:${RecallIntent}`;
 const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   // S0_OPENING transitions
   'S0_OPENING:booking_interest': 'S3_TIME_PREF',
+  'S0_OPENING:booked_confirmation': 'S6_COMPLETED',
   'S0_OPENING:preferences': 'S4_AVAILABILITY',
   'S0_OPENING:asking_availability': 'S4_AVAILABILITY',
   'S0_OPENING:opt_out': 'EXIT_OPT_OUT',
@@ -42,6 +43,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
 
   // S1_INTENT transitions
   'S1_INTENT:booking_interest': 'S3_TIME_PREF',
+  'S1_INTENT:booked_confirmation': 'S6_COMPLETED',
   'S1_INTENT:opt_out': 'EXIT_OPT_OUT',
   'S1_INTENT:urgent': 'S7_HANDOFF',
 
@@ -49,6 +51,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S3_TIME_PREF:preferences': 'S4_AVAILABILITY',
   'S3_TIME_PREF:asking_availability': 'S4_AVAILABILITY',
   'S3_TIME_PREF:booking_interest': 'S4_AVAILABILITY',
+  'S3_TIME_PREF:booked_confirmation': 'S6_COMPLETED',
   'S3_TIME_PREF:opt_out': 'EXIT_OPT_OUT',
   'S3_TIME_PREF:not_now': 'EXIT_DEFERRED',
   'S3_TIME_PREF:decline': 'EXIT_DECLINED',
@@ -59,6 +62,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   // S4_AVAILABILITY transitions
   'S4_AVAILABILITY:slot_selection': 'S5_CONFIRMATION',
   'S4_AVAILABILITY:confirm': 'S6_COMPLETED',
+  'S4_AVAILABILITY:booked_confirmation': 'S6_COMPLETED',
   'S4_AVAILABILITY:preferences': 'S4_AVAILABILITY',
   'S4_AVAILABILITY:asking_availability': 'S4_AVAILABILITY',
   'S4_AVAILABILITY:opt_out': 'EXIT_OPT_OUT',
@@ -68,6 +72,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
 
   // S5_CONFIRMATION transitions
   'S5_CONFIRMATION:confirm': 'S6_COMPLETED',
+  'S5_CONFIRMATION:booked_confirmation': 'S6_COMPLETED',
   'S5_CONFIRMATION:preferences': 'S4_AVAILABILITY',
   'S5_CONFIRMATION:decline': 'EXIT_CANCELLED',
   'S5_CONFIRMATION:opt_out': 'EXIT_OPT_OUT',
@@ -81,9 +86,10 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
 
 const ACTIONS: Partial<Record<TransitionKey, string>> = {
   // S0_OPENING actions
-  'S0_OPENING:booking_interest': 'ask_preferences',
-  'S0_OPENING:preferences': 'show_balanced_slots',
-  'S0_OPENING:asking_availability': 'show_default_slots',
+  'S0_OPENING:booking_interest': 'send_booking_link',
+  'S0_OPENING:booked_confirmation': 'confirm_external_booking',
+  'S0_OPENING:preferences': 'send_booking_link',
+  'S0_OPENING:asking_availability': 'send_booking_link',
   'S0_OPENING:opt_out': 'opt_out_silent',
   'S0_OPENING:not_now': 'defer_60_days',
   'S0_OPENING:decline': 'acknowledge_decline',
@@ -92,9 +98,10 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S0_OPENING:unclear': 'clarify_intent',
 
   // S3_TIME_PREF actions
-  'S3_TIME_PREF:preferences': 'show_balanced_slots',
-  'S3_TIME_PREF:asking_availability': 'show_default_slots',
-  'S3_TIME_PREF:booking_interest': 'show_default_slots',
+  'S3_TIME_PREF:preferences': 'send_booking_link',
+  'S3_TIME_PREF:asking_availability': 'send_booking_link',
+  'S3_TIME_PREF:booking_interest': 'send_booking_link',
+  'S3_TIME_PREF:booked_confirmation': 'confirm_external_booking',
   'S3_TIME_PREF:opt_out': 'opt_out_silent',
   'S3_TIME_PREF:not_now': 'defer_60_days',
   'S3_TIME_PREF:decline': 'acknowledge_decline',
@@ -105,6 +112,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   // S4_AVAILABILITY actions
   'S4_AVAILABILITY:slot_selection': 'confirm_slot',
   'S4_AVAILABILITY:confirm': 'book_first_slot',
+  'S4_AVAILABILITY:booked_confirmation': 'confirm_external_booking',
   'S4_AVAILABILITY:preferences': 'show_balanced_slots',
   'S4_AVAILABILITY:asking_availability': 'show_default_slots',
   'S4_AVAILABILITY:opt_out': 'opt_out_silent',
@@ -114,6 +122,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
 
   // S5_CONFIRMATION actions
   'S5_CONFIRMATION:confirm': 'complete_booking',
+  'S5_CONFIRMATION:booked_confirmation': 'confirm_external_booking',
   'S5_CONFIRMATION:preferences': 'show_balanced_slots',
   'S5_CONFIRMATION:decline': 'cancel_booking',
   'S5_CONFIRMATION:opt_out': 'opt_out_silent',
