@@ -163,7 +163,7 @@ async function createSequence(
     })
     .eq('id', patientId);
 
-  // Create recall sequence
+  // Create recall sequence — status is 'paused' until explicitly launched via /api/recall/launch
   const { error } = await supabase.from('recall_sequences').insert({
     practice_id: practiceId,
     patient_id: patientId,
@@ -171,9 +171,9 @@ async function createSequence(
     segment_overdue: segment,
     months_overdue: Math.round(monthsOverdue * 10) / 10,
     sequence_day: 0 as SequenceDay,
-    sequence_status: 'active',
+    sequence_status: 'paused',
     booking_stage: 'S0_OPENING',
-    next_send_at: null, // Will be set by outreach engine
+    next_send_at: null,
   });
 
   if (error) {

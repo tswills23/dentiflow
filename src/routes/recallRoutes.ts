@@ -4,6 +4,7 @@
 // POST /api/recall/orchestrate — Run sequence orchestrator (Day 1/3, auto-exit, re-entry)
 
 import { Router } from 'express';
+import { supabase } from '../lib/supabase';
 import { ingestPatients } from '../services/recall/ingestAgent';
 import { runDay0Outreach } from '../services/recall/outreachEngine';
 import { runSequenceOrchestrator } from '../services/recall/sequenceOrchestrator';
@@ -59,19 +60,64 @@ router.post('/import', async (req, res) => {
 });
 
 // POST /api/recall/launch
-// Body: { practiceId: string }
-// Trigger Day 0 outreach for imported patients. Call after reviewing /import output.
+// Body: { practiceId: string, confirm: true }
+// Requires confirm=true after reviewing patient count. Shows count first if omitted.
 router.post('/launch', async (req, res) => {
   try {
-    const { practiceId } = req.body;
+    const { practiceId, confirm } = req.body;
 
     if (!practiceId) {
       res.status(400).json({ error: 'Missing practiceId' });
       return;
     }
 
+    // Count eligible paused Day 0 sequences before sending anything
+    const { count, error: countErr } = await supabase
+      .from('recall_sequences')
+      .select('id', { count: 'exact', head: true })
+      .eq('practice_id', practiceId)
+      .eq('sequence_status', 'paused')
+      .eq('sequence_day', 0)
+      .is('last_sent_at', null);
+
+    if (countErr) {
+      res.status(500).json({ error: countErr.message });
+      return;
+    }
+
+    const patientCount = count ?? 0;
+
+    // Require explicit confirmation with count shown first
+    if (!confirm) {
+      res.status(200).json({
+        requiresConfirmation: true,
+        patientCount,
+        message: `This will send SMS to ${patientCount} patients. Resubmit with confirm=true to proceed.`,
+      });
+      return;
+    }
+
+    if (patientCount === 0) {
+      res.status(400).json({ error: 'No paused Day 0 sequences found. Run /import first.' });
+      return;
+    }
+
+    // Activate paused sequences so outreachEngine picks them up
+    const { error: activateErr } = await supabase
+      .from('recall_sequences')
+      .update({ sequence_status: 'active' })
+      .eq('practice_id', practiceId)
+      .eq('sequence_status', 'paused')
+      .eq('sequence_day', 0)
+      .is('last_sent_at', null);
+
+    if (activateErr) {
+      res.status(500).json({ error: activateErr.message });
+      return;
+    }
+
     const result = await runDay0Outreach(practiceId);
-    res.json({ success: true, outreach: result });
+    res.json({ success: true, patientCount, outreach: result });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[recallRoutes] Launch error:', msg);
