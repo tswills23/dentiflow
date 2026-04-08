@@ -241,7 +241,9 @@ async function executeAction(
 ): Promise<{ replyText: string; updatedFields: Record<string, unknown> }> {
   const firstName = patient.first_name || 'there';
   const practiceName = patient.location
-    ? `${practice.name} ${patient.location}`
+    ? (patient.location.toLowerCase().includes(practice.name.toLowerCase())
+        ? patient.location
+        : `${practice.name} ${patient.location}`)
     : practice.name;
   const updatedFields: Record<string, unknown> = {};
 

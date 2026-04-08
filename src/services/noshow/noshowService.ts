@@ -123,7 +123,9 @@ export async function sendNoshowMessage(
   const templateId = getNoshowTemplateId(messageDay, patient.phone);
 
   const practiceName = patient.location
-    ? `${practice.name} ${patient.location}`
+    ? (patient.location.toLowerCase().includes(practice.name.toLowerCase())
+        ? patient.location
+        : `${practice.name} ${patient.location}`)
     : practice.name;
 
   const messageBody = renderTemplate(

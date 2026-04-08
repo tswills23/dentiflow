@@ -173,9 +173,11 @@ async function sendOutreachSMS(
     seq.sequence_day as SequenceDay,
     patient.phone
   );
-  // Include location in practice name if available (e.g. "Bright Dental Downtown")
+  // Use location as display name if it already contains the practice name, otherwise append
   const displayName = patient.location
-    ? `${practice.name} ${patient.location}`
+    ? (patient.location.toLowerCase().includes(practice.name.toLowerCase())
+        ? patient.location
+        : `${practice.name} ${patient.location}`)
     : practice.name;
 
   const { doctorName, hygienistName } = extractProviderNames(practice);
