@@ -63,7 +63,7 @@ function Conversations({ practiceId }: ConversationsProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(initialPatientId)
   const [previews, setPreviews] = useState<Map<string, ConversationPreview>>(new Map())
-  const [loadingPatients, setLoadingPatients] = useState(true)
+  const [loadingPatients, setLoadingPatients] = useState(false)
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -75,32 +75,41 @@ function Conversations({ practiceId }: ConversationsProps) {
 
     async function fetchPatients() {
       setLoadingPatients(true)
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, first_name, last_name, phone, status')
-        .eq('practice_id', practiceId)
-        .order('created_at', { ascending: false })
 
-      if (!error && data) {
-        setPatients(data as Patient[])
+      const [{ data: patientData, error }, { data: convData }] = await Promise.all([
+        supabase
+          .from('patients')
+          .select('id, first_name, last_name, phone, status')
+          .eq('practice_id', practiceId)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('conversations')
+          .select('patient_id, message_body, created_at')
+          .eq('practice_id', practiceId)
+          .order('created_at', { ascending: false })
+          .limit(5000),
+      ])
 
+      if (!error && patientData) {
+        setPatients(patientData as Patient[])
+
+        // Build preview map: first occurrence per patient_id is the most recent (already sorted desc)
         const previewMap = new Map<string, ConversationPreview>()
-        for (const patient of data as Patient[]) {
-          const { data: msgData } = await supabase
-            .from('conversations')
-            .select('message_body, created_at')
-            .eq('practice_id', practiceId)
-            .eq('patient_id', patient.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
+        const patientMap = new Map((patientData as Patient[]).map((p) => [p.id, p]))
 
-          if (msgData && msgData.length > 0) {
-            previewMap.set(patient.id, {
-              patient,
-              lastMessage: msgData[0].message_body,
-              lastMessageTime: msgData[0].created_at,
-              unread: false,
-            })
+        if (convData) {
+          for (const msg of convData) {
+            if (!previewMap.has(msg.patient_id)) {
+              const patient = patientMap.get(msg.patient_id)
+              if (patient) {
+                previewMap.set(msg.patient_id, {
+                  patient,
+                  lastMessage: msg.message_body,
+                  lastMessageTime: msg.created_at,
+                  unread: false,
+                })
+              }
+            }
           }
         }
         setPreviews(previewMap)

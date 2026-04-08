@@ -11,6 +11,10 @@ export interface DirectiveContext {
   escalation: string;
   serviceDirectives: Map<string, string>;
   practice: Practice;
+  // Recall reply directives (loaded from directives/ root)
+  recallPersona: string;
+  recallReplyRules: string;
+  recallBookingAgent: string;
 }
 
 // In-memory cache for directive files (they rarely change)
@@ -56,6 +60,8 @@ export async function loadDirectives(practiceId: string): Promise<DirectiveConte
     throw new Error(`Practice not found: ${practiceId}`);
   }
 
+  const typedPractice = practice as unknown as Practice;
+
   // Load system directives
   const systemDir = path.join(DIRECTIVES_DIR, 'system');
   const persona = loadDirectiveFile(path.join(systemDir, 'stl-persona.md'));
@@ -77,15 +83,23 @@ export async function loadDirectives(practiceId: string): Promise<DirectiveConte
     console.warn('[directiveLoader] No service directives found');
   }
 
+  // Load recall directives
+  const recallPersona = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'recall_persona.md'));
+  const recallReplyRules = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'recall_reply_rules.md'));
+  const recallBookingAgent = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'sms_booking_agent.md'));
+
   // Interpolate practice-specific values
   return {
-    persona: interpolateDirective(persona, practice),
-    responseRules: interpolateDirective(responseRules, practice),
+    persona: interpolateDirective(persona, typedPractice),
+    responseRules: interpolateDirective(responseRules, typedPractice),
     intentDetection,
-    bookingFlow: interpolateDirective(bookingFlow, practice),
+    bookingFlow: interpolateDirective(bookingFlow, typedPractice),
     escalation,
     serviceDirectives,
-    practice,
+    practice: typedPractice,
+    recallPersona: interpolateDirective(recallPersona, typedPractice),
+    recallReplyRules,
+    recallBookingAgent: interpolateDirective(recallBookingAgent, typedPractice),
   };
 }
 

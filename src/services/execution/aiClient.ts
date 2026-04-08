@@ -57,6 +57,9 @@ export async function generateResponse(
         .map((block) => block.text)
         .join('');
 
+      const usage = response.usage;
+      console.log(`[aiClient] Tokens: in=${usage.input_tokens}, out=${usage.output_tokens}, latency=${Date.now() - start}ms`);
+
       return {
         content: text,
         success: true,

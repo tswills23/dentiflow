@@ -25,7 +25,7 @@ interface GroupedAppointments {
   appointments: Appointment[]
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_URL
 
 function getSourceBadge(apt: Appointment): { label: string; background: string; color: string } | null {
   // Infer source from notes or default

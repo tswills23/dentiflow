@@ -89,7 +89,7 @@ export async function logAutomation(params: {
     message_body: params.messageBody || null,
     service_context: params.serviceContext || null,
     error_message: params.errorMessage || null,
-    metadata: params.metadata || {},
+    metadata: (params.metadata || {}) as any,
   });
 
   if (error) {

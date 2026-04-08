@@ -1,6 +1,10 @@
 import type { Request, Response } from 'express';
 import { handleInboundMessage } from '../services/orchestration/stlOrchestrator';
 import { findActiveSequenceByPhone, handleRecallReply } from '../services/recall/replyHandler';
+import { findActiveReviewSequenceByPhone } from '../services/reviews/reviewSequenceService';
+import { handleReviewReply } from '../services/reviews/reviewReplyHandler';
+import { findActiveNoshowSequenceByPhone } from '../services/noshow/noshowService';
+import { handleNoshowReply } from '../services/noshow/noshowReplyHandler';
 import { supabase } from '../lib/supabase';
 import type { Practice } from '../types/database';
 
@@ -30,8 +34,30 @@ export async function smsWebhook(req: Request, res: Response): Promise<void> {
   // Respond to Twilio immediately (must be < 15 seconds)
   res.type('text/xml').send('<Response></Response>');
 
-  // Phase 8: Check for active recall sequence FIRST
-  // If this phone has an active recall sequence, route to recall handler
+  // Priority 1: Check for active review survey sequence
+  // Review survey replies are short (1-5 or keywords) and time-sensitive
+  const activeReviewSeq = await findActiveReviewSequenceByPhone(practice.id, from);
+
+  if (activeReviewSeq) {
+    console.log(`[smsWebhook] Routing to review handler: sequence ${activeReviewSeq.id} (status: ${activeReviewSeq.status})`);
+    handleReviewReply(activeReviewSeq, body, practice.id).catch((err) => {
+      console.error('[smsWebhook] Review reply processing failed:', err);
+    });
+    return;
+  }
+
+  // Priority 2: Check for active no-show recovery sequence
+  const activeNoshowSeq = await findActiveNoshowSequenceByPhone(practice.id, from);
+
+  if (activeNoshowSeq) {
+    console.log(`[smsWebhook] Routing to noshow handler: sequence ${activeNoshowSeq.id} (status: ${activeNoshowSeq.status})`);
+    handleNoshowReply(activeNoshowSeq.id, from, body, practice.id).catch((err) => {
+      console.error('[smsWebhook] Noshow reply processing failed:', err);
+    });
+    return;
+  }
+
+  // Priority 3: Check for active recall sequence
   const activeRecallSeq = await findActiveSequenceByPhone(practice.id, from);
 
   if (activeRecallSeq) {
@@ -42,7 +68,7 @@ export async function smsWebhook(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // No active recall sequence — route to STL pipeline
+  // Priority 4: No active sequence — route to STL pipeline
   handleInboundMessage({
     practiceId: practice.id,
     phone: from,

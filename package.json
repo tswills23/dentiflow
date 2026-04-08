@@ -7,10 +7,12 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest"
+    "test": "jest",
+    "recall-import": "tsx scripts/recall-import.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@freetube/yt-comment-scraper": "^6.2.0",
     "@supabase/supabase-js": "^2.49.0",
     "cors": "^2.8.5",
     "csv-parse": "^6.2.0",

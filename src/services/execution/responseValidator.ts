@@ -34,6 +34,17 @@ const BLOCKED_PATTERNS: { pattern: RegExp; reason: string }[] = [
   { pattern: /\b(overdue|delinquent|negligent|neglected)\b/i, reason: 'recall_shaming_language' },
   { pattern: /\b(damage|deteriorat|worsen|worse)\b/i, reason: 'recall_fear_language' },
   { pattern: /\b(guarantee|free|discount|promo|special offer|limited time)\b/i, reason: 'recall_incentive_language' },
+
+  // Clinical jargon (recall copy rules v2)
+  { pattern: /\b(exam|baseline|comprehensive|prophy|prophylaxis|periodontal)\b/i, reason: 'recall_clinical_jargon' },
+  { pattern: /\bhygiene visit\b/i, reason: 'recall_clinical_jargon' },
+  { pattern: /\bcleaning\b/i, reason: 'recall_clinical_jargon' },
+
+  // Dead-end phrases (recall copy rules v2 — banned closers)
+  { pattern: /\bno pressure\b/i, reason: 'recall_dead_end_phrase' },
+  { pattern: /\bat your earliest convenience\b/i, reason: 'recall_dead_end_phrase' },
+  { pattern: /\bdon't hesitate to reach out\b/i, reason: 'recall_dead_end_phrase' },
+  { pattern: /\bwe look forward to hearing from you\b/i, reason: 'recall_dead_end_phrase' },
 ];
 
 /**

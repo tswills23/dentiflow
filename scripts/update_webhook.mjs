@@ -4,7 +4,13 @@ import twilio from 'twilio';
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const SERVICE_SID = 'MGbaf27c37d80f0b60e749699f45e8908d';
-const WEBHOOK_URL = 'https://firewire-cod-applying-regardless.trycloudflare.com/webhooks/sms';
+const tunnelUrl = process.argv[2];
+if (!tunnelUrl) {
+  console.error('Usage: node scripts/update_webhook.mjs <tunnel-url>');
+  console.error('  e.g. node scripts/update_webhook.mjs https://abc-def.trycloudflare.com');
+  process.exit(1);
+}
+const WEBHOOK_URL = tunnelUrl.replace(/\/$/, '') + '/webhooks/sms';
 
 console.log(`Setting inbound URL on messaging service to: ${WEBHOOK_URL}`);
 

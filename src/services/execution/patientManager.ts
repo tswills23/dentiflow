@@ -1,6 +1,25 @@
 import { supabase } from '../../lib/supabase';
 import type { Patient, PatientStatus, PatientSource } from '../../types/database';
 
+export async function findPatientByPmsId(
+  practiceId: string,
+  pmsPatientId: string
+): Promise<Patient | null> {
+  const { data, error } = await supabase
+    .from('patients')
+    .select('*')
+    .eq('practice_id', practiceId)
+    .eq('pms_patient_id', pmsPatientId)
+    .limit(1)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('[patientManager] Error finding patient by PMS ID:', error.message);
+  }
+
+  return data as unknown as Patient | null;
+}
+
 export async function findPatientByPhone(
   practiceId: string,
   phone: string
@@ -18,7 +37,7 @@ export async function findPatientByPhone(
     console.error('[patientManager] Error finding patient:', error.message);
   }
 
-  return data;
+  return data as unknown as Patient | null;
 }
 
 export async function createPatient(params: {
@@ -50,7 +69,7 @@ export async function createPatient(params: {
     throw new Error(`Failed to create patient: ${error.message}`);
   }
 
-  return data;
+  return data as unknown as Patient;
 }
 
 export async function findOrCreatePatient(params: {
@@ -96,7 +115,7 @@ export async function updatePatient(
 ): Promise<void> {
   const { error } = await supabase
     .from('patients')
-    .update(updates)
+    .update(updates as any)
     .eq('id', patientId);
 
   if (error) {

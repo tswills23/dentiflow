@@ -20,7 +20,7 @@ router.get('/:token', async (req: Request, res: Response) => {
     const { data: seq, error } = await supabase
       .from('recall_sequences')
       .select('id, practice_id, patient_id, link_clicked_at')
-      .eq('booking_link_token', token)
+      .eq('booking_link_token', token as string)
       .single();
 
     if (error || !seq) {

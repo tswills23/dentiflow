@@ -2,7 +2,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import twilio from 'twilio';
 import { smsWebhook } from './routes/smsWebhook';
 import { formWebhook } from './routes/formWebhook';
 import { missedCallWebhook } from './routes/missedCallWebhook';
@@ -20,10 +22,79 @@ import { startPmsSyncCron } from './services/pms/pmsSyncCron';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// ── CORS: restrict to dashboard + local dev ──────────────────────────
+const ALLOWED_ORIGINS = [
+  'https://dentiflow-dashboard.vercel.app',
+  'http://localhost:5173',  // Vite dev
+  'http://localhost:3000',  // local backend
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (server-to-server, curl, Twilio webhooks)
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
+}));
+
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true })); // Twilio sends form-encoded
+
+// ── Twilio signature validation middleware ────────────────────────────
+function validateTwilioSignature(req: Request, res: Response, next: NextFunction): void {
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const backendUrl = process.env.BACKEND_URL;
+
+  // Skip validation in dev when no auth token configured
+  if (!authToken) {
+    console.warn('[twilio-auth] TWILIO_AUTH_TOKEN not set — skipping signature validation');
+    next();
+    return;
+  }
+
+  const signature = req.headers['x-twilio-signature'] as string;
+  if (!signature) {
+    console.warn('[twilio-auth] Missing x-twilio-signature header');
+    res.status(403).json({ error: 'Missing Twilio signature' });
+    return;
+  }
+
+  // Build URL that Twilio signed against (must match Messaging Service webhook URL)
+  const webhookUrl = backendUrl
+    ? `${backendUrl}${req.originalUrl}`
+    : `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+  const isValid = twilio.validateRequest(authToken, signature, webhookUrl, req.body);
+
+  if (!isValid) {
+    console.warn(`[twilio-auth] Invalid signature for ${webhookUrl}`);
+    res.status(403).json({ error: 'Invalid Twilio signature' });
+    return;
+  }
+
+  next();
+}
+
+// ── Admin API key middleware ──────────────────────────────────────────
+function requireApiKey(req: Request, res: Response, next: NextFunction): void {
+  const expected = process.env.ADMIN_API_KEY;
+
+  // Dev mode: no key configured → allow all
+  if (!expected) {
+    next();
+    return;
+  }
+
+  const key = req.headers['x-api-key'] as string;
+  if (key !== expected) {
+    res.status(401).json({ error: 'Unauthorized — invalid or missing API key' });
+    return;
+  }
+
+  next();
+}
 
 // Request logging (debug)
 app.use((req, _res, next) => {
@@ -36,23 +107,19 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'dentiflow-stl', timestamp: new Date().toISOString() });
 });
 
-// Webhook routes
-app.post('/webhooks/sms', smsWebhook);
+// ── Webhook routes (each has own auth) ───────────────────────────────
+app.post('/webhooks/sms', validateTwilioSignature, smsWebhook);
 app.post('/webhooks/form', formWebhook);
 app.post('/webhooks/missed-call', missedCallWebhook);
-app.use('/webhooks/pms', pmsWebhookRoutes);
+app.use('/webhooks/pms', pmsWebhookRoutes); // Has API key / HMAC auth built in
 
-// Recall API routes
-app.use('/api/recall', recallRoutes);
+// ── Protected API routes (require ADMIN_API_KEY) ─────────────────────
+app.use('/api/recall', requireApiKey, recallRoutes);
+app.use('/api/noshow', requireApiKey, noshowRoutes);
+app.use('/api/appointments', requireApiKey, appointmentRoutes);
 
-// Review & Referral API routes
+// Review routes — mix of public (referral) + admin (action endpoints)
 app.use('/api/reviews', reviewRoutes);
-
-// No-Show Recovery API routes
-app.use('/api/noshow', noshowRoutes);
-
-// Appointment API routes (complete → auto-trigger review)
-app.use('/api/appointments', appointmentRoutes);
 
 // Booking link redirect (click-tracked for reactivation SMS)
 app.use('/r', bookingRedirectRoute);

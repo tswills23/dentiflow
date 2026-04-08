@@ -52,8 +52,9 @@ export async function attributeReactivationBookings(
   const aptByPatient = new Map<string, string>();
   for (const apt of appointments) {
     const existing = aptByPatient.get(apt.patient_id);
-    if (!existing || apt.created_at < existing) {
-      aptByPatient.set(apt.patient_id, apt.created_at);
+    const createdAt = apt.created_at || '';
+    if (!existing || createdAt < existing) {
+      aptByPatient.set(apt.patient_id, createdAt);
     }
   }
 
@@ -63,7 +64,7 @@ export async function attributeReactivationBookings(
     if (!aptCreated) continue;
 
     // Only attribute if appointment was created AFTER the sequence started
-    if (new Date(aptCreated) <= new Date(seq.created_at)) continue;
+    if (new Date(aptCreated) <= new Date(seq.created_at || '')) continue;
 
     // Already at S6_COMPLETED somehow — skip
     if (seq.booking_stage === 'S6_COMPLETED') continue;

@@ -44,8 +44,14 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   // S1_INTENT transitions
   'S1_INTENT:booking_interest': 'S3_TIME_PREF',
   'S1_INTENT:booked_confirmation': 'S6_COMPLETED',
+  'S1_INTENT:preferences': 'S3_TIME_PREF',
+  'S1_INTENT:asking_availability': 'S3_TIME_PREF',
   'S1_INTENT:opt_out': 'EXIT_OPT_OUT',
+  'S1_INTENT:not_now': 'EXIT_DEFERRED',
+  'S1_INTENT:decline': 'EXIT_DECLINED',
   'S1_INTENT:urgent': 'S7_HANDOFF',
+  'S1_INTENT:cost_question': 'S7_HANDOFF',
+  'S1_INTENT:unclear': 'S1_INTENT',
 
   // S3_TIME_PREF transitions
   'S3_TIME_PREF:preferences': 'S4_AVAILABILITY',
@@ -59,21 +65,21 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S3_TIME_PREF:cost_question': 'S7_HANDOFF',
   'S3_TIME_PREF:unclear': 'S3_TIME_PREF',
 
-  // S4_AVAILABILITY transitions
-  'S4_AVAILABILITY:slot_selection': 'S5_CONFIRMATION',
-  'S4_AVAILABILITY:confirm': 'S6_COMPLETED',
+  // S4_AVAILABILITY transitions (link-only: redirect back to S3_TIME_PREF)
+  'S4_AVAILABILITY:slot_selection': 'S3_TIME_PREF',
+  'S4_AVAILABILITY:confirm': 'S3_TIME_PREF',
   'S4_AVAILABILITY:booked_confirmation': 'S6_COMPLETED',
-  'S4_AVAILABILITY:preferences': 'S4_AVAILABILITY',
-  'S4_AVAILABILITY:asking_availability': 'S4_AVAILABILITY',
+  'S4_AVAILABILITY:preferences': 'S3_TIME_PREF',
+  'S4_AVAILABILITY:asking_availability': 'S3_TIME_PREF',
   'S4_AVAILABILITY:opt_out': 'EXIT_OPT_OUT',
   'S4_AVAILABILITY:not_now': 'EXIT_DEFERRED',
   'S4_AVAILABILITY:decline': 'EXIT_DECLINED',
-  'S4_AVAILABILITY:unclear': 'S4_AVAILABILITY',
+  'S4_AVAILABILITY:unclear': 'S3_TIME_PREF',
 
-  // S5_CONFIRMATION transitions
+  // S5_CONFIRMATION transitions (link-only: redirect back to S3_TIME_PREF or complete)
   'S5_CONFIRMATION:confirm': 'S6_COMPLETED',
   'S5_CONFIRMATION:booked_confirmation': 'S6_COMPLETED',
-  'S5_CONFIRMATION:preferences': 'S4_AVAILABILITY',
+  'S5_CONFIRMATION:preferences': 'S3_TIME_PREF',
   'S5_CONFIRMATION:decline': 'EXIT_CANCELLED',
   'S5_CONFIRMATION:opt_out': 'EXIT_OPT_OUT',
   'S5_CONFIRMATION:cancel': 'EXIT_CANCELLED',
@@ -97,6 +103,18 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S0_OPENING:cost_question': 'handoff_cost',
   'S0_OPENING:unclear': 'clarify_intent',
 
+  // S1_INTENT actions
+  'S1_INTENT:booking_interest': 'send_booking_link',
+  'S1_INTENT:booked_confirmation': 'confirm_external_booking',
+  'S1_INTENT:preferences': 'send_booking_link',
+  'S1_INTENT:asking_availability': 'send_booking_link',
+  'S1_INTENT:opt_out': 'opt_out_silent',
+  'S1_INTENT:not_now': 'defer_60_days',
+  'S1_INTENT:decline': 'acknowledge_decline',
+  'S1_INTENT:urgent': 'handoff_urgent',
+  'S1_INTENT:cost_question': 'handoff_cost',
+  'S1_INTENT:unclear': 'clarify_intent',
+
   // S3_TIME_PREF actions
   'S3_TIME_PREF:preferences': 'send_booking_link',
   'S3_TIME_PREF:asking_availability': 'send_booking_link',
@@ -109,21 +127,21 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S3_TIME_PREF:cost_question': 'handoff_cost',
   'S3_TIME_PREF:unclear': 'ask_preferences',
 
-  // S4_AVAILABILITY actions
-  'S4_AVAILABILITY:slot_selection': 'confirm_slot',
-  'S4_AVAILABILITY:confirm': 'book_first_slot',
+  // S4_AVAILABILITY actions (link-only: always send booking link)
+  'S4_AVAILABILITY:slot_selection': 'send_booking_link',
+  'S4_AVAILABILITY:confirm': 'send_booking_link',
   'S4_AVAILABILITY:booked_confirmation': 'confirm_external_booking',
-  'S4_AVAILABILITY:preferences': 'show_balanced_slots',
-  'S4_AVAILABILITY:asking_availability': 'show_default_slots',
+  'S4_AVAILABILITY:preferences': 'send_booking_link',
+  'S4_AVAILABILITY:asking_availability': 'send_booking_link',
   'S4_AVAILABILITY:opt_out': 'opt_out_silent',
   'S4_AVAILABILITY:not_now': 'defer_60_days',
   'S4_AVAILABILITY:decline': 'acknowledge_decline',
-  'S4_AVAILABILITY:unclear': 'reshow_slots',
+  'S4_AVAILABILITY:unclear': 'send_booking_link',
 
-  // S5_CONFIRMATION actions
-  'S5_CONFIRMATION:confirm': 'complete_booking',
+  // S5_CONFIRMATION actions (link-only)
+  'S5_CONFIRMATION:confirm': 'confirm_external_booking',
   'S5_CONFIRMATION:booked_confirmation': 'confirm_external_booking',
-  'S5_CONFIRMATION:preferences': 'show_balanced_slots',
+  'S5_CONFIRMATION:preferences': 'send_booking_link',
   'S5_CONFIRMATION:decline': 'cancel_booking',
   'S5_CONFIRMATION:opt_out': 'opt_out_silent',
   'S5_CONFIRMATION:cancel': 'cancel_booking',

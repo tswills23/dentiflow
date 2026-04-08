@@ -13,7 +13,7 @@ import { selectTemplate, renderTemplate, getTemplateId } from './templates';
 import type { RecallSequence, OutreachResult, SequenceDay } from '../../types/recall';
 import type { Practice, Patient, Provider } from '../../types/database';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'https://dentiflow-stl-production.up.railway.app';
+const BACKEND_URL = process.env.BACKEND_URL;
 
 // Extract doctor/hygienist display names from practice_config.providers
 function extractProviderNames(practice: Practice): { doctorName: string; hygienistName: string } {
@@ -47,6 +47,8 @@ export async function runDay0Outreach(practiceId: string): Promise<OutreachResul
     return result;
   }
 
+  const typedPractice = practice as unknown as Practice;
+
   // 2. Get all Day 0 sequences that haven't been sent yet
   const { data: sequences, error: seqErr } = await supabase
     .from('recall_sequences')
@@ -66,7 +68,7 @@ export async function runDay0Outreach(practiceId: string): Promise<OutreachResul
   // 3. Process each sequence
   for (const seq of sequences as RecallSequence[]) {
     try {
-      await sendOutreachSMS(seq, practice, result);
+      await sendOutreachSMS(seq, typedPractice, result);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       result.errors.push(`Sequence ${seq.id}: ${msg}`);
@@ -108,7 +110,7 @@ export async function sendSequenceSMS(
   }
 
   const result: OutreachResult = { sent: 0, skipped: 0, failed: 0, errors: [] };
-  await sendOutreachSMS(seq as RecallSequence, practice, result);
+  await sendOutreachSMS(seq as RecallSequence, practice as unknown as Practice, result);
 
   if (result.sent > 0) return { success: true };
   return { success: false, error: result.errors[0] || 'Unknown error' };

@@ -176,7 +176,7 @@ async function reEnterDeferred(
         sequence_day: 0,
         booking_stage: 'S0_OPENING',
         last_sent_at: null,
-        next_send_at: null,
+        next_send_at: now.toISOString(),
         exit_reason: null,
         defer_until: null,
         reply_count: 0,

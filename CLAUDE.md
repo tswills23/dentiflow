@@ -1,317 +1,8 @@
-# Agent Instructions
+# CLAUDE.md
 
-> This file is mirrored across CLAUDE.md, AGENTS.md, and GEMINI.md so the same instructions load in any AI environment.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
-
-## The 3-Layer Architecture
-
-**Layer 1: Directive (What to do)**
-- SOPs written in Markdown, live in `directives/`
-- Define the goals, inputs, tools/scripts to use, outputs, and edge cases
-- Natural language instructions, like you'd give a mid-level employee
-
-**Layer 2: Orchestration (Decision making)**
-- This is you. Your job: intelligent routing.
-- Read directives, call execution tools in the right order, handle errors, ask for clarification, update directives with learnings
-- You're the glue between intent and execution
-
-**Layer 3: Execution (Doing the work)**
-- TypeScript services in `src/services/`
-- Utility scripts in `execution/` (migration runners)
-- Environment variables, API tokens stored in `.env`
-- Handle API calls, data processing, database interactions
-- Reliable, testable, fast
-
-**Why this works:** if you do everything yourself, errors compound. 90% accuracy per step = 59% success over 5 steps. The solution is push complexity into deterministic code. That way you just focus on decision-making.
-
-## Operating Principles
-
-**1. Check for tools first**
-Before writing a new service, check `src/services/` and `execution/` per your directive. Only create new files if none exist.
-
-**2. Self-anneal when things break**
-- Read error message and stack trace
-- Fix the code and test it again (unless it uses paid tokens/credits — check w user first)
-- Update the directive with what you learned (API limits, timing, edge cases)
-
-**3. Update directives as you learn**
-Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations — update the directive. But don't create or overwrite directives without asking unless explicitly told to.
-
-## Self-annealing loop
-
-Errors are learning opportunities. When something breaks:
-1. Fix it
-2. Update the tool
-3. Test tool, make sure it works
-4. Update directive to include new flow
-5. System is now stronger
-
-## File Organization
-
-```
-dentiflow/
-├── CLAUDE.md
-├── .env
-├── package.json
-│
-├── directives/
-│   ├── system/                    ← Speed-to-Lead directives
-│   │   ├── stl-persona.md
-│   │   ├── stl-response-rules.md
-│   │   ├── stl-intent-detection.md
-│   │   ├── stl-booking-flow.md
-│   │   └── stl-escalation.md
-│   ├── services/                  ← Dental service knowledge (10 files)
-│   ├── recall_v2.md              ← Recall engine specification
-│   ├── sms_booking_agent.md      ← SMS booking conversation flow
-│   ├── pms_ingest.md             ← Patient data import SOP
-│   ├── hygiene_outreach.md       ← Outreach workflow SOP
-│   ├── preflight.md              ← System health check SOP
-│   ├── onboard_client.md         ← Client onboarding SOP
-│   ├── demo_booking_agent.md     ← Demo flow SOP
-│   └── USAGE.md                  ← Quick start guide
-│
-├── src/
-│   ├── server.ts                  ← Express server
-│   ├── routes/
-│   │   ├── smsWebhook.ts         ← Twilio inbound (routes review > noshow > recall > STL)
-│   │   ├── formWebhook.ts        ← Web form leads
-│   │   ├── missedCallWebhook.ts  ← Missed call leads
-│   │   ├── recallRoutes.ts       ← Recall API endpoints
-│   │   ├── noshowRoutes.ts       ← No-Show Recovery API endpoints
-│   │   └── pmsWebhookRoutes.ts   ← PMS appointment status webhooks
-│   ├── services/
-│   │   ├── orchestration/         ← Speed-to-Lead pipeline
-│   │   │   └── stlOrchestrator.ts
-│   │   ├── execution/             ← Shared execution services
-│   │   │   ├── smsService.ts      ← Twilio SMS (shared by STL + recall)
-│   │   │   ├── responseValidator.ts ← 3-layer validator (shared)
-│   │   │   ├── aiClient.ts
-│   │   │   ├── staffNotifier.ts
-│   │   │   ├── metricsTracker.ts
-│   │   │   ├── conversationStore.ts
-│   │   │   └── patientManager.ts
-│   │   ├── recall/                ← Recall engine services
-│   │   │   ├── csvParser.ts       ← PMS CSV parser (auto-header detection)
-│   │   │   ├── ingestAgent.ts
-│   │   │   ├── outreachEngine.ts
-│   │   │   ├── recallCron.ts      ← Hourly cron for Day 1/3/exit
-│   │   │   ├── sequenceOrchestrator.ts
-│   │   │   ├── replyHandler.ts    ← + emergency staff notifications
-│   │   │   ├── bookingStateMachine.ts
-│   │   │   ├── intentClassifier.ts
-│   │   │   ├── slotSelector.ts
-│   │   │   ├── templates.ts
-│   │   │   └── voiceAssignment.ts
-│   │   ├── noshow/                ← No-Show Recovery services
-│   │   │   ├── noshowService.ts   ← Create sequence, send messages, find active
-│   │   │   ├── noshowReplyHandler.ts ← Reply handling → booking state machine at S3
-│   │   │   └── noshowCron.ts      ← Hourly cron for Message 1/2/exit/deferred
-│   │   ├── pms/                   ← PMS Integration (Dentrix Ascend, etc.)
-│   │   │   ├── adapterRegistry.ts ← Factory: getPmsAdapter(pmsType)
-│   │   │   ├── pmsEventProcessor.ts ← Core: idempotency, patient resolve, status dispatch
-│   │   │   ├── pmsSyncCron.ts     ← Hourly polling cron (for PMS without webhooks)
-│   │   │   └── adapters/
-│   │   │       ├── generic.ts     ← Generic webhook adapter (any PMS)
-│   │   │       └── dentrixAscend.ts ← Dentrix Ascend status mapping + polling stub
-│   │   ├── booking/               ← Booking adapters
-│   │   ├── serviceKnowledge.ts
-│   │   ├── anchorTemplates.ts
-│   │   └── templateFallback.ts
-│   ├── types/
-│   │   ├── database.ts            ← Supabase types
-│   │   ├── recall.ts              ← Recall engine types
-│   │   └── pms.ts                 ← PMS integration types
-│   └── lib/
-│       └── supabase.ts
-│
-├── supabase/
-│   └── migrations/
-│       ├── 001_initial_schema.sql
-│       ├── 002_recall_schema.sql
-│       ├── 003_patient_location.sql
-│       ├── 004_multi_practice_users.sql  ← Multi-practice auth support
-│       ├── 005_reviews_referrals.sql     ← Reviews, feedback, referrals tables
-│       ├── 006_noshow_recovery.sql       ← No-show sequences table + metrics
-│       └── 007_pms_integration.sql      ← PMS integration config + sync log
-│
-├── dashboard/                     ← React + Tailwind (white-label)
-│   └── src/
-│       ├── main.tsx               ← Entry point (BrowserRouter + AuthProvider)
-│       ├── App.tsx                ← Layout, routing, sidebar with practice switcher
-│       ├── contexts/
-│       │   └── AuthContext.tsx    ← Multi-practice auth state (user, profiles[], activePracticeId)
-│       ├── pages/
-│       │   ├── Login.tsx          ← Email/password login (Supabase Auth)
-│       │   ├── PracticeSelector.tsx ← Practice picker for multi-practice users
-│       │   ├── Dashboard.tsx      ← KPIs, activity feed, response speed
-│       │   ├── Leads.tsx          ← Patient leads table
-│       │   ├── Conversations.tsx  ← SMS thread interface
-│       │   └── Appointments.tsx   ← Appointment schedule
-│       ├── hooks/
-│       │   ├── useBranding.ts    ← Practice-specific theme/colors
-│       │   └── useRealtime.ts    ← Supabase real-time subscriptions
-│       ├── components/           ← Shared UI (StatCard, StatusBadge, etc.)
-│       ├── types/
-│       │   └── branding.ts       ← Branding config types
-│       └── lib/
-│           └── supabase.ts       ← Supabase client init
-│
-├── execution/                     ← Migration runner scripts
-│   ├── run_migration.mjs
-│   ├── run_migration_003.mjs
-│   └── verify_migration.mjs
-│
-├── scripts/                       ← Dev utility scripts (tunnels, diagnostics, imports)
-│
-├── worker/                        ← Cloudflare Worker (Retell voice agent middleware)
-│
-└── .tmp/                          ← Temporary/scratch files (gitignored)
-```
-
-## Tech Stack
-
-| Layer | Technology | Notes |
-|-------|-----------|-------|
-| Backend | TypeScript / Node.js (Express) | All server code |
-| Database | Supabase (Postgres) | Shared by STL + Recall |
-| AI Engine | Claude API | Constrained AI (temp 0.3) for STL |
-| SMS | Twilio | Shared by STL + Recall. A2P verification pending |
-| Dashboard | React + Tailwind (Vite) | White-label per practice |
-| Hosting | Vercel (frontend) + Railway (backend) | |
-
-## Integration Status
-
-| Integration | Status | Notes |
-|------------|--------|-------|
-| Supabase | Live | Shared database for STL + Recall |
-| Supabase Auth | Live | Email/password login, multi-practice user support |
-| Twilio SMS | Built, A2P pending | Console.log fallback when SMS_LIVE_MODE=false |
-| Claude API | Live | STL responses |
-| Dashboard | Live | White-label branding per practice, deployed to Vercel |
-| Dentrix Ascend | CSV + webhook built | CSV parser + PMS webhook endpoint (API polling stub until DADP enrollment) |
-| PMS Integration | Built | Generic webhook + Dentrix adapter, auto no-show/review triggers |
-| Google Sheets | Working | Via gcloud auth + Sheets API v4 for import review sheets |
-
-## Speed-to-Lead Pipeline
-
-```
-Inbound (SMS / Web Form / Missed Call)
-    → Webhook endpoint
-    → Find/create patient in Supabase
-    → Match dental service (serviceKnowledge.ts)
-    → Generate AI response (Claude API, constrained)
-    → Validate response (responseValidator.ts — HIPAA, pricing, length)
-    → Send SMS (smsService.ts, 60s cooldown)
-    → Notify staff (staffNotifier.ts)
-    → Log everything (metricsTracker.ts, conversationStore.ts)
-```
-
-## Recall Pipeline
-
-```
-Step 1: Import CSV → POST /api/recall/import
-    → csvParser.ts: auto-detect headers, parse PMS format, filter scheduled patients
-    → ingestAgent.ts: normalize phones, dedupe, assign voice/segment, set location
-    → Returns summary — NO texts sent (human review checkpoint)
-
-Step 2: Launch Outreach → POST /api/recall/launch
-    → outreachEngine.ts: sends Day 0 SMS to all imported patients
-    → Log to conversations + automation_log
-
-Step 3+: Automatic (hourly cron — recallCron.ts)
-    → Day 0 + 24h → Send Day 1 SMS (soft CTA)
-    → Day 1 + 48h → Send Day 3 SMS (direct CTA, non-responders only)
-    → Day 3 + 24h → Auto-exit with no_response
-    → Check deferred patients → re-activate if defer_until passed
-
-Patient Reply → POST /webhooks/sms → routing check
-    → Active review sequence? → reviewReplyHandler.ts
-    → Active noshow sequence? → noshowReplyHandler.ts
-    → Active recall sequence? → replyHandler.ts
-        → Classify intent (context-aware)
-        → Navigate booking state machine (S0→S6)
-        → Validate response (shared responseValidator.ts)
-        → Emergency → staff notification via staffNotifier.ts
-        → Send SMS reply
-    → No active sequence? → speed-to-lead pipeline (unchanged)
-```
-
-## No-Show Recovery Pipeline
-
-```
-Step 1: Mark No-Show → POST /api/noshow/mark (or dashboard button)
-    → Update appointment status to 'no_show'
-    → Create noshow_sequence (status: message_1_pending)
-    → Schedule Message 1 for 1 hour from now
-
-Step 2: Automatic (hourly cron — noshowCron.ts at :05)
-    → message_1_pending + next_send_at passed → Send Message 1, status → message_1_sent
-    → message_1_sent + 24h + no reply → Send Message 2, status → message_2_sent
-    → message_2_sent + 24h + no reply → status → no_response (close sequence)
-    → deferred + defer_until passed → Reset to message_1_pending (one more attempt)
-
-Patient Reply → POST /webhooks/sms → noshow routing
-    → Enter booking state machine at S3_TIME_PREF (skip opening stages)
-    → "not right now" → defer 14 days (not 60 like recall)
-    → "cancel" / "not interested" → declined, exit
-    → "stop" → opt_out, permanent
-    → Concern ("scared", "can't afford") → S7_HANDOFF, staff notification
-    → Booking interest → slot selection → confirm → rebooked
-```
-
-## PMS Integration Pipeline
-
-```
-PMS (Dentrix Ascend / any) sends appointment status change
-    ├── Webhook push ──→ POST /webhooks/pms?practiceId=UUID
-    │                       ↓
-    │                   Verify auth (API key or HMAC-SHA256)
-    │                       ↓
-    │                   Normalize via PMS adapter (Dentrix/generic)
-    │                       ↓
-    │                   Idempotency check (pms_sync_log)
-    │                       ↓
-    │                   Resolve patient (PMS ID → phone → create)
-    │                       ↓
-    │                   Upsert appointment (booking_platform_id)
-    │                       ↓
-    │                   Status dispatch:
-    │                     "No Show"    → createNoshowSequence() → recovery SMS
-    │                     "Complete"   → createReviewSequence() → survey SMS
-    │                     "Cancelled"  → update appointment status
-    │                     "Rescheduled"→ close any active noshow sequence
-    │                     Other        → sync only (appointment status update)
-    │
-    └── Polling cron (10 * * * *) ──→ for PMS without webhooks
-                                        (stub until DADP API access approved)
-```
-
-- Auth: per-practice config in `pms_integrations` table (webhook_secret or webhook_api_key)
-- Idempotency: `pms_sync_log` table with UNIQUE(practice_id, pms_event_id)
-- Patient matching: pms_patient_id → phone → create new
-- Dashboard manual buttons remain as fallback (existing dedup prevents double sequences)
-- Auto-disable after 10 consecutive webhook errors
-
-## Authentication & Multi-Tenancy
-
-```
-Page load → Supabase session check
-  ├── No session → /login (all routes redirect)
-  └── Session found → fetch user_profiles (all rows for this auth_user_id)
-        ├── 1 profile → auto-select practice, show dashboard
-        └── N profiles → show PracticeSelector
-              └── User picks one → localStorage saves choice → dashboard
-                    └── Sidebar shows practice switcher dropdown
-```
-
-- **AuthContext** (`dashboard/src/contexts/AuthContext.tsx`) — single source of truth for auth state
-- **user_profiles** table links `auth.users.id` → `practices.id` (many-to-many via composite unique)
-- **RLS** on all 8 tables enforces `practice_id IN (SELECT practice_id FROM user_profiles WHERE auth_user_id = auth.uid())`
-- **Service role** bypasses RLS for backend operations (webhooks, cron jobs)
-- **No self-serve signup** — accounts created manually via Supabase dashboard
-- **Practice switching** reloads all data + branding for the selected practice
+> Mirrored across CLAUDE.md, AGENTS.md, GEMINI.md.
 
 ## Critical Rules
 
@@ -323,11 +14,122 @@ Page load → Supabase session check
 - 60-second cooldown per phone number
 - One outbound per inbound — no double-sends
 - Recall opt-out is permanent — sets recall_opt_out=true on patient record
-- Express body limit is 5mb for CSV imports (`express.json({ limit: '5mb' })`)
+- Express body limit is 5mb for CSV imports
 - Emergency replies during recall trigger staff SMS notification
+
+## Architecture
+
+3-layer DOE: Directives (`directives/`) → Orchestration (you) → Execution (`src/services/`).
+Push complexity into deterministic TypeScript. You focus on decision-making.
+
+## Operating Principles
+
+1. **Check for tools first** — check `src/services/` and `execution/` before creating new files
+2. **Self-anneal** — fix errors, update tools, test, update directives with learnings
+3. **Update directives as you learn** — but don't create/overwrite without asking
+4. **Run everything end to end** — never tell the user to open a terminal or run commands. Execute all steps yourself via Bash. The user asks, you deliver the result. Only interrupt for unavoidable interactive steps (e.g. browser sign-in).
+5. **Reuse production code in scripts** — `npx tsx scripts/<tool>.ts` imports from `src/services/` directly. Never reimplement logic that already exists.
+6. **Never process CSVs in-context** — use the `/recall-import` skill with a file path. Never Read CSV content into the conversation.
+
+## Dev Commands
+
+**Backend** (root):
+```bash
+npm run dev          # tsx watch src/server.ts (hot reload)
+npm run build        # tsc → dist/
+npm start            # node dist/server.js (production)
+```
+
+**Dashboard** (inside `dashboard/`):
+```bash
+npm run dev          # Vite dev server
+npm run build        # tsc + vite build → dist/
+```
+
+**Tunnel** (expose local backend to Twilio):
+```bash
+node scripts/cf_tunnel.mjs    # Cloudflare tunnel (preferred — no interstitial)
+node scripts/ngrok_tunnel.mjs # ngrok alternative
+```
+
+> No test suite or lint commands exist. `npm test` is declared but no tests are implemented.
+
+## Environment Variables
+
+Copy `.env.example` to `.env`. Required vars:
+
+| Variable | Purpose |
+|----------|---------|
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Backend DB access (service role bypasses RLS) |
+| `SUPABASE_ANON_KEY` | Dashboard client |
+| `ANTHROPIC_API_KEY` | Claude AI calls |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_PHONE_NUMBER` | SMS |
+| `SMS_LIVE_MODE` | `false` for dev (console.log), `true` to send real SMS |
+| `RECALL_CRON_ENABLED` | `true` to activate recall scheduler |
+| `DEFAULT_PRACTICE_ID` | Practice UUID for scripts |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Dashboard env (prefix required by Vite) |
+
+## CLI Tools
+
+| Command | What it does |
+|---------|-------------|
+| `npx tsx scripts/recall-import.ts --file <csv>` | Dry run: parse, eligibility, voice tiers, summary |
+| `npx tsx scripts/recall-import.ts --file <csv> --sheet` | + Create Google Sheet (Eligible + per-location tabs) |
+| `npx tsx scripts/recall-import.ts --file <csv> --export <out.csv>` | + Export eligible list to CSV |
+| `npx tsx scripts/recall-import.ts --file <csv> --import` | + Write eligible patients to Supabase |
+
+Google Sheets requires `gcloud auth login --enable-gdrive-access` (one-time browser sign-in).
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | TypeScript / Node.js (Express) |
+| Database | Supabase (Postgres) |
+| AI Engine | Claude API (Sonnet 4.5, temp 0.3, 300 max tokens) |
+| SMS | Twilio (A2P verification pending) |
+| Dashboard | React + Tailwind (Vite) |
+| Hosting | Vercel (frontend) + Railway (backend) |
+
+## Key Paths
+
+- `src/server.ts` — Express server, webhook routes, middleware (CORS, Twilio sig validation, API key)
+- `src/routes/smsWebhook.ts` — Inbound routing: review > noshow > recall > STL
+- `src/services/orchestration/` — STL pipeline (prompt builder, directive loader, intent detector)
+- `src/services/execution/` — Shared services (SMS, validator, AI client, metrics, patient manager)
+- `src/services/recall/` — Recall engine (cron, templates, reply handler, booking state machine)
+- `src/services/noshow/` — No-show recovery (cron at :05, reply handler enters at S3_TIME_PREF)
+- `src/services/pms/` — PMS integration (adapters, event processor, sync cron at :10)
+- `src/services/reviews/` — Review sequences, referrals, score parsing
+- `src/types/` — `database.ts` (re-exports from `supabase.ts`), `recall.ts`, `pms.ts`, `review.ts`
+- `supabase/migrations/` — 001-008 (schema, recall, location, auth, reviews, noshow, PMS, booking links)
+- `dashboard/src/` — Pages, AuthContext, hooks (useRealtime, useBranding)
+- `directives/system/` — 5 STL directives: `stl-persona`, `stl-intent-detection`, `stl-booking-flow`, `stl-response-rules`, `stl-escalation`
+- `directives/services/` — 10 service directives (one per dental service: emergency, crown, implant, etc.)
+- `.claude/docs/pipelines.md` — Detailed pipeline flow diagrams
+- `.claude/docs/structure.md` — Full directory tree
+
+## Pipelines & Auth
+
+<!-- Detailed pipeline diagrams: .claude/docs/pipelines.md -->
+<!-- Full directory tree: .claude/docs/structure.md -->
+
+**STL**: Inbound → patient → match service → AI (Claude) → validate → SMS → notify staff → log
+**Recall**: Import CSV → launch Day 0 → cron Day 1/3/exit → reply handler (templates, no AI)
+**No-Show**: Mark → Message 1 (+1h) → Message 2 (+24h) → close (+48h); replies enter booking at S3
+**PMS**: Webhook/poll → adapter → idempotency → patient resolve → upsert → dispatch (noshow/review/cancel)
+**Auth**: Supabase Auth → user_profiles → practice_id → RLS on all tables; service role for backend
+**SMS Routing**: review > noshow > recall > STL (checked in smsWebhook.ts)
+**Dashboard ↔ Backend**: Dashboard queries Supabase directly (no backend API calls). Backend uses service role key to bypass RLS.
+
+## LinkedIn Content
+
+- Always check the last 10 posts in `.claude/skills/linkedin-content-agent/data/drafts/` before drafting to avoid topic overlap.
+- Voice: casual, direct, humor-forward. Never formal or consultant-y.
+- Hook must work above the fold — no context required to be interesting.
+- Pillars: dental SaaS · recall/reactivation · SMS/outbound · AI in dental · founder ops.
+- When logging engagement stats: append to the analytics file and confirm in one line. No analysis unless asked.
 
 ## Summary
 
-You sit between human intent (directives) and deterministic execution (TypeScript services). Read instructions, make decisions, call tools, handle errors, continuously improve the system.
-
-Be pragmatic. Be reliable. Self-anneal.
+You sit between directives and execution. Read instructions, make decisions, call tools, handle errors, self-anneal.

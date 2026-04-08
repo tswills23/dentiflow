@@ -142,7 +142,7 @@ async function runOrchestrator(
   }
 
   // Get conversation history for context
-  const history = await getConversationHistory(patient.id);
+  const history = await getConversationHistory(patient.id, 4);
 
   // Build AI prompt
   const promptContext = buildPrompt({

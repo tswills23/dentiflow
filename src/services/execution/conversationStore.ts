@@ -25,7 +25,7 @@ export async function saveMessage(params: {
       ai_generated: params.aiGenerated || false,
       automation_type: params.automationType || null,
       twilio_sid: params.twilioSid || null,
-      metadata: params.metadata || {},
+      metadata: (params.metadata || {}) as any,
     })
     .select()
     .single();
@@ -34,7 +34,7 @@ export async function saveMessage(params: {
     throw new Error(`Failed to save message: ${error.message}`);
   }
 
-  return data;
+  return data as unknown as Conversation;
 }
 
 export async function getConversationHistory(
@@ -54,7 +54,7 @@ export async function getConversationHistory(
   }
 
   // Return in chronological order
-  return (data || []).reverse();
+  return (data || []).reverse() as unknown as Conversation[];
 }
 
 export async function getRecentOutboundMessage(
@@ -73,5 +73,5 @@ export async function getRecentOutboundMessage(
     console.error('[conversationStore] Error fetching recent outbound:', error.message);
   }
 
-  return data;
+  return data as unknown as Conversation | null;
 }

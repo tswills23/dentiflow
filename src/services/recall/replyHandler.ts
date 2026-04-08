@@ -54,6 +54,20 @@ export async function handleRecallReply(
     return errorResult(sequenceId, sequence.patient_id, 'Patient not found');
   }
 
+  const typedPatient = patient as unknown as Patient;
+
+  if (typedPatient.recall_opt_out) {
+    await logAutomation({
+      practiceId,
+      patientId: patient.id,
+      automationType: 'recall',
+      action: 'blocked_opt_out',
+      result: 'skipped',
+      metadata: { sequenceId, reason: 'patient opted out' },
+    });
+    return errorResult(sequenceId, patient.id, 'Patient has opted out of recall');
+  }
+
   const { data: practice } = await supabase
     .from('practices')
     .select('*')
@@ -63,6 +77,8 @@ export async function handleRecallReply(
   if (!practice) {
     return errorResult(sequenceId, sequence.patient_id, 'Practice not found');
   }
+
+  const typedPractice = practice as unknown as Practice;
 
   // 2. Log inbound message
   await saveMessage({
@@ -101,8 +117,8 @@ export async function handleRecallReply(
   const { replyText, updatedFields } = await executeAction(
     transition.action,
     sequence,
-    patient,
-    practice,
+    typedPatient,
+    typedPractice,
     messageBody,
     classification
   );
@@ -153,8 +169,8 @@ export async function handleRecallReply(
   // 9. Handle terminal-specific side effects
   if (transition.nextStage === 'S7_HANDOFF' && transition.action === 'handoff_urgent') {
     await notifyEscalation(
-      practice,
-      patient,
+      typedPractice,
+      typedPatient,
       'Emergency detected during recall',
       messageBody
     );
@@ -231,7 +247,7 @@ async function executeAction(
 
   // Build booking link for this sequence if available
   const bookingLinkUrl = sequence.booking_link_token
-    ? `${process.env.BACKEND_URL || 'https://dentiflow-stl-production.up.railway.app'}/r/${sequence.booking_link_token}`
+    ? `${process.env.BACKEND_URL}/r/${sequence.booking_link_token}`
     : null;
 
   switch (action) {

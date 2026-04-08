@@ -84,23 +84,33 @@ function Recall({ practiceId }: RecallProps) {
     async function fetchData() {
       setLoading(true)
 
-      // Fetch sequences
-      const { data: seqData, error: seqError } = await supabase
-        .from('recall_sequences')
-        .select('*')
-        .eq('practice_id', practiceId)
+      // Fetch all sequences with pagination (Supabase default cap is 1000)
+      const allSeqs: RecallSequence[] = []
+      const PAGE_SIZE = 1000
+      let from = 0
+      while (true) {
+        const { data: seqData, error: seqError } = await supabase
+          .from('recall_sequences')
+          .select('*')
+          .eq('practice_id', practiceId)
+          .range(from, from + PAGE_SIZE - 1)
 
-      if (seqError) {
-        console.error('Error fetching sequences:', seqError)
-        setLoading(false)
-        return
+        if (seqError) {
+          console.error('Error fetching sequences:', seqError)
+          setLoading(false)
+          return
+        }
+
+        const page = (seqData ?? []) as RecallSequence[]
+        allSeqs.push(...page)
+        if (page.length < PAGE_SIZE) break
+        from += PAGE_SIZE
       }
 
-      const seqs = (seqData ?? []) as RecallSequence[]
-      setSequences(seqs)
+      setSequences(allSeqs)
 
       // Fetch patient info for all patients in sequences
-      const patientIds = [...new Set(seqs.map((s) => s.patient_id))]
+      const patientIds = [...new Set(allSeqs.map((s: RecallSequence) => s.patient_id))]
       if (patientIds.length > 0) {
         // Batch fetch in chunks of 500
         const patientMap = new Map<string, PatientInfo>()
