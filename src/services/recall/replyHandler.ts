@@ -256,26 +256,25 @@ async function executeAction(
     case 'send_booking_link': {
       if (bookingLinkUrl) {
         return {
-          replyText: `That's great, ${firstName}! You can pick a time that works best for you right here: ${bookingLinkUrl}`,
+          replyText: `awesome — grab a time here: ${bookingLinkUrl}`,
           updatedFields,
         };
       }
-      // Fallback if no booking link token
       return {
-        replyText: `That's great, ${firstName}! Do you have a preference for days or times? For example, mornings or afternoons, or specific days of the week?`,
+        replyText: `awesome! do mornings or afternoons work better for you, or any particular days?`,
         updatedFields,
       };
     }
 
     case 'confirm_external_booking':
       return {
-        replyText: `That's awesome, ${firstName}! We're looking forward to seeing you at ${practiceName}. See you soon!`,
+        replyText: `perfect, see you soon!`,
         updatedFields,
       };
 
     case 'ask_preferences':
       return {
-        replyText: `That's great, ${firstName}! Do you have a preference for days or times? For example, mornings or afternoons, or specific days of the week?`,
+        replyText: `do mornings or afternoons work better, or any particular days?`,
         updatedFields,
       };
 
@@ -293,7 +292,7 @@ async function executeAction(
 
       if (slots.length === 0) {
         return {
-          replyText: `Thanks ${firstName}! I don't have openings matching those preferences right now. Would different days or times work for you?`,
+          replyText: `nothing matching that right now — would different days or times work?`,
           updatedFields,
         };
       }
@@ -302,7 +301,7 @@ async function executeAction(
       const slotList = slotsToDisplayList(slots);
 
       return {
-        replyText: `Here are some times that work at ${practiceName}:\n\n${slotList}\n\nJust reply with a number to pick one, or let me know if you'd like different options.`,
+        replyText: `here's what we've got:\n\n${slotList}\n\nreply with 1, 2, or 3`,
         updatedFields,
       };
     }
@@ -318,16 +317,15 @@ async function executeAction(
           updatedFields.selected_slot = selectedSlot;
 
           return {
-            replyText: `Got it! Just to confirm - you'd like ${selectedSlot.fullDisplay} at ${practiceName}. Does that work? Reply "yes" to confirm.`,
+            replyText: `got it — ${selectedSlot.fullDisplay}. does that work? reply yes to confirm`,
             updatedFields,
           };
         }
       }
 
-      // Invalid slot selection
       const slotList = slotsToDisplayList(offeredSlots);
       return {
-        replyText: `I didn't catch which slot you'd like. Here are the options again:\n\n${slotList}\n\nJust reply with 1, 2, or 3.`,
+        replyText: `just reply with 1, 2, or 3:\n\n${slotList}`,
         updatedFields,
       };
     }
@@ -338,12 +336,12 @@ async function executeAction(
         const slot = offeredSlots[0];
         updatedFields.selected_slot = slot;
         return {
-          replyText: `You're all set, ${firstName}! Your appointment at ${practiceName} is booked for ${slot.fullDisplay}. We'll see you then!`,
+          replyText: `you're all set for ${slot.fullDisplay} — see you then!`,
           updatedFields,
         };
       }
       return {
-        replyText: `Thanks ${firstName}! Let me find some available times for you. Do you prefer mornings or afternoons?`,
+        replyText: `do mornings or afternoons work better for you?`,
         updatedFields,
       };
     }
@@ -352,12 +350,12 @@ async function executeAction(
       const slot = sequence.selected_slot;
       if (slot) {
         return {
-          replyText: `You're all set, ${firstName}! Your appointment at ${practiceName} is confirmed for ${slot.fullDisplay}. We look forward to seeing you!`,
+          replyText: `confirmed — ${slot.fullDisplay}. see you then!`,
           updatedFields,
         };
       }
       return {
-        replyText: `You're all set, ${firstName}! Your appointment at ${practiceName} is confirmed. We'll see you soon!`,
+        replyText: `you're all set, see you soon!`,
         updatedFields,
       };
     }
@@ -367,12 +365,12 @@ async function executeAction(
       if (offeredSlots.length > 0) {
         const slotList = slotsToDisplayList(offeredSlots);
         return {
-          replyText: `No problem! Here are those times again:\n\n${slotList}\n\nJust reply with a number, or let me know if you'd like different options.`,
+          replyText: `here are those times again:\n\n${slotList}\n\nreply with 1, 2, or 3`,
           updatedFields,
         };
       }
       return {
-        replyText: `Would you like me to show you some available times? Just let me know your preferred days or times.`,
+        replyText: `do mornings or afternoons work better, or any particular days?`,
         updatedFields,
       };
     }
@@ -380,7 +378,7 @@ async function executeAction(
     case 'opt_out_silent':
       updatedFields.opt_out = true;
       return {
-        replyText: `You've been removed from our recall list. You won't receive further messages from ${practiceName}. If you ever want to schedule, just give us a call.`,
+        replyText: `no problem, you're off the list. give us a call if you ever want to come in`,
         updatedFields,
       };
 
@@ -388,44 +386,44 @@ async function executeAction(
       updatedFields.defer_until = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
       updatedFields.exit_reason = 'deferred';
       return {
-        replyText: `No problem at all, ${firstName}! We'll check back in a couple of months. Take care!`,
+        replyText: `totally fine, we'll circle back in a couple months`,
         updatedFields,
       };
 
     case 'acknowledge_decline':
       return {
-        replyText: `Understood, ${firstName}. If you ever need to schedule a visit, we're here for you at ${practiceName}. Take care!`,
+        replyText: `no worries — reach out whenever you're ready`,
         updatedFields,
       };
 
     case 'handoff_urgent':
       return {
-        replyText: `I'm sorry to hear that, ${firstName}. Please call us right away at ${practice.phone || 'our office'} so we can help you as soon as possible.`,
+        replyText: `oh no — call us right away at ${practice.phone || 'the office'} and we'll get you in`,
         updatedFields,
       };
 
     case 'handoff_cost':
       return {
-        replyText: `Great question, ${firstName}! For specific pricing and insurance questions, please give us a call at ${practice.phone || 'our office'} and our team will be happy to help.`,
+        replyText: `good question — easiest to go over that by phone: ${practice.phone || 'give us a call'}`,
         updatedFields,
       };
 
     case 'handoff_wrong_number':
     case 'handoff_general':
       return {
-        replyText: `I'll have someone from our team reach out to you directly. You can also call us at ${practice.phone || 'our office'}.`,
+        replyText: `i'll have someone reach out — or you can call us at ${practice.phone || 'the office'}`,
         updatedFields,
       };
 
     case 'clarify_intent':
       return {
-        replyText: `Hi ${firstName}! I wasn't sure what you meant. Would you like to schedule a visit at ${practiceName}? Just reply "yes" to get started or let me know how I can help.`,
+        replyText: `just checking — were you looking to get back in for a cleaning?`,
         updatedFields,
       };
 
     case 'cancel_booking':
       return {
-        replyText: `No problem, ${firstName}. Your appointment has been cancelled. If you'd like to reschedule in the future, just let us know.`,
+        replyText: `got it, cancelled. let us know if you want to find another time`,
         updatedFields,
       };
 
@@ -433,7 +431,7 @@ async function executeAction(
     case 'stay_in_stage':
     default:
       return {
-        replyText: `Thanks for your message, ${firstName}! Would you like to schedule a visit at ${practiceName}? Just reply "yes" to get started.`,
+        replyText: `were you looking to get back in for a cleaning?`,
         updatedFields,
       };
   }
