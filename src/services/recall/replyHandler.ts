@@ -44,6 +44,20 @@ export async function handleRecallReply(
 
   const sequence = seq as RecallSequence;
 
+  // GUARD: Do not respond to replies on terminal sequences. A completed/exited
+  // sequence should never trigger automation, even if the patient replies.
+  if (['completed', 'exited'].includes(sequence.sequence_status)) {
+    await logAutomation({
+      practiceId,
+      patientId: sequence.patient_id,
+      automationType: 'recall',
+      action: 'blocked_terminal',
+      result: 'skipped',
+      metadata: { sequenceId, sequence_status: sequence.sequence_status, exit_reason: sequence.exit_reason },
+    });
+    return errorResult(sequenceId, sequence.patient_id, `Sequence is ${sequence.sequence_status}, not responding`);
+  }
+
   const { data: patient } = await supabase
     .from('patients')
     .select('*')
@@ -90,6 +104,31 @@ export async function handleRecallReply(
     automationType: 'recall',
     metadata: { sequenceId, bookingStage: sequence.booking_stage },
   });
+
+  // 2b. DEBOUNCE: If we sent an outbound to this patient in the last 8 seconds,
+  // skip this reply — the patient is likely sending a follow-up message before
+  // reading our response. Prevents rapid-fire double-sends from race conditions.
+  const eightSecondsAgo = new Date(Date.now() - 8000).toISOString();
+  const { data: recentOutbound } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('patient_id', patient.id)
+    .eq('direction', 'outbound')
+    .eq('automation_type', 'recall')
+    .gte('created_at', eightSecondsAgo)
+    .limit(1);
+
+  if (recentOutbound && recentOutbound.length > 0) {
+    await logAutomation({
+      practiceId,
+      patientId: patient.id,
+      automationType: 'recall',
+      action: 'debounced',
+      result: 'skipped',
+      metadata: { sequenceId, reason: 'outbound sent within last 8s' },
+    });
+    return errorResult(sequenceId, patient.id, 'Debounced — recent outbound');
+  }
 
   // 3. Increment reply count
   await supabase
@@ -255,7 +294,7 @@ async function executeAction(
   switch (action) {
     case 'explain_reason':
       return {
-        replyText: `yeah so we noticed it's been a bit since you've been in — just wanted to see if we could get you back on the schedule`,
+        replyText: `yeah it's been a bit since we've seen you — wanted to see if we could get you back in`,
         updatedFields,
       };
 
@@ -267,7 +306,7 @@ async function executeAction(
         };
       }
       return {
-        replyText: `awesome! do mornings or afternoons work better for you, or any particular days?`,
+        replyText: `awesome — mornings or afternoons better? any day in particular?`,
         updatedFields,
       };
     }
@@ -404,26 +443,32 @@ async function executeAction(
 
     case 'handoff_urgent':
       return {
-        replyText: `oh no — call us right away at ${practice.phone || 'the office'} and we'll get you in`,
+        replyText: practice.phone
+          ? `oh no — call us right away at ${practice.phone} and we'll get you in`
+          : `oh no — hang on, someone from the office will reach out right away`,
         updatedFields,
       };
 
     case 'handoff_cost':
       return {
-        replyText: `good question — easiest to go over that by phone: ${practice.phone || 'give us a call'}`,
+        replyText: practice.phone
+          ? `good question — easier to sort that on the phone: ${practice.phone}`
+          : `good question — someone from the office will reach out to help with that`,
         updatedFields,
       };
 
     case 'handoff_wrong_number':
     case 'handoff_general':
       return {
-        replyText: `i'll have someone reach out — or you can call us at ${practice.phone || 'the office'}`,
+        replyText: practice.phone
+          ? `someone from our team will reach out — or give us a call at ${practice.phone}`
+          : `someone from our team will reach out shortly`,
         updatedFields,
       };
 
     case 'clarify_intent':
       return {
-        replyText: `just checking — were you looking to get back in for a cleaning?`,
+        replyText: `wait — were you looking to come in for a cleaning?`,
         updatedFields,
       };
 
@@ -434,10 +479,16 @@ async function executeAction(
       };
 
     case 'no_action_terminal':
+      // Terminal stage — do NOT send any reply
+      return {
+        replyText: '',
+        updatedFields,
+      };
+
     case 'stay_in_stage':
     default:
       return {
-        replyText: `were you looking to get back in for a cleaning?`,
+        replyText: `were you trying to come in for a cleaning?`,
         updatedFields,
       };
   }

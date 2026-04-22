@@ -25,19 +25,27 @@ const OPT_OUT_KEYWORDS = [
   'unsubscribe', 'opt out', 'opt-out', 'optout', 'remove me',
   'stop emailing', 'stop texting', 'stop contacting', 'stop messaging',
   'dont contact', "don't contact", 'do not contact', 'leave me alone',
-  'take me off', 'remove from list', 'no more emails', 'spam',
+  'take me off', 'remove from list', 'no more emails',
+  // NOTE: "spam" removed — "is this spam?" is a curiosity question, not a STOP request
 ];
 
 const URGENT_KEYWORDS = [
   'pain', 'painful', 'hurts', 'hurt', 'hurting', 'ache', 'aching',
   'emergency', 'urgent', 'asap', 'bleeding', 'blood', 'swollen',
   'swelling', 'broken', 'cracked', 'chipped', 'infection', 'abscess',
+  'tooth fell out', 'knocked out', 'knocked a tooth',
 ];
 
 const COST_KEYWORDS = [
   'cost', 'price', 'how much', 'insurance', 'coverage', 'copay',
-  'deductible', 'payment plan', 'payment option', 'payment', 'afford',
-  'expensive', 'fee', 'financing', 'estimate', 'quote', 'ballpark',
+  'deductible', 'payment plan', 'payment option', 'afford',
+  'expensive', 'financing', 'estimate', 'quote', 'ballpark',
+];
+
+const WRONG_NUMBER_KEYWORDS = [
+  'wrong number', 'wrong person', 'you have the wrong',
+  "this isn't", 'this isnt', 'not me', 'never been a patient',
+  'not a patient',
 ];
 
 const NOT_NOW_KEYWORDS = [
@@ -45,18 +53,20 @@ const NOT_NOW_KEYWORDS = [
   'remind me later', 'not a good time', 'another time',
   'in a few months', 'reach out later', 'not this month',
   'too busy', 'im busy', "i'm busy", 'busy right now',
+  'busy this', 'next month', 'next year', 'next week',
+  'some other time', 'later this year',
 ];
 
 const DECLINE_KEYWORDS = [
-  'no thanks', 'no thank you', 'not interested', 'pass',
+  'no thanks', 'no thank you', 'not interested', 'pass on this',
   'already have a dentist', 'have a dentist', 'no longer a patient',
-  "i'm good", 'im good', "i'm all set", 'all set', 'no need',
+  "i'm good", 'im good', 'no need', "don't need", 'dont need',
+  'not for me', "i'll pass", 'ill pass',
 ];
 
 const CONFIRM_KEYWORDS = [
-  'sounds good', 'that works', 'works for me', 'perfect',
-  'awesome', 'great', "let's do it", 'lets do it', 'book it',
-  'confirmed', 'confirm',
+  'that works', 'perfect',
+  'confirmed', 'confirm', 'book it',
 ];
 
 const BOOKING_INTEREST_KEYWORDS = [
@@ -68,18 +78,21 @@ const BOOKING_INTEREST_KEYWORDS = [
   'open to it', "i'd be open", 'id be open', 'down for it',
   "i'm in", 'im in', 'lets do it', "let's do it",
   'sounds great', 'sounds good', 'works for me', 'why not',
-  'why not', 'ok lets do it', 'ok sure', 'alright', 'all right',
+  'ok lets do it', 'ok sure', 'alright', 'all right',
   'for sure', 'yea sure', 'yeah sure', 'go for it', 'go ahead',
   "let's go", 'lets go', "i'll do it", 'ill do it', 'lets book',
-  "let's book",
+  "let's book", 'please do', 'send it', 'send it over',
+  'send over', 'let me know', 'of course', 'absolutely',
+  'definitely',
 ];
 
 const BOOKED_CONFIRMATION_KEYWORDS = [
   'i booked', 'i scheduled', 'already booked', 'already scheduled',
-  'just booked', 'just scheduled', 'got one', 'got an appointment',
+  'just booked', 'just scheduled', 'got an appointment',
   'made an appointment', 'booked one', 'booked it', 'scheduled it',
-  'all set', 'all done', 'took care of it', 'done', 'i did',
-  'booked online', 'scheduled online',
+  'took care of it', 'booked online', 'scheduled online',
+  // NOTE: Removed "all set", "done", "all done", "i did", "got one" —
+  // these conflict with decline/confirm and caused false positives.
 ];
 
 const ASKING_AVAILABILITY_KEYWORDS = [
@@ -88,11 +101,21 @@ const ASKING_AVAILABILITY_KEYWORDS = [
   'show me', 'let me see', 'what options', 'what are my options',
 ];
 
-const SHORT_POSITIVE = ['yes', 'yeah', 'yep', 'yup', 'sure', 'ok', 'okay'];
+const SHORT_POSITIVE = [
+  'yes', 'yeah', 'yep', 'yup', 'sure', 'ok', 'okay',
+  'ya', 'yea', 'ye', 'k', 'kk', 'cool', 'down',
+];
 
 const SHORT_POSITIVE_PHRASES = [
   'sure thing', 'yes please', 'yep please', 'yeah please',
-  'sounds good', 'works for me', 'that works',
+  'sounds good', 'works for me', 'that works', 'im down',
+  "i'm down",
+];
+
+// Negation markers — if present with a positive token, downgrade to unclear
+const NEGATION_MARKERS = [
+  ' but ', ' not ', ' no ', "don't", "dont ", ' except ',
+  ' however ', ' although ',
 ];
 
 // Phrases that signal engagement/curiosity — treat as booking_interest at S0_OPENING
@@ -162,11 +185,18 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function hasNegation(text: string): boolean {
+  const padded = ` ${text.toLowerCase()} `;
+  return NEGATION_MARKERS.some(m => padded.includes(m));
+}
+
 function isShortPositive(text: string): boolean {
   const t = text.trim().toLowerCase();
 
+  // Reject any short text containing negation ("yes but no", "yes not today")
+  if (hasNegation(t)) return false;
+
   if (SHORT_POSITIVE.includes(t)) return true;
-  if (t === 'k') return true;
 
   const clean = t.replace(/[^\w]/g, '');
   if (SHORT_POSITIVE.includes(clean)) return true;
@@ -174,8 +204,6 @@ function isShortPositive(text: string): boolean {
   for (const phrase of SHORT_POSITIVE_PHRASES) {
     if (t.includes(phrase)) return true;
   }
-
-  if (t.startsWith('yes') && t.length < 15) return true;
 
   return false;
 }
@@ -283,6 +311,8 @@ export function classifyIntent(
     if (currentStage === 'S4_AVAILABILITY') {
       return { intent: 'confirm', confidence: 'high', matchedKeywords: emojiMatch, rawText: text };
     }
+    // Emoji-only at any other stage = positive engagement
+    return { intent: 'booking_interest', confidence: 'high', matchedKeywords: emojiMatch, rawText: text };
   }
 
   // Empty/whitespace (and no emoji) → unclear
@@ -295,14 +325,20 @@ export function classifyIntent(
     return { intent: 'opt_out', confidence: 'high', matchedKeywords: getMatches(textLower, OPT_OUT_KEYWORDS), rawText: text };
   }
 
-  // 2. CHECK COST before URGENT
+  // 2. URGENT BEFORE COST — "my tooth hurts, how much" must escalate to emergency,
+  //    not get routed to cost handoff.
+  if (matchAny(textLower, URGENT_KEYWORDS)) {
+    return { intent: 'urgent', confidence: 'high', matchedKeywords: getMatches(textLower, URGENT_KEYWORDS), rawText: text };
+  }
+
+  // 3. COST
   if (matchAny(textLower, COST_KEYWORDS)) {
     return { intent: 'cost_question', confidence: 'high', matchedKeywords: getMatches(textLower, COST_KEYWORDS), rawText: text };
   }
 
-  // 3. URGENT (pain, emergency)
-  if (matchAny(textLower, URGENT_KEYWORDS)) {
-    return { intent: 'urgent', confidence: 'high', matchedKeywords: getMatches(textLower, URGENT_KEYWORDS), rawText: text };
+  // 3a. WRONG NUMBER — treat as needs_human handoff, not opt_out
+  if (matchAny(textLower, WRONG_NUMBER_KEYWORDS)) {
+    return { intent: 'decline', confidence: 'high', matchedKeywords: getMatches(textLower, WRONG_NUMBER_KEYWORDS), rawText: text };
   }
 
   // 3b. BOOKED CONFIRMATION (patient says they booked via the link)
