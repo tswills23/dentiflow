@@ -48,22 +48,10 @@ interface ActivityEvent {
 
 // Booking stage labels for the funnel
 const FUNNEL_STAGES = [
-  { key: 'sent', label: 'Sent', description: 'Messages sent' },
-  { key: 'clicked', label: 'Clicked', description: 'Clicked booking link' },
+  { key: 'sent', label: 'Patients Contacted', description: 'Unique patients reached' },
   { key: 'replied', label: 'Replied', description: 'Got a reply' },
-  { key: 'S6_COMPLETED', label: 'Booked', description: 'Appointment set' },
+  { key: 'clicked', label: 'Clicked Booking Link', description: 'Clicked booking link' },
 ] as const
-
-// Map booking stages to funnel index (which stages count as "at or past" each funnel step)
-const STAGE_FUNNEL_INDEX: Record<string, number> = {
-  S0_OPENING: 2,   // They replied at least
-  S1_INTENT: 2,
-  S3_TIME_PREF: 2,
-  S4_AVAILABILITY: 2,
-  S5_CONFIRMATION: 2,
-  S6_COMPLETED: 3,
-  S7_HANDOFF: 6,
-}
 
 function Recall({ practiceId }: RecallProps) {
   const [sequences, setSequences] = useState<RecallSequence[]>([])
@@ -298,39 +286,22 @@ function Recall({ practiceId }: RecallProps) {
     const responseRate = withSent > 0 ? (withReplies / withSent) * 100 : 0
     const bookingRate = withReplies > 0 ? (booked / withReplies) * 100 : 0
 
-    return { total, active, booked, noResponse, optedOut, deferred, responseRate, bookingRate, withReplies, withSent }
+    return { total, withReplies, withSent }
   }, [filteredSequences])
 
   // Funnel data
   const funnelData = useMemo(() => {
     const sent = filteredSequences.filter((s) => s.last_sent_at !== null).length
-    const clicked = filteredSequences.filter((s) => s.link_clicked_at !== null).length
     const replied = filteredSequences.filter((s) => s.reply_count > 0).length
-    const booked = filteredSequences.filter((s) => s.booking_stage === 'S6_COMPLETED').length
+    const clicked = filteredSequences.filter((s) => s.link_clicked_at !== null).length
 
     return [
       { ...FUNNEL_STAGES[0], count: sent },
-      { ...FUNNEL_STAGES[1], count: clicked },
-      { ...FUNNEL_STAGES[2], count: replied },
-      { ...FUNNEL_STAGES[3], count: booked },
+      { ...FUNNEL_STAGES[1], count: replied },
+      { ...FUNNEL_STAGES[2], count: clicked },
     ]
   }, [filteredSequences])
 
-  // Day progression breakdown
-  const dayBreakdown = useMemo(() => {
-    const activeSeqs = filteredSequences.filter((s) => s.sequence_status === 'active')
-    const day0 = activeSeqs.filter((s) => s.sequence_day === 0).length
-    const day1 = activeSeqs.filter((s) => s.sequence_day === 1).length
-    const day3 = activeSeqs.filter((s) => s.sequence_day === 3).length
-    const autoExited = filteredSequences.filter((s) =>
-      (s.sequence_status === 'exited' || s.sequence_status === 'completed') && s.exit_reason === 'no_response'
-    ).length
-    const deferredPool = filteredSequences.filter((s) =>
-      s.defer_until !== null && s.sequence_status !== 'completed'
-    ).length
-
-    return { day0, day1, day3, autoExited, deferredPool }
-  }, [filteredSequences])
 
   // Performance by voice tier
   const voicePerformance = useMemo(() => {
@@ -347,18 +318,6 @@ function Recall({ practiceId }: RecallProps) {
     })
   }, [filteredSequences])
 
-  // Performance by day
-  const dayPerformance = useMemo(() => {
-    // Count sequences that got a reply on each day (approximation: which day they're currently on)
-    const days = [0, 1, 3] as const
-    return days.map((day) => {
-      const daySeqs = filteredSequences.filter((s) => s.sequence_day >= day)
-      const sent = daySeqs.length
-      const replied = daySeqs.filter((s) => s.reply_count > 0).length
-      const responseRate = sent > 0 ? (replied / sent) * 100 : 0
-      return { day: `Day ${day}`, sent, replied, responseRate }
-    })
-  }, [filteredSequences])
 
   // Filtered activity by location / voice / day
   const filteredActivity = useMemo(() => {
@@ -501,89 +460,47 @@ function Recall({ practiceId }: RecallProps) {
         </div>
       </div>
 
-      {/* Section 1: Campaign Overview */}
+      {/* Section 1: Campaign Overview — 3 KPIs */}
       <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
         Campaign Overview
       </p>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: 24 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
         <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
           <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Active</span>
+            <span className="dot dot-amber" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Patients Contacted</span>
           </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
-            {stats.active.toLocaleString()}
+          <p className="font-metric" style={{ fontSize: 32, color: 'var(--amber)', lineHeight: 1, margin: 0 }}>
+            {stats.withSent.toLocaleString()}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>in-progress sequences</p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>unique patients reached</p>
         </div>
 
         <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
           <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Booked</span>
+            <span className="dot dot-blue" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Replied</span>
           </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.booked.toLocaleString()}
+          <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
+            {stats.withReplies.toLocaleString()}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>appointments from reactivation</p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
+            {stats.withSent > 0 ? `${((stats.withReplies / stats.withSent) * 100).toFixed(0)}% reply rate` : 'reply rate'}
+          </p>
         </div>
 
         <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Response Rate</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Clicked Booking Link</span>
           </div>
           <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.responseRate.toFixed(1)}%
+            {filteredSequences.filter((s) => s.link_clicked_at !== null).length.toLocaleString()}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>{stats.withReplies.toLocaleString()} of {stats.withSent.toLocaleString()} replied</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '150ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Booking Rate</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.bookingRate.toFixed(1)}%
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
+            {stats.withSent > 0 ? `${((filteredSequences.filter((s) => s.link_clicked_at !== null).length / stats.withSent) * 100).toFixed(0)}% of patients contacted` : 'of patients contacted'}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>of replies → booked</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '200ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-amber" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>No Response</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 28, color: 'var(--amber)', lineHeight: 1, margin: 0 }}>
-            {stats.noResponse.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>auto-exited after Day 3</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '250ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-red" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Opted Out</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 28, color: 'var(--red)', lineHeight: 1, margin: 0 }}>
-            {stats.optedOut.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>permanent unsubscribe</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '300ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Deferred</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 28, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
-            {stats.deferred.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>will re-enter in 60 days</p>
         </div>
       </div>
 
@@ -643,80 +560,24 @@ function Recall({ practiceId }: RecallProps) {
         </div>
       </div>
 
-      {/* Section 3: Day Progression + Section 5: Performance - side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={{ marginBottom: 24 }}>
-        {/* Day Progression */}
-        <div>
-          <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-            Day Progression
-          </p>
-          <div className="card animate-fade-in" style={{ padding: '1.5rem', animationDelay: '150ms' }}>
-            <div className="flex flex-col gap-4">
-              {[
-                { label: 'Day 0', sublabel: 'Waiting for first reply', count: dayBreakdown.day0, dot: 'dot-amber' },
-                { label: 'Day 1', sublabel: 'Follow-up sent', count: dayBreakdown.day1, dot: 'dot-amber' },
-                { label: 'Day 3', sublabel: 'Final attempt sent', count: dayBreakdown.day3, dot: 'dot-amber' },
-                { label: 'Auto-Exited', sublabel: 'No response after Day 3', count: dayBreakdown.autoExited, dot: 'dot-red' },
-                { label: 'Deferred', sublabel: 'Will re-enter later', count: dayBreakdown.deferredPool, dot: 'dot-blue' },
-              ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between" style={{ padding: '8px 0', borderBottom: '0.5px solid var(--border-default)' }}>
-                  <div className="flex items-center gap-3">
-                    <span className={`dot ${row.dot}`} />
-                    <div>
-                      <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>{row.label}</p>
-                      <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: 0 }}>{row.sublabel}</p>
-                    </div>
-                  </div>
-                  <span className="font-metric" style={{ fontSize: 24, color: 'var(--text-primary)' }}>
-                    {row.count.toLocaleString()}
-                  </span>
-                </div>
-              ))}
+      {/* Performance by Voice */}
+      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
+        Response Rate by Voice
+      </p>
+      <div className="card animate-fade-in" style={{ padding: '1.5rem', marginBottom: 24, animationDelay: '150ms' }}>
+        <div className="flex flex-col gap-0">
+          {voicePerformance.map((v, idx) => (
+            <div key={v.voice} className="flex items-center justify-between" style={{ padding: '12px 0', borderBottom: idx < voicePerformance.length - 1 ? '0.5px solid var(--border-default)' : 'none' }}>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', margin: 0, textTransform: 'capitalize' }}>{v.voice}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '2px 0 0' }}>{v.sent.toLocaleString()} patients contacted</p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <p className="font-metric" style={{ fontSize: 24, color: 'var(--accent)', margin: 0 }}>{v.responseRate.toFixed(1)}%</p>
+                <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '2px 0 0' }}>{v.replied} replied</p>
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Performance by Voice Tier */}
-        <div>
-          <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-            Performance by Voice
-          </p>
-          <div className="card animate-fade-in" style={{ padding: '1.5rem', animationDelay: '200ms' }}>
-            <div className="flex flex-col gap-4">
-              {voicePerformance.map((v) => (
-                <div key={v.voice} style={{ padding: '8px 0', borderBottom: '0.5px solid var(--border-default)' }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-                      {v.voice}
-                    </span>
-                    <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>
-                      {v.total.toLocaleString()} patients
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Response</span>
-                      <p className="font-metric" style={{ fontSize: 20, color: 'var(--accent)', margin: '2px 0 0' }}>
-                        {v.responseRate.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Booking</span>
-                      <p className="font-metric" style={{ fontSize: 20, color: 'var(--accent)', margin: '2px 0 0' }}>
-                        {v.bookingRate.toFixed(1)}%
-                      </p>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Booked</span>
-                      <p className="font-metric" style={{ fontSize: 20, color: 'var(--blue)', margin: '2px 0 0' }}>
-                        {v.booked}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 

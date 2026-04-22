@@ -83,11 +83,10 @@ function Conversations({ practiceId }: ConversationsProps) {
           .eq('practice_id', practiceId)
           .order('created_at', { ascending: false }),
         supabase
-          .from('conversations')
+          .from('conversation_previews')
           .select('patient_id, message_body, created_at')
           .eq('practice_id', practiceId)
-          .order('created_at', { ascending: false })
-          .limit(5000),
+          .order('created_at', { ascending: false }),
       ])
 
       if (!error && patientData) {
@@ -172,21 +171,21 @@ function Conversations({ practiceId }: ConversationsProps) {
   }, [messages])
 
   const filteredPatients = useMemo(() => {
-    if (!searchQuery.trim()) return patients
+    // Only show patients who have at least one conversation
+    const withConversations = patients.filter((p) => previews.has(p.id))
+    if (!searchQuery.trim()) return withConversations
     const query = searchQuery.toLowerCase()
-    return patients.filter(
+    return withConversations.filter(
       (p) =>
         patientDisplayName(p).toLowerCase().includes(query) ||
         p.phone?.includes(query)
     )
-  }, [patients, searchQuery])
+  }, [patients, searchQuery, previews])
 
   const sortedPatients = useMemo(() => {
     return [...filteredPatients].sort((a, b) => {
       const previewA = previews.get(a.id)
       const previewB = previews.get(b.id)
-      if (previewA && !previewB) return -1
-      if (!previewA && previewB) return 1
       if (previewA && previewB) {
         return (
           new Date(previewB.lastMessageTime).getTime() -
@@ -329,7 +328,7 @@ function Conversations({ practiceId }: ConversationsProps) {
             </div>
           ) : sortedPatients.length === 0 ? (
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-faint)', fontSize: 13 }}>
-              No patients found
+              {searchQuery.trim() ? 'No matching conversations' : 'No conversations yet'}
             </div>
           ) : (
             sortedPatients.map((patient) => {

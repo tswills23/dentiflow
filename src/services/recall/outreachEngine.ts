@@ -26,13 +26,18 @@ function extractProviderNames(practice: Practice): { doctorName: string; hygieni
     /hygienist|rdh/i.test(p.title)
   );
 
-  const doctorName = doctor?.name || practice.owner_name || 'your dentist';
+  // Strip any existing "Dr." prefix so templates that add it don't double it
+  const rawDoctorName = doctor?.name || practice.owner_name || 'your dentist';
+  const doctorName = rawDoctorName.replace(/^Dr\.?\s+/i, '').trim();
   const hygienistName = hygienist?.name || 'your hygiene team';
 
   return { doctorName, hygienistName };
 }
 
-export async function runDay0Outreach(practiceId: string): Promise<OutreachResult> {
+export async function runDay0Outreach(
+  practiceId: string,
+  options?: { location?: string }
+): Promise<OutreachResult> {
   const result: OutreachResult = { sent: 0, skipped: 0, failed: 0, errors: [] };
 
   // 1. Get practice info
@@ -49,23 +54,33 @@ export async function runDay0Outreach(practiceId: string): Promise<OutreachResul
 
   const typedPractice = practice as unknown as Practice;
 
-  // 2. Get all Day 0 sequences that haven't been sent yet
-  const { data: sequences, error: seqErr } = await supabase
+  // 2. Get Day 0 sequences scoped to location if provided
+  // Join patients!inner so we can filter by patient.location without a separate query.
+  // This prevents cross-location sends when multiple locations are loaded in the same practice.
+  let query = supabase
     .from('recall_sequences')
-    .select('*')
+    .select('*, patients!inner(location)')
     .eq('practice_id', practiceId)
     .eq('sequence_status', 'active')
     .eq('sequence_day', 0)
     .is('last_sent_at', null);
+
+  if (options?.location) {
+    query = query.ilike('patients.location', `%${options.location}%`);
+  }
+
+  const { data: sequences, error: seqErr } = await query;
 
   if (seqErr || !sequences?.length) {
     console.log('[outreachEngine] No Day 0 sequences to send');
     return result;
   }
 
-  console.log(`[outreachEngine] Processing ${sequences.length} Day 0 sequences`);
+  const locationLabel = options?.location ? ` for "${options.location}"` : '';
+  console.log(`[outreachEngine] Processing ${sequences.length} Day 0 sequences${locationLabel}`);
 
-  // 3. Process each sequence
+  // 3. Process each sequence — hard rate limit: 1 msg/sec
+  // Burst sends triggered Twilio account suspension on 2026-04-08. No exceptions.
   for (const seq of sequences as RecallSequence[]) {
     try {
       await sendOutreachSMS(seq, typedPractice, result);
@@ -74,6 +89,7 @@ export async function runDay0Outreach(practiceId: string): Promise<OutreachResul
       result.errors.push(`Sequence ${seq.id}: ${msg}`);
       result.failed++;
     }
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   console.log(
@@ -173,12 +189,8 @@ async function sendOutreachSMS(
     seq.sequence_day as SequenceDay,
     patient.phone
   );
-  // Use location as display name if it already contains the practice name, otherwise append
-  const displayName = patient.location
-    ? (patient.location.toLowerCase().includes(practice.name.toLowerCase())
-        ? patient.location
-        : `${practice.name} ${patient.location}`)
-    : practice.name;
+  // Use patient location as display name when available, otherwise practice name
+  const displayName = patient.location || practice.name;
 
   const { doctorName, hygienistName } = extractProviderNames(practice);
 

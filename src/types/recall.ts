@@ -168,6 +168,48 @@ export interface IngestResult {
   errors: string[];
 }
 
+// =============================================================================
+// Agent Pipeline Types (new separated agent flow)
+// =============================================================================
+
+export interface SegmentedRecord {
+  firstName: string;
+  lastName?: string;
+  phone: string;           // E.164 normalized (+1XXXXXXXXXX)
+  email?: string;
+  lastVisitDate?: string;  // ISO date
+  location?: string;
+  monthsOverdue: number;
+  voice: RecallVoice;
+  segment: OverdueSegment;
+}
+
+export interface SegmentAgentResult {
+  records: SegmentedRecord[];
+  skippedNextAppt: number;
+  skippedDuplicate: number;
+  skippedInvalidPhone: number;
+  skippedTest: number;
+  parseErrors: string[];
+  byLocation: Record<string, number>;
+  byVoice: Record<string, number>;
+  bySegment: Record<string, number>;
+}
+
+export interface PatientAgentResult {
+  upserted: number;
+  skipped: number;
+  errors: string[];
+  patientIds: string[];
+}
+
+export interface SequenceAgentResult {
+  created: number;
+  skipped: number;
+  errors: string[];
+  sequenceIds: string[];
+}
+
 export interface OutreachResult {
   sent: number;
   skipped: number;

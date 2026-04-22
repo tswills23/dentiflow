@@ -118,30 +118,30 @@ export function getNoshowTemplateId(
 const TEMPLATES: TemplateBank = {
   // =========================================================================
   // OFFICE VOICE (< 6 months overdue)
-  // Tone: Friendly, casual, "we" language. Soft CTA on Day 0 is fine.
+  // Tone: Friendly, casual, "we" language. No CTA on Day 0 — open a loop.
   // =========================================================================
   office: {
-    // Day 0 — Warm check-in + booking link
+    // Day 0 — Warm check-in, open loop (NO CTA, NO booking link)
     0: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, quick note from {{Practice Name}}. We've got some openings and thought of you. Grab a time that works: {{Booking Link}}`,
+        body: `Hey {{First Name}}, quick note from {{Practice Name}}. We've been thinking about getting you back in. You around to chat for a sec?`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, just a heads up from {{Practice Name}} — we've got a few spots open and wanted to see if you'd like to grab one: {{Booking Link}}`,
+        body: `Hey {{First Name}}, this is {{Practice Name}} reaching out. Wanted to see if you'd be open to coming back in sometime soon. Got a minute?`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, {{Practice Name}} here. We'd love to get you back on the schedule. Pick a time here: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. We'd love to get you back on the schedule. Would that work for you?`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, hope things are good. We've got some availability at {{Practice Name}} and wanted to give you first dibs: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hope things are good. Team at {{Practice Name}} wanted to check in and see if you're due for a visit. You free to text?`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, hello from {{Practice Name}}. Just wanted to reach out and see if you'd like to come by soon. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hello from {{Practice Name}}. Just wanted to reach out and see if you'd like to come by soon. You around?`,
       },
     },
     // Day 1 — Gentle health frame + booking link

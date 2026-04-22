@@ -44,9 +44,15 @@ export async function runOrchestratorForAllPractices(): Promise<{
 
   console.log(`[recallCron] Running orchestrator for ${practiceIds.length} practice(s)`);
 
+  // Optional location filter — set RECALL_LOCATION_FILTER env var to restrict cron to one location
+  const locationFilter = process.env.RECALL_LOCATION_FILTER || undefined;
+  if (locationFilter) {
+    console.log(`[recallCron] Location filter active: "${locationFilter}"`);
+  }
+
   for (const practiceId of practiceIds) {
     try {
-      const result = await runSequenceOrchestrator(practiceId);
+      const result = await runSequenceOrchestrator(practiceId, locationFilter ? { location: locationFilter } : undefined);
       summary.results[practiceId] = result;
       summary.practicesProcessed++;
 

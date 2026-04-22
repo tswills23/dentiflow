@@ -59,10 +59,25 @@ function useCountUp(target: number, duration: number = 800): number {
   return value
 }
 
+interface RecallSequence {
+  id: string
+  practice_id: string
+  patient_id: string
+  sequence_status: string
+  booking_stage: string
+  reply_count: number
+  opt_out: boolean
+  last_sent_at: string | null
+  link_clicked_at: string | null
+  created_at: string
+}
+
 function Dashboard({ practiceId }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly')
   const [activityLog, setActivityLog] = useState<AutomationLogEntry[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
+  const [recallSequences, setRecallSequences] = useState<RecallSequence[]>([])
+  const [recallLoading, setRecallLoading] = useState(true)
 
   const dateRange = useMemo(() => {
     const end = new Date()
@@ -73,8 +88,10 @@ function Dashboard({ practiceId }: DashboardProps) {
       start.setDate(end.getDate() - 30)
     }
     return {
-      start: start.toISOString().split('T')[0],
-      end: end.toISOString().split('T')[0],
+      start: start.toISOString(),
+      end: end.toISOString(),
+      startDate: start.toISOString().split('T')[0],
+      endDate: end.toISOString().split('T')[0],
     }
   }, [period])
 
@@ -86,15 +103,40 @@ function Dashboard({ practiceId }: DashboardProps) {
 
   const filteredMetrics = useMemo(() => {
     return metrics.filter(
-      (m) => m.date >= dateRange.start && m.date <= dateRange.end
+      (m) => m.date >= dateRange.startDate && m.date <= dateRange.endDate
     )
   }, [metrics, dateRange])
 
-  const stats = useMemo(() => {
-    if (filteredMetrics.length === 0) {
-      return { revenue: 0, leads: 0, appointments: 0, avgResponseTime: 0, under60Percentage: 0, recallSent: 0, recallLinksClicked: 0, recallReplies: 0, recallBooked: 0, recallOptOuts: 0, recallReplyRate: 0, recallBookingRate: 0, recallClickRate: 0, noshowTotal: 0, noshowRecovered: 0, noshowRecoveryRate: 0 }
+  // Fetch recall sequences directly — single source of truth (same as Recall page)
+  useEffect(() => {
+    if (!practiceId) return
+
+    async function fetchRecall() {
+      setRecallLoading(true)
+      const allSeqs: RecallSequence[] = []
+      const PAGE_SIZE = 1000
+      let from = 0
+      while (true) {
+        const { data, error } = await supabase
+          .from('recall_sequences')
+          .select('id, practice_id, patient_id, sequence_status, booking_stage, reply_count, opt_out, last_sent_at, link_clicked_at, created_at')
+          .eq('practice_id', practiceId)
+          .range(from, from + PAGE_SIZE - 1)
+
+        if (error || !data) break
+        allSeqs.push(...(data as RecallSequence[]))
+        if (data.length < PAGE_SIZE) break
+        from += PAGE_SIZE
+      }
+      setRecallSequences(allSeqs)
+      setRecallLoading(false)
     }
 
+    fetchRecall()
+  }, [practiceId])
+
+  const stats = useMemo(() => {
+    // STL + no-show KPIs from metrics_daily (still valid source for these)
     const revenue = filteredMetrics.reduce((sum, m) => sum + (m.estimated_revenue_recovered ?? 0), 0)
     const leads = filteredMetrics.reduce((sum, m) => sum + (m.new_leads ?? 0), 0)
     const appointments = filteredMetrics.reduce((sum, m) => sum + (m.appointments_booked ?? 0), 0)
@@ -103,24 +145,26 @@ function Dashboard({ practiceId }: DashboardProps) {
     const avgResponseTime = totalResponses > 0 ? weightedSum / totalResponses : 0
     const totalUnder60s = filteredMetrics.reduce((sum, m) => sum + (m.under_60s_count ?? 0), 0)
     const under60Percentage = totalResponses > 0 ? (totalUnder60s / totalResponses) * 100 : 0
-
-    // Reactivation KPIs
-    const recallSent = filteredMetrics.reduce((sum, m) => sum + (m.recall_sent ?? 0), 0)
-    const recallLinksClicked = filteredMetrics.reduce((sum, m) => sum + (m.recall_links_clicked ?? 0), 0)
-    const recallReplies = filteredMetrics.reduce((sum, m) => sum + (m.recall_replies ?? 0), 0)
-    const recallBooked = filteredMetrics.reduce((sum, m) => sum + (m.recall_booked ?? 0), 0)
-    const recallOptOuts = filteredMetrics.reduce((sum, m) => sum + (m.recall_opt_outs ?? 0), 0)
-    const recallReplyRate = recallSent > 0 ? (recallReplies / recallSent) * 100 : 0
-    const recallBookingRate = recallReplies > 0 ? (recallBooked / recallReplies) * 100 : 0
-    const recallClickRate = recallSent > 0 ? (recallLinksClicked / recallSent) * 100 : 0
-
-    // No-show KPIs
     const noshowTotal = filteredMetrics.reduce((sum, m) => sum + ((m as unknown as Record<string, number>).noshow_total ?? 0), 0)
     const noshowRecovered = filteredMetrics.reduce((sum, m) => sum + ((m as unknown as Record<string, number>).noshow_recovered ?? 0), 0)
     const noshowRecoveryRate = noshowTotal > 0 ? (noshowRecovered / noshowTotal) * 100 : 0
 
+    // Recall KPIs from recall_sequences — same source of truth as Recall page
+    // Filter to sequences created within the selected period
+    const periodSeqs = recallSequences.filter(
+      (s) => s.created_at >= dateRange.start && s.created_at <= dateRange.end
+    )
+    const recallSent = periodSeqs.filter((s) => s.last_sent_at !== null).length
+    const recallLinksClicked = periodSeqs.filter((s) => s.link_clicked_at !== null).length
+    const recallReplies = periodSeqs.filter((s) => s.reply_count > 0).length
+    const recallBooked = periodSeqs.filter((s) => s.booking_stage === 'S6_COMPLETED').length
+    const recallOptOuts = periodSeqs.filter((s) => s.opt_out || s.booking_stage === 'EXIT_OPT_OUT').length
+    const recallReplyRate = recallSent > 0 ? (recallReplies / recallSent) * 100 : 0
+    const recallBookingRate = recallReplies > 0 ? (recallBooked / recallReplies) * 100 : 0
+    const recallClickRate = recallSent > 0 ? (recallLinksClicked / recallSent) * 100 : 0
+
     return { revenue, leads, appointments, avgResponseTime, under60Percentage, recallSent, recallLinksClicked, recallReplies, recallBooked, recallOptOuts, recallReplyRate, recallBookingRate, recallClickRate, noshowTotal, noshowRecovered, noshowRecoveryRate }
-  }, [filteredMetrics])
+  }, [filteredMetrics, recallSequences, dateRange])
 
   const animatedRevenue = useCountUp(stats.revenue, 800)
 
@@ -209,7 +253,7 @@ function Dashboard({ practiceId }: DashboardProps) {
 
   const responseTimeSec = stats.avgResponseTime / 1000
 
-  if (metricsLoading) {
+  if (metricsLoading || recallLoading) {
     return (
       <div style={{ padding: '24px 32px' }}>
         <div className="space-y-6">
@@ -342,120 +386,48 @@ function Dashboard({ practiceId }: DashboardProps) {
         </div>
       </div>
 
-      {/* Recall Section Label */}
+      {/* Reactivation Section Label */}
       <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
         Reactivation
       </p>
 
-      {/* Reactivation KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4" style={{ marginBottom: 8 }}>
+      {/* Reactivation KPI Cards — 3 metrics */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
         <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="dot dot-amber" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Reactivation Sent</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Patients Contacted</span>
           </div>
           <p className="font-metric" style={{ fontSize: 32, color: 'var(--amber)', lineHeight: 1, margin: 0 }}>
             {stats.recallSent}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>texts sent to patients</p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>unique patients reached</p>
         </div>
 
         <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Link Clicks</span>
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Replied</span>
           </div>
           <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
+            {stats.recallReplies}
+          </p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
+            {stats.recallSent > 0 ? `${((stats.recallReplies / stats.recallSent) * 100).toFixed(0)}% reply rate` : 'reply rate'}
+          </p>
+        </div>
+
+        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="dot dot-accent" />
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Clicked Booking Link</span>
+          </div>
+          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
             {stats.recallLinksClicked}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>booking link clicks</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Booked</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.recallBooked}
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
+            {stats.recallSent > 0 ? `${((stats.recallLinksClicked / stats.recallSent) * 100).toFixed(0)}% of patients contacted` : 'of patients contacted'}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>appointments from reactivation</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '150ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Click Rate</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.recallClickRate.toFixed(1)}%
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>of texts got a click</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '200ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Booking Rate</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.recallBookingRate.toFixed(1)}%
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>of replies booked</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '250ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-red" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Opt-outs</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--red)', lineHeight: 1, margin: 0 }}>
-            {stats.recallOptOuts}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>patients unsubscribed</p>
-        </div>
-      </div>
-
-      {/* No-Show Recovery Section Label */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-        No-Show Recovery
-      </p>
-
-      {/* No-Show KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-red" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>No-Shows</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--red)', lineHeight: 1, margin: 0 }}>
-            {stats.noshowTotal}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>missed appointments</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Recovered</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.noshowRecovered}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>rebooked after no-show</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Recovery Rate</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.noshowRecoveryRate.toFixed(1)}%
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>of no-shows rebooked</p>
         </div>
       </div>
 
