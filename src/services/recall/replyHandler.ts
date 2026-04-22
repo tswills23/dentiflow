@@ -292,11 +292,19 @@ async function executeAction(
     : null;
 
   switch (action) {
-    case 'explain_reason':
+    case 'explain_reason': {
+      const months = sequence.months_overdue || 0;
+      const timePhrase =
+        months >= 12 ? 'over a year' :
+        months >= 9 ? 'almost a year' :
+        months >= 6 ? `about ${months} months` :
+        months >= 3 ? `a few months` :
+        'a bit';
       return {
-        replyText: `Saw it's been a while since we've seen you — wanted to make sure we got you back in before too much longer. You due for a cleaning?`,
+        replyText: `It's been ${timePhrase} since your last cleaning — wanted to make sure we got you back in before too much longer. Want me to get you on the books?`,
         updatedFields,
       };
+    }
 
     case 'send_booking_link': {
       if (bookingLinkUrl) {
