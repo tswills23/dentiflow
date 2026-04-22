@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "npx tsx src/server.ts",
     "test": "jest",
     "recall-import": "tsx scripts/recall-import.ts",
     "recall-segment": "tsx scripts/recall-segment.ts",
