@@ -255,7 +255,7 @@ async function executeAction(
   switch (action) {
     case 'explain_reason':
       return {
-        replyText: `hey! noticed it's been a little while since we've seen you — wanted to reach out and get you back in. want to grab a time?`,
+        replyText: `yeah so we noticed it's been a bit since you've been in — just wanted to see if we could get you back on the schedule`,
         updatedFields,
       };
 
