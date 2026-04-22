@@ -294,32 +294,32 @@ async function executeAction(
   switch (action) {
     case 'explain_reason':
       return {
-        replyText: `yeah it's been a bit since we've seen you — wanted to see if we could get you back in`,
+        replyText: `Saw it's been a while since we've seen you — wanted to make sure we got you back in before too much longer. You due for a cleaning?`,
         updatedFields,
       };
 
     case 'send_booking_link': {
       if (bookingLinkUrl) {
         return {
-          replyText: `awesome — grab a time here: ${bookingLinkUrl}`,
+          replyText: `Perfect — grab a time here: ${bookingLinkUrl}`,
           updatedFields,
         };
       }
       return {
-        replyText: `awesome — mornings or afternoons better? any day in particular?`,
+        replyText: `Perfect — mornings or afternoons work better?`,
         updatedFields,
       };
     }
 
     case 'confirm_external_booking':
       return {
-        replyText: `perfect, see you soon!`,
+        replyText: `Perfect, see you then. Give us a call if anything changes.`,
         updatedFields,
       };
 
     case 'ask_preferences':
       return {
-        replyText: `do mornings or afternoons work better, or any particular days?`,
+        replyText: `Mornings or afternoons work better, or any particular days?`,
         updatedFields,
       };
 
@@ -423,7 +423,7 @@ async function executeAction(
     case 'opt_out_silent':
       updatedFields.opt_out = true;
       return {
-        replyText: `no problem, you're off the list. give us a call if you ever want to come in`,
+        replyText: `Got it, you're off the list. If you ever need us, just give us a call.`,
         updatedFields,
       };
 
@@ -431,48 +431,53 @@ async function executeAction(
       updatedFields.defer_until = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
       updatedFields.exit_reason = 'deferred';
       return {
-        replyText: `totally fine, we'll circle back in a couple months`,
+        replyText: `No worries. Is it a timing thing, or did you end up finding somewhere else?`,
         updatedFields,
       };
 
     case 'acknowledge_decline':
       return {
-        replyText: `no worries — reach out whenever you're ready`,
+        replyText: `No worries. Is it a timing thing, or did you end up finding somewhere else?`,
         updatedFields,
       };
 
     case 'handoff_urgent':
       return {
         replyText: practice.phone
-          ? `oh no — call us right away at ${practice.phone} and we'll get you in`
-          : `oh no — hang on, someone from the office will reach out right away`,
+          ? `I'm so sorry to hear that — give us a call at ${practice.phone} and we'll get you taken care of ASAP.`
+          : `I'm so sorry to hear that — hang on, someone will reach out right away to get you in.`,
         updatedFields,
       };
 
     case 'handoff_cost':
       return {
-        replyText: `depends on what you need and what your insurance covers — easiest to sort once you're in. want to grab a time?`,
+        replyText: `Good question — really depends on your insurance and what you need. We'll verify before you come in so there are no surprises. Mornings or afternoons work better?`,
         updatedFields,
       };
 
     case 'handoff_wrong_number':
+      return {
+        replyText: `So sorry about that — looks like we may have the wrong number. I'll take you off the list. Have a good one.`,
+        updatedFields,
+      };
+
     case 'handoff_general':
       return {
         replyText: practice.phone
-          ? `someone from our team will reach out — or give us a call at ${practice.phone}`
-          : `someone from our team will reach out shortly`,
+          ? `Someone from our team will reach out — or give us a call at ${practice.phone}.`
+          : `Someone from our team will reach out shortly.`,
         updatedFields,
       };
 
     case 'clarify_intent':
       return {
-        replyText: `wait — were you looking to come in for a cleaning?`,
+        replyText: `Just to make sure — were you looking to come in for a cleaning?`,
         updatedFields,
       };
 
     case 'cancel_booking':
       return {
-        replyText: `got it, cancelled. let us know if you want to find another time`,
+        replyText: `Got it, cancelled. Let us know if you want to find another time.`,
         updatedFields,
       };
 
@@ -486,7 +491,7 @@ async function executeAction(
     case 'stay_in_stage':
     default:
       return {
-        replyText: `were you trying to come in for a cleaning?`,
+        replyText: `Just to make sure — were you looking to come in for a cleaning?`,
         updatedFields,
       };
   }
