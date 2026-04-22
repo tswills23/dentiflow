@@ -213,7 +213,7 @@ const TEMPLATES: TemplateBank = {
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, this is {{Hygienist Name}} at {{Practice Name}}. Just thinking about you today and wanted to reach out. Are you free to text for a sec?`,
+        body: `Hey {{First Name}}, this is {{Hygienist Name}} at {{Practice Name}}. Your file came across my desk this morning and wanted to reach out. Are you free to text for a sec?`,
       },
       v5: {
         subject: '',

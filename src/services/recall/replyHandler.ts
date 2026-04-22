@@ -293,12 +293,13 @@ async function executeAction(
 
   switch (action) {
     case 'explain_reason': {
-      const months = sequence.months_overdue || 0;
+      const months = Math.round(sequence.months_overdue || 0);
       const timePhrase =
+        months >= 18 ? 'over a year and a half' :
         months >= 12 ? 'over a year' :
         months >= 9 ? 'almost a year' :
         months >= 6 ? `about ${months} months` :
-        months >= 3 ? `a few months` :
+        months >= 3 ? 'a few months' :
         'a bit';
       return {
         replyText: `It's been ${timePhrase} since your last cleaning — wanted to make sure we got you back in before too much longer. Want me to get you on the books?`,
