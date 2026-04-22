@@ -88,6 +88,15 @@ const SHORT_POSITIVE_PHRASES = [
   'sounds good', 'works for me', 'that works',
 ];
 
+// Phrases that signal engagement/curiosity — treat as booking_interest at S0_OPENING
+const CURIOSITY_PHRASES = [
+  'whats this about', "what's this about", 'what is this about',
+  'whats this', "what's this", 'what is this',
+  'what do you need', 'what do you want', 'what did you need',
+  'who is this', 'who are you', 'who is this from',
+  'tell me more', 'what for', 'about what',
+];
+
 const SLOT_EXACT = ['1', '2', '3', 'one', 'two', 'three'];
 
 const SLOT_PHRASES = [
@@ -354,6 +363,17 @@ export function classifyIntent(
 
   if (isShortPositive(textClean)) {
     return { intent: 'booking_interest', confidence: 'high', matchedKeywords: [textClean], rawText: text };
+  }
+
+  // "Sure whats this about", "Yeah what do you need" — starts with positive + curiosity
+  const startsPositive = SHORT_POSITIVE.some(w => textClean.startsWith(w + ' ') || textClean === w);
+  if (startsPositive) {
+    return { intent: 'booking_interest', confidence: 'medium', matchedKeywords: [textClean.split(' ')[0]], rawText: text };
+  }
+
+  // Pure curiosity phrases — patient is engaged, treat as interest
+  if (CURIOSITY_PHRASES.some(p => textLower.replace(/[^\w\s]/g, ' ').trim().includes(p))) {
+    return { intent: 'booking_interest', confidence: 'medium', matchedKeywords: ['curiosity'], rawText: text };
   }
 
   const fuzzy = fuzzyMatchBooking(textClean);
