@@ -42,11 +42,53 @@ This system sends real SMS messages to real patients at a real dental practice (
 - Response validator runs AFTER AI, BEFORE send — catches diagnosis language, HIPAA violations
 - Template fallback if Claude API fails — never silence
 - SMS_LIVE_MODE=false for dev (console.log instead of Twilio)
-- 60-second cooldown per phone number
+- 60-second cooldown per phone number (STL); 8-second DB-level debounce (recall replyHandler)
 - One outbound per inbound — no double-sends
 - Recall opt-out is permanent — sets recall_opt_out=true on patient record
 - Express body limit is 5mb for CSV imports
 - Emergency replies during recall trigger staff SMS notification
+- Terminal recall sequences (completed/exited) must NEVER auto-reply — replyHandler checks `sequence_status` before routing
+- Intent classifier ordering: opt_out → URGENT → COST → wrong_number → booked_confirmation (URGENT must beat COST so "tooth hurts, how much" escalates to emergency, not cost handoff)
+- `spam` is NOT an opt-out keyword — "is this spam?" is curiosity, not STOP
+- Cost questions in recall stay in S1_INTENT (do not kick to S7_HANDOFF; losing the thread drops patient into STL AI which has a different voice)
+
+## Reply Voice Rules (calibrated from user roleplay)
+
+All patient-facing SMS — both hardcoded recall replies and STL AI prompt — must:
+- Use sentence case with proper punctuation (not all-lowercase)
+- Use contractions always (haven't, we'll, I'm, you're)
+- Use em dashes (—) for natural pauses, not hyphens
+- Max ONE exclamation point per conversation, preferably zero
+- Never lead with "Thanks for reaching out to X!"
+- Never say "Our team" / "Our staff" — say "I" or "we"
+- Personalize with time-since-last-visit when available ("It's been about 6 months since your last cleaning")
+- Round `months_overdue` to whole number — no "6.2 months"
+- Specific reason for outreach beats vague warmth: "your file came across my desk this morning" > "just thinking about you"
+
+Cost questions: acknowledge, reassure via "we verify insurance before you come in so there are no surprises", pivot to time preference.
+
+Urgent/pain: ALWAYS inject `practice.phone` into the reply. "I'm so sorry to hear that — give us a call at {phone} and we'll get you taken care of ASAP."
+
+Decline / not-now: no rebuttal. Single soft either/or question: "No worries. Is it a timing thing, or did you end up finding somewhere else?"
+
+Opt-out: TCPA-safe "Got it, you're off the list" — never say "close your file" (misleading).
+
+Wrong-number: apologize, remove from list, exit. Do NOT try to convert.
+
+Booking confirmation: don't invent dates the patient didn't mention. "Perfect, see you then. Give us a call if anything changes."
+
+Handoff fallbacks: every handoff that references `practice.phone` must handle null — fall through to "someone from the team will reach out" copy.
+
+## Railway Deploy Gotchas
+
+- Railway auto-deploys from GitHub pushes to master, but BUILDS SILENTLY FAIL when: (a) source files are referenced but not committed to git (see April 2026 incident where 4 files in `src/services/recall/` existed only locally — every deploy failed `tsc` for days, Railway kept serving the last-good container), (b) `node_modules/.cache` mount causes `npm ci` EBUSY errors, (c) Node version mismatch (need >=20 per `engines` in `package.json`).
+- ALWAYS verify deploy status with `railway status --json` after push — do not trust "build succeeded" emails alone, check `latestDeployment.status === 'SUCCESS'` and `latestDeployment.meta.commitHash` matches the commit you pushed.
+- Use `npm install` instead of `npm ci` in Railway's `buildCommand` to avoid EBUSY on mounted cache.
+- Service-level env vars in Railway dashboard override `railway.json` — do NOT set `START_COMMAND` as an env var, it breaks the config file path.
+- Debug failing deploys: `railway logs --build <deploymentId>` shows the actual tsc/npm errors. The deployment ID comes from `railway status --json`.
+- `railway up` fails on Windows with "Incorrect function. NUL" error — use `git push` to trigger GitHub auto-deploy instead.
+- To force a redeploy after a failed cached build, change any env var (`railway variables set DEPLOY_TRIGGER=<timestamp>`) — this invalidates the Docker build cache.
+- `dist/` is gitignored — production runs compiled JS, so Railway must build from source. `start` is `node dist/server.js`, `buildCommand` runs `npm run build` (tsc).
 
 ## Architecture
 
