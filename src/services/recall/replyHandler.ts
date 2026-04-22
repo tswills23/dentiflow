@@ -253,6 +253,12 @@ async function executeAction(
     : null;
 
   switch (action) {
+    case 'explain_reason':
+      return {
+        replyText: `hey! noticed it's been a little while since we've seen you — wanted to reach out and get you back in. want to grab a time?`,
+        updatedFields,
+      };
+
     case 'send_booking_link': {
       if (bookingLinkUrl) {
         return {

@@ -29,11 +29,11 @@ import { isTerminalStage } from '../../types/recall';
 type TransitionKey = `${RecallStage}:${RecallIntent}`;
 
 const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
-  // S0_OPENING transitions
-  'S0_OPENING:booking_interest': 'S3_TIME_PREF',
+  // S0_OPENING transitions — any engagement goes to S1_INTENT (explain stage)
+  'S0_OPENING:booking_interest': 'S1_INTENT',
   'S0_OPENING:booked_confirmation': 'S6_COMPLETED',
-  'S0_OPENING:preferences': 'S4_AVAILABILITY',
-  'S0_OPENING:asking_availability': 'S4_AVAILABILITY',
+  'S0_OPENING:preferences': 'S1_INTENT',
+  'S0_OPENING:asking_availability': 'S1_INTENT',
   'S0_OPENING:opt_out': 'EXIT_OPT_OUT',
   'S0_OPENING:not_now': 'EXIT_DEFERRED',
   'S0_OPENING:decline': 'EXIT_DECLINED',
@@ -41,7 +41,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S0_OPENING:cost_question': 'S7_HANDOFF',
   'S0_OPENING:unclear': 'S0_OPENING',
 
-  // S1_INTENT transitions
+  // S1_INTENT transitions — patient confirmed interest, send booking link
   'S1_INTENT:booking_interest': 'S3_TIME_PREF',
   'S1_INTENT:booked_confirmation': 'S6_COMPLETED',
   'S1_INTENT:preferences': 'S3_TIME_PREF',
@@ -91,11 +91,11 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
 // =============================================================================
 
 const ACTIONS: Partial<Record<TransitionKey, string>> = {
-  // S0_OPENING actions
-  'S0_OPENING:booking_interest': 'send_booking_link',
+  // S0_OPENING actions — explain why we're reaching out
+  'S0_OPENING:booking_interest': 'explain_reason',
   'S0_OPENING:booked_confirmation': 'confirm_external_booking',
-  'S0_OPENING:preferences': 'send_booking_link',
-  'S0_OPENING:asking_availability': 'send_booking_link',
+  'S0_OPENING:preferences': 'explain_reason',
+  'S0_OPENING:asking_availability': 'explain_reason',
   'S0_OPENING:opt_out': 'opt_out_silent',
   'S0_OPENING:not_now': 'defer_60_days',
   'S0_OPENING:decline': 'acknowledge_decline',
@@ -103,7 +103,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S0_OPENING:cost_question': 'handoff_cost',
   'S0_OPENING:unclear': 'clarify_intent',
 
-  // S1_INTENT actions
+  // S1_INTENT actions — patient is engaged, send booking link
   'S1_INTENT:booking_interest': 'send_booking_link',
   'S1_INTENT:booked_confirmation': 'confirm_external_booking',
   'S1_INTENT:preferences': 'send_booking_link',
@@ -113,7 +113,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S1_INTENT:decline': 'acknowledge_decline',
   'S1_INTENT:urgent': 'handoff_urgent',
   'S1_INTENT:cost_question': 'handoff_cost',
-  'S1_INTENT:unclear': 'clarify_intent',
+  'S1_INTENT:unclear': 'explain_reason',
 
   // S3_TIME_PREF actions
   'S3_TIME_PREF:preferences': 'send_booking_link',
