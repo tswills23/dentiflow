@@ -65,6 +65,13 @@ const BOOKING_INTEREST_KEYWORDS = [
   'count me in', 'put me down', 'get scheduled', 'come in',
   'cleaning', 'cleanings', 'checkup', 'check-up', 'exam',
   'i need', 'need to',
+  'open to it', "i'd be open", 'id be open', 'down for it',
+  "i'm in", 'im in', 'lets do it', "let's do it",
+  'sounds great', 'sounds good', 'works for me', 'why not',
+  'why not', 'ok lets do it', 'ok sure', 'alright', 'all right',
+  'for sure', 'yea sure', 'yeah sure', 'go for it', 'go ahead',
+  "let's go", 'lets go', "i'll do it", 'ill do it', 'lets book',
+  "let's book",
 ];
 
 const BOOKED_CONFIRMATION_KEYWORDS = [

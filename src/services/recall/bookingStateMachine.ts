@@ -51,7 +51,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S1_INTENT:decline': 'EXIT_DECLINED',
   'S1_INTENT:urgent': 'S7_HANDOFF',
   'S1_INTENT:cost_question': 'S7_HANDOFF',
-  'S1_INTENT:unclear': 'S1_INTENT',
+  'S1_INTENT:unclear': 'S3_TIME_PREF',
 
   // S3_TIME_PREF transitions
   'S3_TIME_PREF:preferences': 'S4_AVAILABILITY',
@@ -113,7 +113,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S1_INTENT:decline': 'acknowledge_decline',
   'S1_INTENT:urgent': 'handoff_urgent',
   'S1_INTENT:cost_question': 'handoff_cost',
-  'S1_INTENT:unclear': 'explain_reason',
+  'S1_INTENT:unclear': 'send_booking_link',
 
   // S3_TIME_PREF actions
   'S3_TIME_PREF:preferences': 'send_booking_link',
