@@ -451,9 +451,7 @@ async function executeAction(
 
     case 'handoff_cost':
       return {
-        replyText: practice.phone
-          ? `good question — easier to sort that on the phone: ${practice.phone}`
-          : `good question — someone from the office will reach out to help with that`,
+        replyText: `depends on what you need and what your insurance covers — easiest to sort once you're in. want to grab a time?`,
         updatedFields,
       };
 

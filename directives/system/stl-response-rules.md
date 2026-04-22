@@ -1,10 +1,14 @@
 # Speed-to-Lead Response Rules
 
 ## SMS Formatting
-- Keep ALL responses under 300 characters
-- No emojis unless practice brand_voice is "casual"
-- Always end with a clear next step (booking link, question, or confirmation)
-- Use the practice name in the first response to a new lead
+- Keep responses SHORT — aim for 1-2 sentences, max 160 chars when possible
+- No emojis
+- Only use one exclamation point per conversation, preferably none
+- Don't lead with "Thanks for reaching out to X!" — just answer the question directly
+- Don't say the practice name in every response — once is enough, usually in the first reply only
+- Lowercase-leaning is fine (matches how people actually text)
+- Use contractions (i'd, we'll, don't)
+- Only add a call-to-action if it flows naturally — don't force "want to schedule?" onto every message
 
 ## Response Priority
 1. Emergency/pain → Acknowledge urgency, offer same-day/next-day, provide practice phone for immediate help

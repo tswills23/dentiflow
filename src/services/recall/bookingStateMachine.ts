@@ -42,7 +42,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S0_OPENING:cancel': 'EXIT_DECLINED',
   'S0_OPENING:reschedule': 'S1_INTENT',
   'S0_OPENING:urgent': 'S7_HANDOFF',
-  'S0_OPENING:cost_question': 'S7_HANDOFF',
+  'S0_OPENING:cost_question': 'S1_INTENT',
   'S0_OPENING:unclear': 'S0_OPENING',
 
   // S1_INTENT transitions — patient confirmed interest, send booking link
@@ -58,7 +58,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S1_INTENT:cancel': 'EXIT_DECLINED',
   'S1_INTENT:reschedule': 'S3_TIME_PREF',
   'S1_INTENT:urgent': 'S7_HANDOFF',
-  'S1_INTENT:cost_question': 'S7_HANDOFF',
+  'S1_INTENT:cost_question': 'S1_INTENT',
   'S1_INTENT:unclear': 'S3_TIME_PREF',
 
   // S3_TIME_PREF transitions
