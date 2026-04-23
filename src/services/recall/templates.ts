@@ -247,7 +247,7 @@ const TEMPLATES: TemplateBank = {
     3: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, hygiene team one last time. I know getting back in after a gap is the hardest part — it's always less of a deal than it feels like. First visit's on me: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team one last time. I know getting back in after a gap is the hardest part — it's always less of a deal than it feels like. First visit's on us: {{Booking Link}}`,
       },
       v2: {
         subject: '',
@@ -259,7 +259,7 @@ const TEMPLATES: TemplateBank = {
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, hygiene team again. I'd really rather you come in than keep worrying about it. First visit back is on me — grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team again. I'd really rather you come in than keep worrying about it. First visit back is on us — grab a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
@@ -327,7 +327,7 @@ const TEMPLATES: TemplateBank = {
       },
       v2: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. First visit's on me: {{Booking Link}}`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. First visit's on us: {{Booking Link}}`,
       },
       v3: {
         subject: '',
