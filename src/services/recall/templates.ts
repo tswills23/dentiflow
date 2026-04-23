@@ -144,50 +144,50 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, hello from {{Practice Name}}. Just wanted to reach out and see if you'd like to come by soon. You around?`,
       },
     },
-    // Day 1 — Gentle health frame + booking link
+    // Day 1 — Patient-outcome frame + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, {{Practice Name}} again. We like to stay ahead of things for our patients even when everything feels fine. Grab a spot here: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} again. Most things that turn into bigger issues don't hurt until they do. Worth a quick visit to make sure you're good: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, just a thought from {{Practice Name}} — sometimes the most important things are the ones you can't see yet. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. The easy stuff stays easy when you catch it early. Grab a time and we'll make sure everything's looking good: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, we always like to make sure everything's looking good for our patients at {{Practice Name}}. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} again. A lot of patients tell us they wished they'd come in sooner. We'd rather that not be you. Grab a spot: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, staying on top of things now helps avoid surprises later. We share that with all our patients at {{Practice Name}}. Pick a spot: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. Small things are easy. Big things aren't. We'd love to make sure yours are still small: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, just want to make sure everything's in good shape for you. This is something we check for everyone at {{Practice Name}}. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} again. You probably feel fine — most people do. That's actually when it's easiest to stay that way. Pick a time: {{Booking Link}}`,
       },
     },
-    // Day 3 — Complimentary visit + booking link
+    // Day 3 — Remove inertia + complimentary visit + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, we'd like to cover your first visit back at {{Practice Name}} — completely on us. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. First visit back is on us, no strings. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, {{Practice Name}} here. Your next visit is on us, no cost. Pick a spot: {{Booking Link}}`,
+        body: `Hey {{First Name}}, last one from us. We know re-booking after a gap feels like a bigger deal than it is. Come in, we'll take care of you. First visit is covered: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, we want to make coming back easy. Your first visit at {{Practice Name}} is covered. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} here. We'd rather have you back than not. First visit is on us — pick a time whenever you're ready: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, from {{Practice Name}} — your first visit back is completely covered. Pick a time here: {{Booking Link}}`,
+        body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and a covered visit. Grab it if you want it: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, we'd really love to see you back at {{Practice Name}}. This one's on us. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} one last time. If cost or timing has been the thing, we've taken care of the cost part. First visit back is free: {{Booking Link}}`,
       },
     },
   },
@@ -220,50 +220,50 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, {{Hygienist Name}} from {{Practice Name}} here. Your chart came across my desk and I wanted to touch base. You around?`,
       },
     },
-    // Day 1 — Clinical implication (sender-as-subject) + booking link
+    // Day 1 — Patient-outcome frame (hygiene team voice) + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, it's {{Hygienist Name}} again. When it's been a while between visits I always like to take a look just to stay ahead of things. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team from {{Practice Name}} again. The patients I worry about most are the ones who feel fine and keep putting it off. Don't want that to be you. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, {{Hygienist Name}} here. Honestly the longer it goes between visits the more I like to make sure everything's good. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team here. Honestly what I see most is things that were totally fixable early becoming a much bigger deal. Easy to avoid. Pick a time: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, this is {{Hygienist Name}} at {{Practice Name}}. I'd feel better getting eyes on things just to make sure nothing's developing quietly. Grab a spot: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team at {{Practice Name}}. I'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, {{Hygienist Name}} from {{Practice Name}}. I always like to stay ahead of things for my patients and I'd love to get you in. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team again. The gap between "totally fine" and "wish I'd come in sooner" is usually one visit. Let's make sure you stay on the right side of it: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, it's {{Hygienist Name}}. I don't like to let too much time go by without checking in on my patients. Grab a spot: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team here. Most of what we catch could've been nothing if we'd seen it a little earlier. Worth the visit: {{Booking Link}}`,
       },
     },
-    // Day 3 — Barrier removal + booking link
+    // Day 3 — Acknowledge avoidance + barrier removal + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, {{Hygienist Name}} here. Last thing from me — I set aside a few spots for patients I haven't seen in a while. First visit back is on me: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team one last time. I know getting back in after a gap is the hardest part — it's always less of a deal than it feels like. First visit's on me: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, it's {{Hygienist Name}}. I get it, getting back on the schedule is the hard part. I've got a couple no-cost spots open. Grab one: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team here. Last thing from me. If you've been putting it off, I'm not here to make you feel bad about it. Just come in. First visit is covered: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, {{Hygienist Name}} at {{Practice Name}}. I really don't want too much more time to go by. I've waived the cost for your visit back: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team at {{Practice Name}}. Last one, I promise. I've got a no-cost spot with your name on it. Easier than you think: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, it's {{Hygienist Name}}. Your first visit back to {{Practice Name}} is on me. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team again. I'd really rather you come in than keep worrying about it. First visit back is on me — grab a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, {{Hygienist Name}} here. I'd really love to see you back. This one's on me, no cost. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. I've made it free. Everything else is easy: {{Booking Link}}`,
       },
     },
   },
@@ -296,50 +296,50 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, Dr. {{Doctor Name}} here from {{Practice Name}}. Had something come up I wanted to touch base with you about. You free to text?`,
       },
     },
-    // Day 1 — Clinical implication (doctor-as-subject) + booking link
+    // Day 1 — Patient-outcome frame (doctor voice) + booking link
     1: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. When it's been a while between visits I always like to take a look just to make sure nothing's developing quietly. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. The things I wish I'd seen earlier — they never announced themselves. I'd rather rule things out than assume. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} here. Honestly the longer it goes between visits the more I tend to find things that could've been caught earlier. I'd rather it be a quick easy visit: {{Booking Link}}`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. I've seen enough to know that "feeling fine" and "everything's fine" aren't always the same thing. Pick a time: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. I'd feel better getting eyes on things. When it's been a while I just don't like to assume everything's fine. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. If something's developing, catching it now is the difference between a simple fix and a real problem. I'd rather it be simple: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, it's Dr. {{Doctor Name}}. I always like to stay ahead of things for my patients and it's been long enough that I'd rather just take a look. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} here. I'm not trying to alarm you — most of the time it's nothing. But the times it isn't, earlier is always better. Pick a time: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. The one thing I see often is things develop quietly. I'd rather catch something simple now than deal with something bigger later: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. I'd rather you come in and leave with good news than keep waiting. Grab a time: {{Booking Link}}`,
       },
     },
-    // Day 3 — Doctor's personal offer + booking link
+    // Day 3 — Clinical close + remove last barrier + booking link
     3: {
       v1: {
         subject: '',
-        body: `{{First Name}}, last thing from me. I set aside a few spots this month for patients I haven't seen in a while. First visit back is on me: {{Booking Link}}`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} one last time. If anything's been holding you back — cost, timing, whatever — I've taken care of the cost. Come in: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} one more time. I get it, getting back on the schedule after a while is the hard part. I've got a couple no-cost spots open. Grab one: {{Booking Link}}`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. First visit's on me: {{Booking Link}}`,
       },
       v3: {
         subject: '',
-        body: `{{First Name}}, I really don't want too much more time to go by without at least taking a look. I've waived the cost for your visit back: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}}. Last one. I've set aside a no-cost visit for patients I haven't seen in a while. I'd like you to take it: {{Booking Link}}`,
       },
       v4: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} here. Your first visit back is on me. Pick a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} one more time. I'm not going to keep following up — but I did want to make this as easy as possible. First visit back is covered: {{Booking Link}}`,
       },
       v5: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} here. I'd really love to see you back at {{Practice Name}}. This one's on me: {{Booking Link}}`,
+        body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've waived the cost for your visit back. If there's ever a time to come in, it's now: {{Booking Link}}`,
       },
     },
   },
@@ -376,7 +376,7 @@ export function renderTemplate(
   body = body.replace(/\{\{First Name\}\}/g, firstName);
   body = body.replace(/\{\{Practice Name\}\}/g, practiceName);
   body = body.replace(/\{\{Doctor Name\}\}/g, doctorName);
-  body = body.replace(/\{\{Hygienist Name\}\}/g, hygienistName);
+  body = body.replace(/\{\{Hygienist Name\}\}/g, 'hygiene team');
   if (bookingLink) {
     body = body.replace(/\{\{Booking Link\}\}/g, bookingLink);
   }
