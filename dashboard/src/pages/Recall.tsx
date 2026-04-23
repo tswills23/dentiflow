@@ -64,6 +64,9 @@ function Recall({ practiceId }: RecallProps) {
   const [locationFilter, setLocationFilter] = useState<string>('all')
   const [voiceFilter, setVoiceFilter] = useState<string>('all')
   const [dayFilter, setDayFilter] = useState<string>('all')
+  const [campaignStartDate, setCampaignStartDate] = useState<string>(() => {
+    return localStorage.getItem('recall_campaign_start') ?? ''
+  })
 
   // Fetch all recall sequences
   useEffect(() => {
@@ -245,9 +248,14 @@ function Recall({ practiceId }: RecallProps) {
     return [...locs].sort()
   }, [patients])
 
-  // Filter sequences by location
+  // Filter sequences by location / voice / campaign start
   const filteredSequences = useMemo(() => {
     let filtered = sequences
+
+    if (campaignStartDate) {
+      const start = new Date(campaignStartDate).getTime()
+      filtered = filtered.filter((s) => new Date(s.created_at).getTime() >= start)
+    }
 
     if (locationFilter !== 'all') {
       const patientIdsAtLocation = new Set<string>()
@@ -319,9 +327,14 @@ function Recall({ practiceId }: RecallProps) {
   }, [filteredSequences])
 
 
-  // Filtered activity by location / voice / day
+  // Filtered activity by location / voice / day / campaign start
   const filteredActivity = useMemo(() => {
     let events = activityLog
+
+    if (campaignStartDate) {
+      const start = new Date(campaignStartDate).getTime()
+      events = events.filter((e) => new Date(e.created_at).getTime() >= start)
+    }
 
     if (locationFilter !== 'all') {
       events = events.filter((e) => e.patient_location === locationFilter)
@@ -457,6 +470,56 @@ function Recall({ practiceId }: RecallProps) {
             <option value="hygienist">Hygienist</option>
             <option value="doctor">Doctor</option>
           </select>
+
+          {/* Campaign start date filter */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap' }}>
+              From
+            </label>
+            <input
+              type="date"
+              value={campaignStartDate}
+              onChange={(e) => {
+                setCampaignStartDate(e.target.value)
+                if (e.target.value) {
+                  localStorage.setItem('recall_campaign_start', e.target.value)
+                } else {
+                  localStorage.removeItem('recall_campaign_start')
+                }
+              }}
+              style={{
+                background: 'var(--bg-card)',
+                border: '0.5px solid var(--border-default)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '6px 10px',
+                fontSize: 13,
+                color: campaignStartDate ? 'var(--text-primary)' : 'var(--text-faint)',
+                fontFamily: "'Outfit', sans-serif",
+                cursor: 'pointer',
+                colorScheme: 'dark',
+              }}
+            />
+            {campaignStartDate && (
+              <button
+                onClick={() => {
+                  setCampaignStartDate('')
+                  localStorage.removeItem('recall_campaign_start')
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-faint)',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  lineHeight: 1,
+                  padding: '2px 4px',
+                }}
+                title="Clear date filter"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
