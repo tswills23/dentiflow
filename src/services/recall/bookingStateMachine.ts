@@ -118,7 +118,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S0_OPENING:booking_interest': 'explain_reason',
   'S0_OPENING:booked_confirmation': 'confirm_external_booking',
   'S0_OPENING:preferences': 'explain_reason',
-  'S0_OPENING:asking_availability': 'explain_reason',
+  'S0_OPENING:asking_availability': 'send_booking_link',
   'S0_OPENING:confirm': 'explain_reason',
   'S0_OPENING:slot_selection': 'explain_reason',
   'S0_OPENING:opt_out': 'opt_out_silent',
