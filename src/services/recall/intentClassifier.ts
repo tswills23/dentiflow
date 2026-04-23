@@ -53,7 +53,7 @@ const NOT_NOW_KEYWORDS = [
   'remind me later', 'not a good time', 'another time',
   'in a few months', 'reach out later', 'not this month',
   'too busy', 'im busy', "i'm busy", 'busy right now',
-  'busy this', 'next month', 'next year', 'next week',
+  'busy this', 'next month', 'next year',
   'some other time', 'later this year',
 ];
 
@@ -99,6 +99,7 @@ const ASKING_AVAILABILITY_KEYWORDS = [
   'what times', 'what time', 'available', 'availability',
   'do you have', 'any openings', 'any slots', 'what days',
   'show me', 'let me see', 'what options', 'what are my options',
+  'next week', 'open next', 'have open',
 ];
 
 const SHORT_POSITIVE = [
