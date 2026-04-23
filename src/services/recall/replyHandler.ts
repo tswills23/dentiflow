@@ -309,7 +309,7 @@ async function executeAction(
 
     case 'send_booking_link': {
       if (bookingLinkUrl) {
-        const phone = typedPractice.phone || null;
+        const phone = practice.phone || null;
         const callLine = phone
           ? ` Give us a call at ${phone} if you need help booking.`
           : ` Give us a call if you need help booking.`;
