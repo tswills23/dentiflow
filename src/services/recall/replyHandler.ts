@@ -309,13 +309,17 @@ async function executeAction(
 
     case 'send_booking_link': {
       if (bookingLinkUrl) {
+        const phone = typedPractice.phone || null;
+        const callLine = phone
+          ? ` Give us a call at ${phone} if you need help booking.`
+          : ` Give us a call if you need help booking.`;
         return {
-          replyText: `Perfect — grab a time here: ${bookingLinkUrl}`,
+          replyText: `Here's a link to our schedule — grab a day and time that works for you: ${bookingLinkUrl}${callLine}`,
           updatedFields,
         };
       }
       return {
-        replyText: `Perfect — mornings or afternoons work better?`,
+        replyText: `Mornings or afternoons work better?`,
         updatedFields,
       };
     }
