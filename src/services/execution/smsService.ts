@@ -4,9 +4,13 @@ import type { Patient } from '../../types/database';
 
 // Read lazily so dotenv has time to load regardless of import order
 const getSmsLiveMode = () => process.env.SMS_LIVE_MODE === 'true';
-// When set, ALL outbound SMS are blocked unless the recipient matches this number.
+// When set, ALL outbound SMS are blocked unless the recipient is in this comma-separated list.
 // Use during testing to guarantee no patient texts can go out.
-const getAllowedPhone = () => process.env.TEST_MODE_ALLOWED_PHONE || null;
+const getAllowedPhones = (): string[] | null => {
+  const val = process.env.TEST_MODE_ALLOWED_PHONE;
+  if (!val) return null;
+  return val.split(',').map(p => p.trim()).filter(Boolean);
+};
 const COOLDOWN_MS = 10_000; // 10-second cooldown for testing (production: 60_000)
 
 let twilioClient: twilio.Twilio | null = null;
@@ -45,9 +49,9 @@ export async function sendSMS(
     return { success: false, error: 'cooldown_active', simulated: false };
   }
 
-  // Hard fence: if TEST_MODE_ALLOWED_PHONE is set, block all sends to other numbers
-  const allowedPhone = getAllowedPhone();
-  if (allowedPhone && to !== allowedPhone) {
+  // Hard fence: if TEST_MODE_ALLOWED_PHONE is set, block all sends to numbers not on the list
+  const allowedPhones = getAllowedPhones();
+  if (allowedPhones && !allowedPhones.includes(to)) {
     console.warn(`[smsService] BLOCKED — TEST_MODE_ALLOWED_PHONE is set. Refusing send to ${to}`);
     return { success: false, error: 'blocked_test_mode', simulated: false };
   }

@@ -277,7 +277,7 @@ const TEMPLATES: TemplateBank = {
     0: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, Dr. {{Doctor Name}} here. Your name came up when I was reviewing charts today and I wanted to reach out. Got a sec to text?`,
+        body: `Hey {{First Name}}, Dr. {{Doctor Name}} here from {{Practice Name}}. Your name came up when I was reviewing charts today and I wanted to reach out. Got a sec to text?`,
       },
       v2: {
         subject: '',
@@ -289,7 +289,7 @@ const TEMPLATES: TemplateBank = {
       },
       v4: {
         subject: '',
-        body: `Hey {{First Name}}, this is Dr. {{Doctor Name}}. Was reviewing some patient charts and yours came up. Wanted to reach out personally. Got a minute?`,
+        body: `Hey {{First Name}}, this is Dr. {{Doctor Name}} from {{Practice Name}}. Was reviewing some patient charts and yours came up. Wanted to reach out personally. Got a minute?`,
       },
       v5: {
         subject: '',
