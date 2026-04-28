@@ -50,6 +50,7 @@ export type RecallIntent =
   | 'cost_question'
   | 'reschedule'
   | 'cancel'
+  | 'identify_practice'
   | 'unclear';
 
 export type IntentConfidence = 'high' | 'medium' | 'low';

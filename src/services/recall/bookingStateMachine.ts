@@ -44,6 +44,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S0_OPENING:urgent': 'S7_HANDOFF',
   'S0_OPENING:cost_question': 'S1_INTENT',
   'S0_OPENING:unclear': 'S0_OPENING',
+  'S0_OPENING:identify_practice': 'S0_OPENING',
 
   // S1_INTENT transitions — patient confirmed interest, send booking link
   'S1_INTENT:booking_interest': 'S3_TIME_PREF',
@@ -60,6 +61,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S1_INTENT:urgent': 'S7_HANDOFF',
   'S1_INTENT:cost_question': 'S1_INTENT',
   'S1_INTENT:unclear': 'S3_TIME_PREF',
+  'S1_INTENT:identify_practice': 'S1_INTENT',
 
   // S3_TIME_PREF transitions
   'S3_TIME_PREF:preferences': 'S4_AVAILABILITY',
@@ -76,6 +78,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S3_TIME_PREF:urgent': 'S7_HANDOFF',
   'S3_TIME_PREF:cost_question': 'S7_HANDOFF',
   'S3_TIME_PREF:unclear': 'S3_TIME_PREF',
+  'S3_TIME_PREF:identify_practice': 'S3_TIME_PREF',
 
   // S4_AVAILABILITY transitions (link-only: redirect back to S3_TIME_PREF)
   'S4_AVAILABILITY:slot_selection': 'S3_TIME_PREF',
@@ -91,6 +94,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S4_AVAILABILITY:urgent': 'S7_HANDOFF',
   'S4_AVAILABILITY:cost_question': 'S7_HANDOFF',
   'S4_AVAILABILITY:unclear': 'S3_TIME_PREF',
+  'S4_AVAILABILITY:identify_practice': 'S4_AVAILABILITY',
 
   // S5_CONFIRMATION transitions (link-only: redirect back to S3_TIME_PREF or complete)
   'S5_CONFIRMATION:confirm': 'S6_COMPLETED',
@@ -106,6 +110,7 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S5_CONFIRMATION:urgent': 'S7_HANDOFF',
   'S5_CONFIRMATION:cost_question': 'S7_HANDOFF',
   'S5_CONFIRMATION:unclear': 'S5_CONFIRMATION',
+  'S5_CONFIRMATION:identify_practice': 'S5_CONFIRMATION',
 };
 
 // =============================================================================
@@ -129,6 +134,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S0_OPENING:urgent': 'handoff_urgent',
   'S0_OPENING:cost_question': 'handoff_cost',
   'S0_OPENING:unclear': 'clarify_intent',
+  'S0_OPENING:identify_practice': 'identify_practice',
 
   // S1_INTENT actions — patient is engaged, send booking link
   'S1_INTENT:booking_interest': 'send_booking_link',
@@ -145,6 +151,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S1_INTENT:urgent': 'handoff_urgent',
   'S1_INTENT:cost_question': 'handoff_cost',
   'S1_INTENT:unclear': 'send_booking_link',
+  'S1_INTENT:identify_practice': 'identify_practice',
 
   // S3_TIME_PREF actions
   'S3_TIME_PREF:preferences': 'send_booking_link',
@@ -161,6 +168,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S3_TIME_PREF:urgent': 'handoff_urgent',
   'S3_TIME_PREF:cost_question': 'handoff_cost',
   'S3_TIME_PREF:unclear': 'send_booking_link',
+  'S3_TIME_PREF:identify_practice': 'identify_practice',
 
   // S4_AVAILABILITY actions (link-only: always send booking link)
   'S4_AVAILABILITY:slot_selection': 'send_booking_link',
@@ -176,6 +184,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S4_AVAILABILITY:urgent': 'handoff_urgent',
   'S4_AVAILABILITY:cost_question': 'handoff_cost',
   'S4_AVAILABILITY:unclear': 'send_booking_link',
+  'S4_AVAILABILITY:identify_practice': 'identify_practice',
 
   // S5_CONFIRMATION actions (link-only)
   'S5_CONFIRMATION:confirm': 'confirm_external_booking',
@@ -191,6 +200,7 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S5_CONFIRMATION:urgent': 'handoff_urgent',
   'S5_CONFIRMATION:cost_question': 'handoff_cost',
   'S5_CONFIRMATION:unclear': 'clarify_intent',
+  'S5_CONFIRMATION:identify_practice': 'identify_practice',
 };
 
 // =============================================================================

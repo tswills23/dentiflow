@@ -482,6 +482,12 @@ async function executeAction(
         updatedFields,
       };
 
+    case 'identify_practice':
+      return {
+        replyText: `This is ${practiceName} — Dr. Philip's office. We were reaching out to get you back in for a visit. Want me to find you a time?`,
+        updatedFields,
+      };
+
     case 'clarify_intent':
       return {
         replyText: `Just to make sure — were you looking to come in for a cleaning?`,

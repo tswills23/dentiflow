@@ -119,6 +119,15 @@ const NEGATION_MARKERS = [
   ' however ', ' although ',
 ];
 
+// Phrases asking which office/practice this is — answer with identity, don't treat as booking
+const IDENTIFY_PRACTICE_PHRASES = [
+  'what office', 'which office', 'what practice', 'which practice',
+  'what dental', 'which dental', 'what dentist', 'which dentist',
+  'what office is this', 'which office is this',
+  'where is this from', 'where are you',
+  'what place is this', 'what location',
+];
+
 // Phrases that signal engagement/curiosity — treat as booking_interest at S0_OPENING
 const CURIOSITY_PHRASES = [
   'whats this about', "what's this about", 'what is this about',
@@ -413,6 +422,11 @@ export function classifyIntent(
   const startsPositive = SHORT_POSITIVE.some(w => textClean.startsWith(w + ' ') || textClean === w);
   if (startsPositive) {
     return { intent: 'booking_interest', confidence: 'medium', matchedKeywords: [textClean.split(' ')[0]], rawText: text };
+  }
+
+  // Identity questions — patient asking which office this is
+  if (IDENTIFY_PRACTICE_PHRASES.some(p => textLower.includes(p))) {
+    return { intent: 'identify_practice', confidence: 'high', matchedKeywords: ['identify_practice'], rawText: text };
   }
 
   // Pure curiosity phrases — patient is engaged, treat as interest
