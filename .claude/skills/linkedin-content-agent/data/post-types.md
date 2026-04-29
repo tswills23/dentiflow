@@ -1,6 +1,6 @@
 # LinkedIn Post Types -- Structural Definitions
 
-8 post types rotated across the content calendar. Each has specific structural requirements that must be met for the post to qualify as that type.
+8 post types rotated across the content calendar. Each has specific structural requirements that must be met for the post to qualify as that type. Each post must also map to one of the 5 content pillars (see SKILL.md).
 
 ---
 
@@ -17,9 +17,14 @@
 
 **Hook style:** Surprising number or counterintuitive cost calculation
 
-**Source docs:** #3 (Speed-to-Lead), #5 (Revenue Capture), #12 (72-Hour Playbook revenue math)
+**Source docs:** #3 (Speed-to-Lead), #5 (Revenue Capture), #12 (72-Hour Playbook revenue math), #17 (Reviews/Referrals), #18 (No-Show Recovery)
 
-**Example angle:** "3 empty hygiene chairs per day at $200/chair = $156,000/year in lost production. Most practices don't track this number."
+**Example angles by pillar:**
+- Recall: "3 empty hygiene chairs per day at $200/chair = $156,000/year in lost production. Most practices don't track this number."
+- Reviews: "Your practice has 500 happy patients. You got 3 Google reviews last month. That math doesn't add up."
+- Speed-to-Lead: "62% of calls to dental practices go unanswered. Each one costs $300-$500 in lifetime value."
+- System Thinking: "Your marketing spend is $5K/month. Your revenue leakage is $15K/month. You're optimizing the wrong number."
+- Acquisition/Sales: "Most practices lose more revenue from operational leaks than they spend on all their marketing combined."
 
 ---
 
@@ -36,9 +41,14 @@
 
 **Hook style:** Name the framework directly or lead with the outcome it produces
 
-**Source docs:** #3 (Speed-to-Lead), #4 (Recall/Reactivation), #11 (Revenue OS), #12 (72-Hour Playbook)
+**Source docs:** #3 (Speed-to-Lead), #4 (Recall/Reactivation), #11 (Revenue OS), #12 (72-Hour Playbook), #17 (Reviews/Referrals), #19 (JP Roadmap)
 
-**Example angle:** "The 72-Hour Recall Protocol has 3 rules. Break any of them and results collapse."
+**Example angles by pillar:**
+- Recall: "The 72-Hour Recall Protocol has 3 rules. Break any of them and results collapse."
+- Reviews: "The Review Velocity Framework: how to go from 3 reviews/month to 15-20 without your front desk doing anything."
+- Speed-to-Lead: "The 60-Second Response System: what fires when a lead comes in and why most practices take 10 hours."
+- System Thinking: "The 9 stages where dental revenue leaks. Most practices only plug 1-2 of them."
+- Acquisition/Sales: "The guarantee structure that eliminates risk and makes prospects say yes."
 
 ---
 
@@ -55,9 +65,14 @@
 
 **Hook style:** Direct contradiction of a widely-held belief
 
-**Source docs:** #3 (Speed-to-Lead "staff blames lead quality"), #5 (Revenue Capture "they'll call when ready"), #13 (Money Model "free leads have no intention of buying = MYTH")
+**Source docs:** #3 (Speed-to-Lead), #5 (Revenue Capture), #13 (Money Model), #17 (Reviews/Referrals)
 
-**Example angle:** "Your front desk is not the problem. Your response time is."
+**Example angles by pillar:**
+- Recall: "'Our recall list is cold.' No. Your recall list is uncontacted. There's a difference."
+- Reviews: "Asking patients 'please leave us a review' is the worst way to get reviews."
+- Speed-to-Lead: "Your front desk is not the problem. Your response time is."
+- System Thinking: "You don't have a marketing problem. You have a revenue system problem."
+- Acquisition/Sales: "Why 'free consultation' is the worst offer a dental practice can run."
 
 ---
 
@@ -75,9 +90,14 @@
 
 **Hook style:** Bold promise or specific outcome ("Here's the complete recall system I use to recover $15K-$40K/month in lost hygiene revenue")
 
-**Source docs:** #12 (72-Hour Playbook -- primary source), #14 (SMS Test Plan), #2 (30-Day Sprint)
+**Source docs:** #12 (72-Hour Playbook), #14 (SMS Test Plan), #2 (30-Day Sprint), #17 (Reviews/Referrals), #18 (No-Show Recovery)
 
-**Example angle:** Full 72-Hour Recall Protocol with the 3 rules, day-by-day breakdown, and reply handling scripts.
+**Example angles by pillar:**
+- Recall: Full 72-Hour Recall Protocol with the 3 rules, day-by-day breakdown, and reply handling scripts.
+- Reviews: Complete automated review collection workflow: post-visit text, routing logic, private feedback loop.
+- Speed-to-Lead: The 3 scripts that cover every inbound channel: phone pickup, web form auto-text, missed call recovery.
+- System Thinking: The complete revenue audit checklist. 9 systems, 27 checkpoints, do it in 30 minutes.
+- Acquisition/Sales: The offer stack I'd build for any dental marketing agency. Pricing, guarantees, upsells.
 
 ---
 
@@ -94,9 +114,14 @@
 
 **Hook style:** Story opener that creates a loop ("I sold $7M in 10 months. The skill that made that possible has nothing to do with sales.")
 
-**Source docs:** #15 (AI Consultant System Prompt -- background), #13 (Money Model -- Hormozi frameworks applied)
+**Source docs:** #15 (AI Consultant System Prompt), #13 (Money Model), #19 (JP Roadmap)
 
-**Example angle:** Selling at Acquisition.com taught me that speed beats quality in first contact. That's why our recall system responds in under 60 seconds.
+**Example angles by pillar:**
+- Recall: "The first recall batch we sent got a 12% response rate. What I learned from the responses that didn't convert."
+- Reviews: "A practice owner told me they had 'plenty of reviews.' They had 47. Their competitor across the street had 312."
+- Speed-to-Lead: "At Acquisition.com, speed was religion. The person who called back fastest won. Dental is the same game."
+- System Thinking: "The first time I mapped out every place a dental practice leaks revenue, I found 9 gaps. The owner was only aware of 2."
+- Acquisition/Sales: "Selling at Acquisition.com taught me that speed beats quality in first contact."
 
 ---
 
@@ -113,9 +138,14 @@
 
 **Hook style:** Lead with the result or the surprising finding
 
-**Source docs:** #14 (SMS Test Plan -- A/B structure), #1 (MVP Agent SOPs -- system architecture)
+**Source docs:** #14 (SMS Test Plan), #1 (MVP Agent SOPs), #20 (System Summary)
 
-**Example angle:** "We tested reason-based vs empathy-based openers on 500 overdue patients. Here's what happened."
+**Example angles by pillar:**
+- Recall: "We tested reason-based vs empathy-based openers on 500 overdue patients. Here's what happened."
+- Reviews: "Just finished building the automated review collection engine. Here's what it does and what we expect."
+- Speed-to-Lead: "Our speed-to-lead pipeline now responds in under 60 seconds. Here's the architecture."
+- System Thinking: "Built module 4 of 6 this week. Here's what the full system looks like and what's left."
+- Acquisition/Sales: "Applied Hormozi's offer design framework to dental. Here's the offer stack I landed on."
 
 ---
 
@@ -132,9 +162,14 @@
 
 **Hook style:** Direct utility ("Here's the exact script your front desk should use when a patient calls about cost")
 
-**Source docs:** #12 (72-Hour Playbook templates), #14 (SMS Test Plan reply handling), #3 (Speed-to-Lead recovery scripts)
+**Source docs:** #12 (72-Hour Playbook templates), #14 (SMS Test Plan reply handling), #3 (Speed-to-Lead recovery scripts), #17 (Reviews/Referrals), #18 (No-Show Recovery)
 
-**Example angle:** The 5 reply scripts that handle every recall patient response: yes, not now, cost question, who is this, and stop.
+**Example angles by pillar:**
+- Recall: The 5 reply scripts that handle every recall patient response: yes, not now, cost question, who is this, and stop.
+- Reviews: The post-visit text template that routes happy patients to Google and unhappy patients to private feedback.
+- Speed-to-Lead: The 3 auto-text scripts: phone pickup, web form response, missed call recovery.
+- System Thinking: The 30-minute revenue audit. 9 questions to find where your practice is leaking money.
+- Acquisition/Sales: The discovery call script that uncovers real problems instead of pitching solutions.
 
 ---
 
@@ -151,6 +186,11 @@
 
 **Hook style:** State the myth as if it's true, then reveal why it's wrong
 
-**Source docs:** #4 (Recall "dirty lists"), #3 (Speed-to-Lead "leads aren't interested"), #13 (Money Model "free leads won't buy")
+**Source docs:** #4 (Recall), #3 (Speed-to-Lead), #13 (Money Model), #17 (Reviews/Referrals), #18 (No-Show Recovery)
 
-**Example angle:** "'Our recall list is cold.' No. Your recall list is uncontacted. There's a difference."
+**Example angles by pillar:**
+- Recall: "'Our recall list is cold.' No. Your recall list is uncontacted. There's a difference."
+- Reviews: "'We ask every patient to leave a review.' No you don't. And asking is the wrong approach anyway."
+- Speed-to-Lead: "'Our leads aren't interested.' Your leads called you. They were interested. You just took too long."
+- System Thinking: "'We need more new patients.' No. You need to stop losing the ones you already have."
+- Acquisition/Sales: "'Free leads have no intention of buying.' Wrong. Free leads convert at the same rate when the offer is right."

@@ -5,75 +5,49 @@ post_time: 7:00 AM
 post_type: playbook
 topic: Full 72-hour recall playbook giveaway
 hook_style: bold_promise
-word_count: 480
+word_count: 400
 source_docs: [12, 4, 3]
-status: draft
+status: posted
 sequence: week2_post3
+cta: comment RECALL
 ---
 
-Here's everything I built to run a recall system that doesn't depend on anyone remembering to do anything.
+We built a 3-day SMS recall sequence that reactivates 25-35% of overdue patients. Here's the framework.
 
-The full protocol. Day by day. Template by template.
+Most practices send one text, get ignored, and call it a recall system. That's not a system. That's a text message with a dream.
+
+The protocol runs over 72 hours. Three messages. Each one has a different job.
 
 Day 0: The check-in. No booking ask.
 
-The job of Day 0 is to reopen the loop, not close it. Patients who have been gone 6, 12, 14 months need to feel like a person reached out, not a system running a sequence.
+The only goal is to get a reply. No CTA. No scheduling language. Just a personal note from the doctor that makes the patient feel remembered.
 
-The message changes based on how long they've been overdue.
+Why doctor voice? For patients gone 12+ months, a text from the front desk hits different — and not in a good way. A note from their actual doctor? That moves people.
 
-0 to 3 months out, office coordinator voice:
-"Hi [Name], this is [Coordinator] from [Practice Name]. We haven't seen you in a while and just wanted to check in. Would this week or next week work better for a visit?"
+We're A/B testing two opener styles right now — reason-based vs. empathy-based. Both outperform "it's time for your cleaning" by a wide margin. Turns out patients don't love being reminded they're overdue. Who knew.
 
-6 to 12 months out, hygienist voice:
-"Hi [Name], this is [Hygienist] from [Practice Name]. Even when everything feels fine, regular visits help keep things on track. Would mornings or afternoons work better to come in?"
+Day 1: The consequence frame. 24 hours later.
 
-12+ months out, doctor voice:
-"Hi [Name], this is Dr. [Last Name] from [Practice Name]. I noticed it's been a while since your last visit and wanted to personally check in. Would this week or next week make more sense to come back in?"
+Same voice. Same thread. Now you introduce implication — not fear, just context. Small dental issues don't show symptoms until they've progressed. The patient already trusts you from Day 0, so the soft CTA actually lands.
 
-The longer they've been gone, the higher the authority needs to be. A "just checking in" text from the front desk doesn't move someone who hasn't been in for 14 months.
+Day 3: The offer. Non-responders only.
 
-A note from their doctor usually does.
+This only goes to patients who opened but didn't reply. Interested enough to read, not interested enough to type back. We've all been that person.
 
-Day 1: The soft ask. 24 hours later.
+Day 3 removes the last barrier. The offer doesn't lead the conversation — it closes it.
 
-Same voice as Day 0. The sequence should feel like a conversation, not a cold outreach campaign.
+Patients who replied at any point — even "not right now" — exit the sequence immediately. No Day 3. Pushing past that is how you turn a maybe-later into an unsubscribe.
 
-This one adds the consequence frame. Not pressure. Just context.
+What I keep watching kill this in the wild:
 
-"Regular visits also catch things early. Cavities found at 6 months cost a lot less than cavities found at 18. Would [Time Option 1] or [Time Option 2] work this week?"
+Practices send Day 0 and stop. One text is not a sequence, it's just hope with a phone number.
 
-Day 3: The direct offer. Non-responders only.
+Patient replies at 9pm. Nobody sees it until morning. By then they've talked themselves out of it and you're back to square one.
 
-This goes out 72 hours from Day 0. Only to patients who received Day 0 and Day 1 and said nothing.
+The math: 400 overdue patients. Without a system, 5-8% come back. With this sequence, 25-35%. At $180 per hygiene visit, that's up to $19,440 in recovered production sitting inside your PMS collecting dust.
 
-If they replied to anything -- even "maybe later" -- they exit the sequence. No Day 3.
+I put the full protocol in a doc — every template word for word, reply scripts, Day 3 offer variants, segmentation logic, all of it.
 
-"I have [Morning/Afternoon] available [Day]. Want me to hold it for you?"
-
-No explanation. No re-pitch. They've seen Day 0 and Day 1. They know why we're reaching out.
-
-What I keep watching kill this in practice:
-
-One-message-and-done. They send Day 0 and stop. One attempt dressed up as a system.
-
-Staff rewrites the copy. The authority escalation only works if the message actually sounds like the doctor, not like the coordinator changed the name at the top.
-
-After-hours replies ignored. Patient responds at 9pm. Nobody sees it until morning. The booking window is gone.
-
-"Not now" gets pushed anyway. The moment a patient acknowledges the outreach, they exit the sequence. Pushing someone who said not now is how you earn opt-outs.
-
-The math, since someone will ask.
-
-400 overdue patients.
-
-Without a system: 5 to 8 percent reactivate. That's 20 to 32 patients.
-
-With a structured 3-day sequence: 25 to 35 percent. That's 100 to 140 patients.
-
-At $180 per hygiene visit, that's up to $19,440 in recovered production. Before any of them say yes to treatment while they're in the chair.
-
-The production already exists inside the PMS. It's sitting there, waiting for someone to actually follow through.
-
-When was the last time a patient on your overdue list heard from anyone other than the automated birthday text?
+Comment RECALL and I'll send it over.
 
 - T

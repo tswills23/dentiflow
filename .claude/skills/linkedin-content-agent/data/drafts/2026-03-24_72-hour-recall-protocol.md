@@ -4,16 +4,20 @@ post_day: tuesday
 post_time: 7:00 AM
 post_type: framework
 topic: 72-hour recall protocol - 3 rules
-hook_style: bold_claim
-word_count: 370
+hook_style: pattern_interrupt
+word_count: 390
 source_docs: [12, 4]
-status: draft
+status: posted
 sequence: week2_post2
 ---
 
-Most recall systems send one message and hope for the best.
+I stopped asking practices "do you do recall?"
 
-This one runs on 3 rules and a 72-hour clock.
+Every practice does recall.
+
+I started asking "show me the last 50 patients you contacted and what happened next."
+
+That's when the room gets quiet.
 
 After watching enough practices run recall into the ground, a pattern kept showing up. The problem is never intent. Every team I've talked to wants to follow up.
 

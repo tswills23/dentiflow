@@ -1,10 +1,10 @@
 ---
-date: 2026-03-20
-post_day: thursday
+date: 2026-03-21
+post_day: friday
 post_time: 12:00 PM
 post_type: contrarian
 topic: You don't have a marketing problem, you have a follow-up problem
-hook_style: provocative_question
+hook_style: provocative_statement
 word_count: 340
 source_docs: [4, 5, 12]
 status: posted

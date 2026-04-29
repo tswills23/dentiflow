@@ -22,6 +22,14 @@ Pull from this bank when drafting posts. Use one or two per post. Mix types. Add
 
 8. "'We tried recall and it didn't work' is usually code for 'we sent one postcard in November and moved on with our lives.'"
 
+9. "Running ads without fixing your follow-up is like pouring water into a bucket with no bottom. The water's not the problem. The bucket is the problem."
+
+10. "Sending one confirmation text 24 hours before the appointment and expecting people to show up is like sending one wedding invite and skipping the rehearsal dinner. Things slip."
+
+11. "Most practices ask for reviews the way you'd ask someone for a ride to the airport. Awkwardly, at checkout, while they're already reaching for the door."
+
+12. "Your Google Business Profile has 47 reviews. Your competitor across the street has 312. Patients aren't comparing your clinical skills. They're comparing your star counts."
+
 ---
 
 ## Running Bits / Recurring Sign-offs
@@ -45,3 +53,9 @@ Pull from this bank when drafting posts. Use one or two per post. Mix types. Add
 9. "If your recall system is 'someone in the office remembers to call sometimes,' I have news for you and it's not good."
 
 10. "Your overdue patient list isn't getting smaller while you think about it. It's just getting dustier."
+
+11. "Somewhere right now a practice owner is refreshing their Google Ads dashboard while the phone rings to voicemail in the next room."
+
+12. "This has been your daily reminder that your no-show rate is not a personality trait of your patients. It's a feature of your confirmation system."
+
+13. "If your review strategy is 'we have a sign at the front desk,' I have questions about your other strategies too."

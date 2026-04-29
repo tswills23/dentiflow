@@ -7,15 +7,15 @@ topic: Speed-to-Lead: 60-second response scripts
 hook_style: surprising_number
 word_count: 265
 source_docs: [3, 5]
-status: draft
+status: posted
 sequence: week2_post4
 ---
 
-A Harvard study found that responding within 60 seconds of an inbound inquiry increases close rates by 391%.
+Responding within 60 seconds increases close rates by 391%. Harvard measured it. Most dental practices don't respond within 60 minutes.
 
-Here's what that looks like inside a dental practice.
+Here's what that gap looks like in practice.
 
-Usually it looks like nothing. 38 percent of dental calls go unanswered. The patient calls, nobody picks up, they move on. No alarm fires. Nobody knows it happened.
+38 percent of dental calls go unanswered. The patient calls, nobody picks up, they move on. No alarm fires. Nobody knows it happened.
 
 Three scripts that fix the most common versions of this.
 
@@ -29,7 +29,7 @@ The only job is to get a live voice on the line before the patient finishes deci
 
 Script 2: Web form response.
 
-Patient fills out your new patient form at 9pm. Without automation, that's 10 hours of silence in a 60-second window.
+Patient fills out your new patient form at 9pm. Without automation, that's 10 hours of silence. In a 60-second window. That's like leaving someone on read for a week and then wondering why they ghosted you.
 
 Auto-text fires within 60 seconds:
 
@@ -45,9 +45,13 @@ Auto-text fires within 60 seconds of the missed call:
 
 Then someone actually calls back. Today. Not tomorrow. Not when it's convenient.
 
-The practices I've seen run this consistently don't spend more on marketing.
+None of this is complicated. The bar is literally on the ground. And somehow most practices are still tripping over it.
 
-They just stopped letting inbound demand walk out the door.
+The ones I've seen run this consistently don't spend more on marketing. They just stopped letting inbound demand walk out the door while they were busy spending money to bring it in.
+
+Somewhere right now a practice owner is refreshing their Google Ads dashboard while the phone rings to voicemail in the next room.
+
+Don't be that guy.
 
 What's your current response time when a new patient reaches out?
 

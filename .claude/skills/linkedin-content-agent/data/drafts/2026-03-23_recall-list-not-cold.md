@@ -7,7 +7,7 @@ topic: Your recall list isn't cold, it's uncontacted
 hook_style: direct_contradiction
 word_count: 280
 source_docs: [4, 12]
-status: draft
+status: posted
 sequence: week2_post1
 ---
 

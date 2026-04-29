@@ -4,7 +4,7 @@ Dentiflow SMS Autoresearch -- Self-improving recall copy optimization.
 
 Karpathy autoresearch pattern applied to dental recall SMS copy:
 1. Generate 10 SMS copy variants from current prompt instructions
-2. Evaluate each against 7 recall-specific criteria via Claude -> score out of 70
+2. Evaluate each against 10 recall-specific criteria via Claude -> score out of 100
 3. Compare against best score -- keep winner
 4. Mutate the winner instructions for next cycle
 5. Repeat every 2 minutes
@@ -34,8 +34,8 @@ load_dotenv()
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 GEN_MODEL = "claude-sonnet-4-6"       # generates SMS copy variants
-EVAL_MODEL = "claude-sonnet-4-6"       # evaluates copy against criteria
-MUTATE_MODEL = "claude-sonnet-4-6"     # mutates the copy instructions
+EVAL_MODEL = "claude-opus-4-6"         # evaluates copy against criteria (more nuanced judgment)
+MUTATE_MODEL = "claude-opus-4-6"       # mutates the copy instructions (more nuanced judgment)
 
 BASE_DIR = Path(__file__).resolve().parent / "data"
 INSTRUCTIONS_FILE = BASE_DIR / "copy_instructions.txt"
@@ -82,6 +82,11 @@ SCENARIOS = [
     ("day_0_opener", "Patient: David, 15 months overdue, last saw Dr. Rivera, patient had periodontal concerns flagged on last visit"),
     ("reply_reschedule", "Patient replied: 'I booked for Tuesday but something came up, can I move it?'"),
     ("reply_vague_interest", "Patient replied: 'Maybe... when are you open?'"),
+
+    # Real patient responses from April 8 recall blast -- must handle these gracefully
+    ("reply_moved_away", "Patient replied: 'Hey I moved out of state.' or 'I live in TN now' or 'He is in Arizona at college'"),
+    ("reply_who_is_this", "Patient replied: 'No. I don't know who you are' or 'Who?' or 'What'"),
+    ("reply_complaint", "Patient replied: 'your pushy sales tactics are really annoying. No thank you!' or 'I was hoping someone wanted to talk about my horrible experience with your dentist last year'"),
 ]
 
 # --- Eval Criteria ---

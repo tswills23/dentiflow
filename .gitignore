@@ -11,3 +11,10 @@ __pycache__/
 *.csv
 dentiflow/
 nul
+
+# Supabase CLI cache and runtime locks
+supabase/.temp/
+.claude/scheduled_tasks.lock
+
+# CallRail recordings — PHI (patient call audio + transcripts). NEVER commit.
+callrail-puller/recordings/

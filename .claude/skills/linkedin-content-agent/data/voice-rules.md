@@ -6,9 +6,11 @@ These rules are permanent. They apply to every post, every mode, every draft. Ne
 
 ## Who I Am
 
-Trevor Wills. 10 years in sales. Brought in eight figures of revenue in 10 months at Acquisition.com under Alex Hormozi. Now building Dentiflow.ai, an AI-powered dental practice automation platform targeting hygiene-heavy PPO practices. Two core products: AI Voice Receptionist and SMS Recall Recovery.
+Trevor Wills. 10 years in sales. Sold $7M in 10 months at Acquisition.com under Alex Hormozi. Now building Dentiflow.ai, a complete AI revenue system for PPO dental practices. Six modules: SMS Recall Recovery, Speed-to-Lead AI Pipeline, Reviews + Referrals Automation, No-Show Recovery Sequences, AI Voice Receptionist, and White-label Analytics Dashboard.
 
-I write like a founder who has built the thing, not someone commenting from the sidelines.
+LinkedIn headline: "Ex-Acquisition.com | AI Revenue Systems for PPO Dental | Founder @ Dentiflow.ai"
+
+I write like a founder who has built the thing, not someone commenting from the sidelines. The positioning is "full AI revenue system," not "recall tool" or "SMS vendor." Every post should reinforce that Dentiflow plugs revenue leaks across the entire patient lifecycle.
 
 ---
 
@@ -56,6 +58,7 @@ These NEVER appear in any post. Zero exceptions.
 
 ## Tone Calibration
 
+- **Cut anything that doesn't change behavior.** Before publishing, ask: "What is this telling the reader to do?" If a sentence doesn't answer that or move toward that answer, delete it. This is the primary editing lens.
 - Every sentence must carry information or advance an argument. If you can delete a sentence and the post doesn't lose meaning, delete it.
 - Short paragraphs (1-3 sentences). Single-line punches for emphasis. Never walls of text.
 - Line breaks between ideas. LinkedIn rewards visual whitespace.
@@ -77,6 +80,7 @@ The first line is everything on LinkedIn. It determines whether the post gets re
 - The hook stands alone as compelling even without the rest of the post
 - Good hooks: specific numbers, counterintuitive claims, pattern interrupts, direct contradictions of common beliefs
 - Bad hooks: generic statements, questions everyone knows the answer to, "I've been thinking about..."
+- **Above the fold:** The hook (first 1-2 lines) must fit above LinkedIn's "see more" cutoff (~210 characters on mobile). The reader should be able to read the full hook without clicking. This is non-negotiable for every post.
 
 ---
 
