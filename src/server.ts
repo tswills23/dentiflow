@@ -15,6 +15,7 @@ import appointmentRoutes from './routes/appointmentRoutes';
 import pmsWebhookRoutes from './routes/pmsWebhookRoutes';
 import bookingRedirectRoute from './routes/bookingRedirectRoute';
 import { startRecallCron } from './services/recall/recallCron';
+import { startRecallReplyMonitor } from './services/recall/recallReplyMonitor';
 import { startReviewCron } from './services/reviews/reviewCronScheduler';
 import { startNoshowCron } from './services/noshow/noshowCron';
 import { startPmsSyncCron } from './services/pms/pmsSyncCron';
@@ -138,6 +139,13 @@ app.listen(PORT, () => {
     startRecallCron();
   } else {
     console.log('[DentiFlow STL] Recall cron disabled (RECALL_CRON_ENABLED=false)');
+  }
+
+  // Start recall reply monitor (15-min cron, auto-disables LLM on validator blocks)
+  if (process.env.RECALL_REPLY_MONITOR_ENABLED !== 'false') {
+    startRecallReplyMonitor();
+  } else {
+    console.log('[DentiFlow STL] Recall reply monitor disabled (RECALL_REPLY_MONITOR_ENABLED=false)');
   }
 
   // Start review cron (hourly review sequence orchestrator)

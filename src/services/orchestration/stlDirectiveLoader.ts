@@ -15,6 +15,7 @@ export interface DirectiveContext {
   recallPersona: string;
   recallReplyRules: string;
   recallBookingAgent: string;
+  recallReplyExamples: string;
 }
 
 // In-memory cache for directive files (they rarely change)
@@ -87,6 +88,7 @@ export async function loadDirectives(practiceId: string): Promise<DirectiveConte
   const recallPersona = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'recall_persona.md'));
   const recallReplyRules = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'recall_reply_rules.md'));
   const recallBookingAgent = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'sms_booking_agent.md'));
+  const recallReplyExamples = loadDirectiveFile(path.join(DIRECTIVES_DIR, 'recall_reply_examples.md'));
 
   // Interpolate practice-specific values
   return {
@@ -100,6 +102,7 @@ export async function loadDirectives(practiceId: string): Promise<DirectiveConte
     recallPersona: interpolateDirective(recallPersona, typedPractice),
     recallReplyRules,
     recallBookingAgent: interpolateDirective(recallBookingAgent, typedPractice),
+    recallReplyExamples: interpolateDirective(recallReplyExamples, typedPractice),
   };
 }
 

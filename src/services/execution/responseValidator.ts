@@ -26,6 +26,28 @@ const BLOCKED_PATTERNS: { pattern: RegExp; reason: string }[] = [
   // Past visit references (HIPAA)
   { pattern: /\b(\d+\s*(months?|years?|weeks?)\s*(since|ago|overdue))\b/i, reason: 'visit_history_reference' },
   { pattern: /\b(your last (visit|appointment|cleaning|checkup))\b/i, reason: 'visit_history_reference' },
+  // Year/season references — Claude phrasings the original list missed
+  { pattern: /\bsince (january|february|march|april|may|june|july|august|september|october|november|december)\b/i, reason: 'visit_history_reference' },
+  { pattern: /\bsince (spring|summer|fall|winter|last year|\d{4})\b/i, reason: 'visit_history_reference' },
+  { pattern: /\b(been a patient since|patient since)\b/i, reason: 'visit_history_reference' },
+
+  // Clinical record references — Claude must not reference charts, x-rays, scans
+  { pattern: /\b(x-?ray|xray|radiograph|scan|chart|records|imaging)\b/i, reason: 'phi_clinical_record_reference' },
+
+  // Insurance specifics v2 — explicit accept/in-network claims
+  { pattern: /\b(we (accept|take|are in[- ]network)|we'?re in[- ]network)\b/i, reason: 'insurance_specifics_v2' },
+
+  // Clinical speculation — "your tooth probably..." pattern bypasses old "you might have" check
+  { pattern: /\byour\b.{0,30}\b(probably|might be|could be|seems|appears)\b/i, reason: 'clinical_speculation' },
+
+  // Prescription / medication-class language
+  { pattern: /\b(prescri|antibiotic|painkiller|narcotic|opioid)/i, reason: 'medication_prescribe' },
+
+  // Written-out pricing (bypasses $-based regex in checkPricing)
+  { pattern: /\b(hundred|thousand)\s*(bucks|dollars)?\b/i, reason: 'pricing_written' },
+
+  // Address leak — Claude must never invent or recite a street address
+  { pattern: /\b\d{1,5}\s+(\w+\s+){1,3}(street|st|avenue|ave|road|rd|blvd|boulevard|lane|ln|drive|dr)\b/i, reason: 'address_leak' },
 
   // Competitor references
   { pattern: /\b(better than|cheaper than|unlike other|other dentist)\b/i, reason: 'competitor_reference' },

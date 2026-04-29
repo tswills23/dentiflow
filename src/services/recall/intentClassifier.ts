@@ -22,10 +22,13 @@ import type {
 // =============================================================================
 
 const OPT_OUT_KEYWORDS = [
-  'unsubscribe', 'opt out', 'opt-out', 'optout', 'remove me',
+  // FCC-canonical opt-out keywords (47 CFR § 64.1200(a)(10)) — these MUST be present
+  'stop', 'stopall', 'unsubscribe', 'quit', 'end', 'cancel', 'revoke',
+  // Phrasal variants
+  'opt out', 'opt-out', 'optout', 'remove me',
   'stop emailing', 'stop texting', 'stop contacting', 'stop messaging',
   'dont contact', "don't contact", 'do not contact', 'leave me alone',
-  'take me off', 'remove from list', 'no more emails',
+  'take me off', 'remove from list', 'no more emails', 'no more',
   // NOTE: "spam" removed — "is this spam?" is a curiosity question, not a STOP request
 ];
 
@@ -34,6 +37,11 @@ const URGENT_KEYWORDS = [
   'emergency', 'urgent', 'asap', 'bleeding', 'blood', 'swollen',
   'swelling', 'broken', 'cracked', 'chipped', 'infection', 'abscess',
   'tooth fell out', 'knocked out', 'knocked a tooth',
+  // Pain-idiom expansion — common patient phrasings the original list missed
+  'killing me', 'killing', 'agony', 'agonizing', 'throbbing', 'pounding',
+  "can't sleep", 'cant sleep', "can't eat", 'cant eat',
+  'fever', 'pus', 'numb', 'face swollen', 'jaw locked',
+  "can't open", 'cant open',
 ];
 
 const COST_KEYWORDS = [
@@ -489,5 +497,37 @@ export function extractSlotNumber(text: string): number | null {
   if (clean.includes('1') || clean.includes('one') || clean.includes('first')) return 1;
   if (clean.includes('2') || clean.includes('two') || clean.includes('second')) return 2;
   if (clean.includes('3') || clean.includes('three') || clean.includes('third')) return 3;
+  return null;
+}
+
+// =============================================================================
+// Critical-intent fast path
+// Used by replyHandler before any LLM routing. These four intents MUST stay
+// deterministic — opt_out (TCPA), urgent (medical), wrong_number (compliance),
+// and slot_selection at S4 (binary numeric routing). If this returns non-null,
+// the keyword classifier + state machine + template path runs unchanged.
+// =============================================================================
+
+export type CriticalIntent = 'opt_out' | 'urgent' | 'wrong_number' | 'slot_selection';
+
+export function classifyCriticalIntent(
+  text: string,
+  currentStage: RecallStage
+): { intent: CriticalIntent; matched: string[] } | null {
+  const t = text.toLowerCase().trim();
+  if (matchAny(t, OPT_OUT_KEYWORDS)) {
+    return { intent: 'opt_out', matched: getMatches(t, OPT_OUT_KEYWORDS) };
+  }
+  if (matchAny(t, URGENT_KEYWORDS)) {
+    return { intent: 'urgent', matched: getMatches(t, URGENT_KEYWORDS) };
+  }
+  if (matchAny(t, WRONG_NUMBER_KEYWORDS)) {
+    return { intent: 'wrong_number', matched: getMatches(t, WRONG_NUMBER_KEYWORDS) };
+  }
+  if (currentStage === 'S4_AVAILABILITY') {
+    const clean = t.replace(/[^\w\s]/g, '');
+    const slot = checkSlotSelection(clean);
+    if (slot) return { intent: 'slot_selection', matched: slot };
+  }
   return null;
 }

@@ -8,9 +8,9 @@ import { handleNoshowReply } from '../services/noshow/noshowReplyHandler';
 import { supabase } from '../lib/supabase';
 import type { Practice } from '../types/database';
 
-// Twilio sends form-encoded POST with From, To, Body
+// Twilio sends form-encoded POST with From, To, Body, MessageSid
 export async function smsWebhook(req: Request, res: Response): Promise<void> {
-  const { From: from, To: to, Body: body } = req.body;
+  const { From: from, To: to, Body: body, MessageSid: messageSid } = req.body;
 
   if (!from || !body) {
     res.status(400).json({ error: 'Missing From or Body' });
@@ -29,6 +29,31 @@ export async function smsWebhook(req: Request, res: Response): Promise<void> {
     // Still respond to Twilio to prevent retries
     res.type('text/xml').send('<Response></Response>');
     return;
+  }
+
+  // Twilio MessageSid dedupe — prevents double-processing on webhook retry.
+  // Insert with PRIMARY KEY constraint; 23505 (unique violation) means retry.
+  if (messageSid) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db = supabase as any;
+    const { error: dedupeError } = await db
+      .from('processed_inbound_sms')
+      .insert({
+        twilio_message_sid: messageSid,
+        practice_id: practice.id,
+        from_phone: from as string,
+      });
+
+    if (dedupeError && (dedupeError.code === '23505' || dedupeError.message.includes('duplicate'))) {
+      console.log(`[smsWebhook] DEDUPE: skipping retry of MessageSid ${messageSid}`);
+      res.type('text/xml').send('<Response></Response>');
+      return;
+    }
+    // Non-dedupe errors (DB hiccup) — log and continue. Better to risk a duplicate
+    // than to silently drop legitimate inbounds.
+    if (dedupeError) {
+      console.error('[smsWebhook] dedupe insert non-23505 error (continuing):', dedupeError.message);
+    }
   }
 
   // Respond to Twilio immediately (must be < 15 seconds)

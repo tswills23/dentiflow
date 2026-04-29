@@ -27,6 +27,7 @@ export interface Practice {
   business_hours: BusinessHours;
   appointment_buffer_minutes: number;
   active: boolean;
+  recall_llm_enabled?: boolean;
   created_at: string;
   updated_at: string;
 }

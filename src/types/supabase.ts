@@ -727,6 +727,7 @@ export type Database = {
           owner_name: string | null
           phone: string | null
           practice_config: Json | null
+          recall_llm_enabled: boolean
           state: string | null
           timezone: string | null
           twilio_phone: string | null
@@ -750,6 +751,7 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           practice_config?: Json | null
+          recall_llm_enabled?: boolean
           state?: string | null
           timezone?: string | null
           twilio_phone?: string | null
@@ -773,6 +775,7 @@ export type Database = {
           owner_name?: string | null
           phone?: string | null
           practice_config?: Json | null
+          recall_llm_enabled?: boolean
           state?: string | null
           timezone?: string | null
           twilio_phone?: string | null
@@ -780,6 +783,138 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      processed_inbound_sms: {
+        Row: {
+          from_phone: string | null
+          practice_id: string | null
+          received_at: string
+          twilio_message_sid: string
+        }
+        Insert: {
+          from_phone?: string | null
+          practice_id?: string | null
+          received_at?: string
+          twilio_message_sid: string
+        }
+        Update: {
+          from_phone?: string | null
+          practice_id?: string | null
+          received_at?: string
+          twilio_message_sid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processed_inbound_sms_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recall_reply_audit: {
+        Row: {
+          action: string
+          cache_read_tokens: number | null
+          confidence_score: number | null
+          created_at: string
+          fallback_reason: string | null
+          id: string
+          inbound_message: string
+          input_tokens: number | null
+          intent: string
+          llm_latency_ms: number | null
+          llm_reasoning: string | null
+          llm_suggested_state: string | null
+          output_tokens: number | null
+          patient_id: string
+          practice_id: string
+          raw_claude_content: string | null
+          reply_text: string
+          sequence_id: string
+          state_after: string
+          state_before: string
+          transition_overridden: boolean
+          used_llm: boolean
+          validator_block_reason: string | null
+          validator_pass: boolean
+        }
+        Insert: {
+          action: string
+          cache_read_tokens?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          fallback_reason?: string | null
+          id?: string
+          inbound_message: string
+          input_tokens?: number | null
+          intent: string
+          llm_latency_ms?: number | null
+          llm_reasoning?: string | null
+          llm_suggested_state?: string | null
+          output_tokens?: number | null
+          patient_id: string
+          practice_id: string
+          raw_claude_content?: string | null
+          reply_text: string
+          sequence_id: string
+          state_after: string
+          state_before: string
+          transition_overridden?: boolean
+          used_llm?: boolean
+          validator_block_reason?: string | null
+          validator_pass?: boolean
+        }
+        Update: {
+          action?: string
+          cache_read_tokens?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          fallback_reason?: string | null
+          id?: string
+          inbound_message?: string
+          input_tokens?: number | null
+          intent?: string
+          llm_latency_ms?: number | null
+          llm_reasoning?: string | null
+          llm_suggested_state?: string | null
+          output_tokens?: number | null
+          patient_id?: string
+          practice_id?: string
+          raw_claude_content?: string | null
+          reply_text?: string
+          sequence_id?: string
+          state_after?: string
+          state_before?: string
+          transition_overridden?: boolean
+          used_llm?: boolean
+          validator_block_reason?: string | null
+          validator_pass?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recall_reply_audit_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recall_reply_audit_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recall_reply_audit_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "recall_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recall_sequences: {
         Row: {
@@ -1146,9 +1281,40 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      conversation_previews: {
+        Row: {
+          created_at: string | null
+          message_body: string | null
+          patient_id: string | null
+          practice_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_practice_id_fkey"
+            columns: ["practice_id"]
+            isOneToOne: false
+            referencedRelation: "practices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_conversation_previews: {
+        Args: { p_practice_id: string }
+        Returns: {
+          created_at: string
+          message_body: string
+          patient_id: string
+        }[]
+      }
       increment_metric: {
         Args: { p_date: string; p_field: string; p_practice_id: string }
         Returns: undefined

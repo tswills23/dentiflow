@@ -16,7 +16,7 @@ import type { Practice, Patient, Provider } from '../../types/database';
 const BACKEND_URL = process.env.BACKEND_URL;
 
 // Extract doctor/hygienist display names from practice_config.providers
-function extractProviderNames(practice: Practice): { doctorName: string; hygienistName: string } {
+export function extractProviderNames(practice: Practice): { doctorName: string; hygienistName: string } {
   const providers = practice.practice_config?.providers || [];
 
   const doctor = providers.find((p: Provider) =>

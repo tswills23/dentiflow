@@ -8,18 +8,38 @@ import { supabase } from '../../lib/supabase';
 import { sendSMS } from '../execution/smsService';
 import { saveMessage } from '../execution/conversationStore';
 import { logAutomation } from '../execution/metricsTracker';
-import { classifyIntent, parsePreferences, extractSlotNumber } from './intentClassifier';
+import { classifyIntent, classifyCriticalIntent, parsePreferences, extractSlotNumber } from './intentClassifier';
 import { getTransition } from './bookingStateMachine';
 import { getAvailableSlots, getDefaultSlots, slotsToDisplayList, getSlotByNumber } from './slotSelector';
+import { generateRecallReply, type RecallAIDecision } from './recallReplyAI';
+import { insertRecallAudit } from './recallReplyAudit';
+import { assignVoice, calculateSegment } from './voiceAssignment';
 import type {
   RecallSequence,
   RecallStage,
+  RecallVoice,
   ReplyHandlerResult,
   AvailableSlot,
   TimePreferences,
 } from '../../types/recall';
 import { notifyEscalation } from '../execution/staffNotifier';
 import type { Practice, Patient } from '../../types/database';
+
+// Actions whose reply text MUST come from the deterministic template path,
+// even when Claude generated something usable. Slot strings, booking links,
+// opt-out confirmations, and emergency escalations cannot be invented by AI.
+const DETERMINISTIC_ACTIONS = new Set([
+  'send_booking_link',
+  'show_balanced_slots',
+  'show_default_slots',
+  'confirm_slot',
+  'book_first_slot',
+  'complete_booking',
+  'reshow_slots',
+  'opt_out_silent',
+  'handoff_urgent',
+  'handoff_wrong_number',
+]);
 
 // =============================================================================
 // Main Entry Point
@@ -143,24 +163,90 @@ export async function handleRecallReply(
     p_field: 'recall_replies',
   });
 
-  // 4. Classify intent
-  const classification = classifyIntent(messageBody, sequence.booking_stage as RecallStage);
+  // 4. Three-branch routing:
+  //    (a) Critical intent (opt_out / urgent / wrong_number / S4 slot) → keyword path UNCHANGED.
+  //    (b) Else if Claude path enabled → call Claude, validate, fall back on any failure.
+  //    (c) Else → keyword path (current behavior).
+  // State transitions ALWAYS come from getTransition(). Claude is text-only.
+  let aiDecision: RecallAIDecision | null = null;
+  const critical = classifyCriticalIntent(messageBody, sequence.booking_stage as RecallStage);
 
-  // 5. Get state machine transition
-  const transition = getTransition(
-    sequence.booking_stage as RecallStage,
-    classification.intent
-  );
+  if (!critical) {
+    // Compute voice tier from sequence (or recompute if missing)
+    const voiceTier: RecallVoice = (sequence.assigned_voice as RecallVoice) ||
+      (sequence.segment_overdue ? assignVoice(sequence.segment_overdue) : 'office');
+    const monthsOverdue = sequence.months_overdue || 0;
 
-  // 6. Execute action and generate reply
-  const { replyText, updatedFields } = await executeAction(
-    transition.action,
-    sequence,
-    typedPatient,
-    typedPractice,
-    messageBody,
-    classification
-  );
+    // Build last-6-message conversation history for context
+    const { data: recentMessages } = await supabase
+      .from('conversations')
+      .select('direction, message_body')
+      .eq('patient_id', patient.id)
+      .eq('automation_type', 'recall')
+      .order('created_at', { ascending: false })
+      .limit(6);
+
+    const conversationHistory = (recentMessages || [])
+      .reverse()
+      .map((m) => ({
+        role: (m.direction === 'inbound' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: m.message_body || '',
+      }))
+      .filter((m) => m.content.length > 0);
+
+    const bookingLinkUrl = sequence.booking_link_token
+      ? `${process.env.BACKEND_URL}/r/${sequence.booking_link_token}`
+      : null;
+
+    aiDecision = await generateRecallReply({
+      practice: typedPractice,
+      patient: typedPatient,
+      sequence,
+      inboundMessage: messageBody,
+      bookingStage: sequence.booking_stage as RecallStage,
+      conversationHistory,
+      bookingLinkUrl,
+      monthsOverdue,
+      voiceTier,
+    });
+  }
+
+  // 5. Resolve final intent + transition + action + reply text
+  let classification: ReturnType<typeof classifyIntent>;
+  let transition: ReturnType<typeof getTransition>;
+  let replyText: string;
+  let updatedFields: Record<string, unknown>;
+  const usedLLM = !!(aiDecision && !aiDecision.fellBackToTemplate);
+
+  if (usedLLM && aiDecision) {
+    // Claude succeeded
+    classification = {
+      intent: aiDecision.intent!,
+      confidence: aiDecision.confidence! >= 0.85 ? 'high' :
+                  aiDecision.confidence! >= 0.7  ? 'medium' : 'low',
+      matchedKeywords: ['llm'],
+      rawText: messageBody,
+    };
+    transition = getTransition(sequence.booking_stage as RecallStage, aiDecision.intent!);
+
+    if (DETERMINISTIC_ACTIONS.has(transition.action)) {
+      // Critical / slot / link actions — text MUST come from template, ignore Claude's reply
+      const result = await executeAction(transition.action, sequence, typedPatient, typedPractice, messageBody, classification);
+      replyText = result.replyText;
+      updatedFields = result.updatedFields;
+    } else {
+      // Conversational action — use Claude's text
+      replyText = aiDecision.replyText!;
+      updatedFields = {};
+    }
+  } else {
+    // Critical intent OR Claude fell back / disabled — use existing keyword path
+    classification = classifyIntent(messageBody, sequence.booking_stage as RecallStage);
+    transition = getTransition(sequence.booking_stage as RecallStage, classification.intent);
+    const result = await executeAction(transition.action, sequence, typedPatient, typedPractice, messageBody, classification);
+    replyText = result.replyText;
+    updatedFields = result.updatedFields;
+  }
 
   // 7. Update sequence in DB
   const updatePayload: Record<string, unknown> = {
@@ -253,6 +339,33 @@ export async function handleRecallReply(
       matchedKeywords: classification.matchedKeywords,
     },
   });
+
+  // 11. Fire-and-forget audit insert. NEVER awaited — audit failures must
+  // never crash the request handler or delay reply delivery.
+  insertRecallAudit({
+    sequence_id: sequenceId,
+    practice_id: practiceId,
+    patient_id: patient.id,
+    inbound_message: messageBody,
+    intent: classification.intent,
+    confidence_score: aiDecision?.confidence ?? null,
+    state_before: transition.currentStage,
+    state_after: transition.nextStage,
+    action: transition.action,
+    reply_text: replyText,
+    used_llm: usedLLM,
+    llm_latency_ms: aiDecision?.claudeLatencyMs ?? null,
+    llm_reasoning: aiDecision?.reasoning ?? null,
+    raw_claude_content: aiDecision?.rawClaudeContent ?? null,
+    validator_pass: !(aiDecision?.fallbackReason === 'validator_blocked'),
+    validator_block_reason: aiDecision?.validatorBlockReason ?? null,
+    fallback_reason: aiDecision?.fallbackReason ?? null,
+    transition_overridden: aiDecision?.transitionOverridden ?? false,
+    llm_suggested_state: aiDecision?.llmSuggestedState ?? null,
+    input_tokens: aiDecision?.inputTokens ?? null,
+    output_tokens: aiDecision?.outputTokens ?? null,
+    cache_read_tokens: aiDecision?.cacheReadTokens ?? null,
+  }).catch((err) => console.error('[replyHandler] audit insert error:', err));
 
   return {
     sequenceId,
