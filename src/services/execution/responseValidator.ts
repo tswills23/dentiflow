@@ -24,7 +24,10 @@ const BLOCKED_PATTERNS: { pattern: RegExp; reason: string }[] = [
   // NOTE: specific_pricing is now handled dynamically in checkPricing() — not here
 
   // Past visit references (HIPAA)
-  { pattern: /\b(\d+\s*(months?|years?|weeks?)\s*(since|ago|overdue))\b/i, reason: 'visit_history_reference' },
+  // NOTE: "X months since" / "X months ago" are ALLOWED — natural phrasing the
+  // recall reply AI is encouraged to use (e.g. "It's been about 8 months since
+  // your last visit"). Only "X months overdue" is blocked here as shaming.
+  { pattern: /\b\d+\s*(months?|years?|weeks?)\s*overdue\b/i, reason: 'visit_history_reference' },
   { pattern: /\b(your last (visit|appointment|cleaning|checkup))\b/i, reason: 'visit_history_reference' },
   // Year/season references — Claude phrasings the original list missed
   { pattern: /\bsince (january|february|march|april|may|june|july|august|september|october|november|december)\b/i, reason: 'visit_history_reference' },

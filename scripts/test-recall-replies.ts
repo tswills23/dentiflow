@@ -14,12 +14,29 @@
 // memory.
 
 import 'dotenv/config';
+import * as fs from 'fs';
+import * as path from 'path';
 import { FIXTURES, type RecallReplyFixture } from '../src/services/recall/__fixtures__/recallReplyScenarios';
 import { classifyCriticalIntent, classifyIntent } from '../src/services/recall/intentClassifier';
 import { generateRecallReply } from '../src/services/recall/recallReplyAI';
 import { getTransition } from '../src/services/recall/bookingStateMachine';
 import type { Practice, Patient } from '../src/types/database';
 import type { RecallSequence } from '../src/types/recall';
+
+// Load directives from disk directly — no DB lookup, fully isolated from prod.
+const DIRECTIVES_DIR = path.resolve(__dirname, '../directives');
+function loadFile(name: string): string {
+  try {
+    return fs.readFileSync(path.join(DIRECTIVES_DIR, name), 'utf-8');
+  } catch {
+    return '';
+  }
+}
+const TEST_DIRECTIVES = {
+  recallPersona: loadFile('recall_persona.md'),
+  recallReplyRules: loadFile('recall_reply_rules.md'),
+  recallReplyExamples: loadFile('recall_reply_examples.md'),
+};
 
 interface FixtureResult {
   id: string;
@@ -30,10 +47,14 @@ interface FixtureResult {
   actualIntent: string | null;
   reply: string | null;
   fallbackReason: string | null;
+  validatorBlockReason: string | null;
+  rawClaudeContent: string | null;
   latencyMs: number | null;
 }
 
-// Synthetic test practice — Village Dental shape
+// Synthetic test practice — fully isolated from production.
+// evalMode bypasses kill-switch and hourly-cap checks so the eval doesn't
+// query or pollute the production audit table.
 const TEST_PRACTICE: Practice = {
   id: '00000000-0000-0000-0000-000000000001',
   name: 'Village Dental',
@@ -123,6 +144,8 @@ async function runFixture(fixture: RecallReplyFixture): Promise<FixtureResult> {
     actualIntent: null,
     reply: null,
     fallbackReason: null,
+    validatorBlockReason: null,
+    rawClaudeContent: null,
     latencyMs: null,
   };
 
@@ -149,7 +172,7 @@ async function runFixture(fixture: RecallReplyFixture): Promise<FixtureResult> {
     return result;
   }
 
-  // Conversational fixtures: call Claude
+  // Conversational fixtures: call Claude (evalMode bypasses prod-only checks)
   const decision = await generateRecallReply({
     practice: TEST_PRACTICE,
     patient: TEST_PATIENT,
@@ -158,15 +181,22 @@ async function runFixture(fixture: RecallReplyFixture): Promise<FixtureResult> {
     bookingStage: fixture.bookingStage,
     conversationHistory: [],
     bookingLinkUrl: TEST_PRACTICE.booking_url,
+    evalMode: {
+      bypassKillSwitches: true,
+      bypassHourlyCap: true,
+      directives: TEST_DIRECTIVES,
+    },
     monthsOverdue: fixture.monthsOverdue,
     voiceTier: fixture.voiceTier,
   });
 
   result.latencyMs = decision.claudeLatencyMs;
   result.fallbackReason = decision.fallbackReason ?? null;
+  result.validatorBlockReason = decision.validatorBlockReason ?? null;
+  result.rawClaudeContent = decision.rawClaudeContent ?? null;
 
   if (decision.fellBackToTemplate) {
-    reasons.push(`Claude fell back: ${decision.fallbackReason}`);
+    reasons.push(`Claude fell back: ${decision.fallbackReason}${decision.validatorBlockReason ? ` (${decision.validatorBlockReason})` : ''}`);
     return result;
   }
 
@@ -208,10 +238,7 @@ async function runFixture(fixture: RecallReplyFixture): Promise<FixtureResult> {
 
 async function main() {
   console.log(`\n[test-recall-replies] Running ${FIXTURES.length} fixtures...\n`);
-
-  // Force enable LLM for the test
-  process.env.RECALL_LLM_ENABLED = 'true';
-  process.env.RECALL_LLM_FORCE_OFF = '';
+  console.log(`  (evalMode bypasses kill switches + cap query — fully isolated from production audit table)\n`);
 
   const results: FixtureResult[] = [];
   for (const fixture of FIXTURES) {
@@ -235,6 +262,8 @@ async function main() {
       console.log(`    actual intent:   ${r.actualIntent ?? '(none)'}`);
       if (r.reply) console.log(`    reply: "${r.reply}"`);
       if (r.fallbackReason) console.log(`    fallback: ${r.fallbackReason}`);
+      if (r.validatorBlockReason) console.log(`    validator block reason: ${r.validatorBlockReason}`);
+      if (r.rawClaudeContent) console.log(`    raw Claude: ${r.rawClaudeContent.slice(0, 400)}`);
       console.log(`    reasons: ${r.reasons.join('; ')}`);
     }
   }

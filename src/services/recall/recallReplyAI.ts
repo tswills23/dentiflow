@@ -48,6 +48,20 @@ export interface RecallAIInput {
   bookingLinkUrl: string | null;
   monthsOverdue: number;
   voiceTier: RecallVoice;
+
+  // EVAL ONLY: bypass production-only checks (hourly cap query, kill switches,
+  // loadDirectives DB lookup). When set, callers must supply `directiveOverrides`
+  // so buildSystemPrompt has the persona/rules/examples it needs.
+  // Production code MUST NOT set this. Only used by scripts/test-recall-replies.ts.
+  evalMode?: {
+    bypassKillSwitches: boolean;
+    bypassHourlyCap: boolean;
+    directives: {
+      recallPersona: string;
+      recallReplyRules: string;
+      recallReplyExamples: string;
+    };
+  };
 }
 
 export type AIFallbackReason =
@@ -120,33 +134,39 @@ export async function generateRecallReply(input: RecallAIInput): Promise<RecallA
     claudeLatencyMs: 0,
   };
 
-  // 1. Three kill switches — any disable → fallback immediately
-  if (process.env.RECALL_LLM_FORCE_OFF === 'true') {
-    return { ...baseFallback, fallbackReason: 'kill_switch_force_off' };
-  }
-  if (process.env.RECALL_LLM_ENABLED !== 'true') {
-    return { ...baseFallback, fallbackReason: 'kill_switch_env_disabled' };
-  }
-  if (input.practice.recall_llm_enabled !== true) {
-    return { ...baseFallback, fallbackReason: 'kill_switch_db' };
+  // 1. Three kill switches — any disable → fallback immediately.
+  // Eval mode bypasses these so the harness can run against current code
+  // without flipping production switches.
+  if (!input.evalMode?.bypassKillSwitches) {
+    if (process.env.RECALL_LLM_FORCE_OFF === 'true') {
+      return { ...baseFallback, fallbackReason: 'kill_switch_force_off' };
+    }
+    if (process.env.RECALL_LLM_ENABLED !== 'true') {
+      return { ...baseFallback, fallbackReason: 'kill_switch_env_disabled' };
+    }
+    if (input.practice.recall_llm_enabled !== true) {
+      return { ...baseFallback, fallbackReason: 'kill_switch_db' };
+    }
   }
 
-  // 2. Hourly cap check
-  const cap = parseInt(process.env.RECALL_LLM_HOURLY_CAP || '50', 10);
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  const { count: recentCount } = await db
-    .from('recall_reply_audit')
-    .select('id', { count: 'exact', head: true })
-    .eq('practice_id', input.practice.id)
-    .eq('used_llm', true)
-    .gte('created_at', oneHourAgo);
+  // 2. Hourly cap check (skipped in eval — would query and pollute prod audit)
+  if (!input.evalMode?.bypassHourlyCap) {
+    const cap = parseInt(process.env.RECALL_LLM_HOURLY_CAP || '50', 10);
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentCount } = await db
+      .from('recall_reply_audit')
+      .select('id', { count: 'exact', head: true })
+      .eq('practice_id', input.practice.id)
+      .eq('used_llm', true)
+      .gte('created_at', oneHourAgo);
 
-  if ((recentCount ?? 0) >= cap) {
-    return { ...baseFallback, fallbackReason: 'hourly_cap_exceeded' };
+    if ((recentCount ?? 0) >= cap) {
+      return { ...baseFallback, fallbackReason: 'hourly_cap_exceeded' };
+    }
   }
 
   // 3. Build prompt and call Claude
-  const systemPrompt = await buildSystemPrompt(input.practice);
+  const systemPrompt = await buildSystemPrompt(input.practice, input.evalMode?.directives);
   const userMessage = buildUserMessage(input);
 
   const aiResponse = await generateStructuredJSON(
@@ -277,8 +297,11 @@ interface ParsedDecision {
   reasoning: string;
 }
 
-async function buildSystemPrompt(practice: Practice): Promise<string> {
-  const dirs = await loadDirectives(practice.id);
+async function buildSystemPrompt(
+  practice: Practice,
+  directiveOverrides?: { recallPersona: string; recallReplyRules: string; recallReplyExamples: string }
+): Promise<string> {
+  const dirs = directiveOverrides ?? await loadDirectives(practice.id);
   const { doctorName } = extractProviderNames(practice);
 
   // Schema repeated 3x (Anthropic guidance for reliable structured output)
@@ -308,7 +331,7 @@ Your job: classify the patient's inbound SMS, choose the next state, and write a
 - Personalize with months overdue rounded to whole number when present.
 - Reply must be under 320 characters.
 
-# HARD DO-NOT
+# HARD DO-NOT (validator will block your reply if you violate these)
 
 You MUST NEVER write any of these:
 - Diagnoses or clinical advice ("you might have", "your tooth is probably")
@@ -319,6 +342,29 @@ You MUST NEVER write any of these:
 - References to x-rays, charts, scans, or patient records
 - Past visit references with month counts other than the rounded phrase from context
 - Statements of fact not present in the user-context block
+
+# BANNED WORDS (validator regex will block)
+
+NEVER write any of these words in your reply UNLESS the patient said it first in their inbound:
+- "cleaning" (use "visit" or "check-in" instead)
+- "exam", "checkup" used as a noun-object (use "visit" instead)
+- "prophy", "prophylaxis", "periodontal", "hygiene visit"
+- "overdue", "delinquent", "negligent"
+- "no pressure", "at your earliest convenience", "don't hesitate to reach out"
+
+If the patient asks "what would I be coming in for?", respond with something
+like "just a routine visit" or "just a regular check-in" — NEVER "a cleaning".
+
+# TIME PHRASINGS
+
+You MAY say things like "it's been about 8 months", "8 months since your last visit",
+or "almost a year since you've been in". Use the rounded phrase from the user-context block
+("Phrase you may use for time gap"). Always round to whole numbers — never "8.4 months".
+
+You MUST NOT write any of these:
+- "X months overdue" — sounds like shaming
+- "since [month name]" or "since [year]" — sounds like we're tracking dates
+- "you've been a patient since [year]"
 
 If the patient describes pain, swelling, bleeding, fever, or any urgent symptom, return intent="urgent" with confidence 1.0 and a brief reply — never reassure or schedule, the deterministic urgent path will run.
 
