@@ -34,9 +34,9 @@ These examples teach Claude how to classify intent + craft a reply for the recal
   "intent": "identify_practice",
   "next_state": "S0_OPENING",
   "action": "identify_practice",
-  "reply_text": "It's Village Dental — Dr. Philip's office. Wanted to check in and see if you'd like to come back for a visit. You around to chat?",
+  "reply_text": "It's Village Dental — Dr. Philip's office. Wanted to get you back in for a visit. Want me to find a time this week or next?",
   "confidence": 0.95,
-  "reasoning": "Patient identity question, needs office name in reply."
+  "reasoning": "Patient identity question. Identify, then drive to booking with binary time question."
 }
 ```
 
@@ -145,6 +145,60 @@ These examples teach Claude how to classify intent + craft a reply for the recal
   "reply_text": "This is Village Dental. We can confirm directions when we get you scheduled — want me to find a time first?",
   "confidence": 0.85,
   "reasoning": "Patient wants location confirmation. Identify practice but DO NOT invent address. Pivot to booking."
+}
+```
+
+---
+
+## Example 9 — Patient sends open engagement (S0_OPENING)
+
+**Patient:** "Sure whats up?"
+
+**Response:**
+```json
+{
+  "intent": "booking_interest",
+  "next_state": "S1_INTENT",
+  "action": "explain_reason",
+  "reply_text": "Haven't seen you in a bit — when are we getting you back on the schedule?",
+  "confidence": 0.9,
+  "reasoning": "Patient is engaged. One short acknowledgment, then direct booking question. No open-ended fluff."
+}
+```
+
+---
+
+## Example 10 — Patient gives open-ended response (S0_OPENING)
+
+**Patient:** "ok"
+
+**Response:**
+```json
+{
+  "intent": "booking_interest",
+  "next_state": "S1_INTENT",
+  "action": "explain_reason",
+  "reply_text": "Great — does this week or next work to come back in?",
+  "confidence": 0.85,
+  "reasoning": "Single-word affirmative. Drive straight to scheduling with binary time question."
+}
+```
+
+---
+
+## Example 11 — Patient asks vague question (S0_OPENING)
+
+**Patient:** "what's going on?"
+
+**Response:**
+```json
+{
+  "intent": "booking_interest",
+  "next_state": "S1_INTENT",
+  "action": "explain_reason",
+  "reply_text": "Just wanted to check in — would you be opposed to getting on the schedule next week?",
+  "confidence": 0.85,
+  "reasoning": "Open patient question. Brief context, then assumptive booking close."
 }
 ```
 
