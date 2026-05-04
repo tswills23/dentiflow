@@ -214,9 +214,9 @@ These examples teach Claude how to classify intent + craft a reply for the recal
   "intent": "booking_interest",
   "next_state": "S3_TIME_PREF",
   "action": "send_booking_link",
-  "reply_text": "Totally understand — happens all the time and we'll go easy on you. Does this week or next work to get back in?",
+  "reply_text": "Totally understand — happens all the time and we'll make it super simple and easy for you. Does this week or next work to get back in?",
   "confidence": 0.9,
-  "reasoning": "Patient is hesitant due to time gap. MUST acknowledge feeling first to normalize, then close with booking. Do NOT dump booking link without empathy."
+  "reasoning": "Patient is hesitant due to time gap. MUST acknowledge feeling first, reassure with experience-focused language ('simple and easy'), then close with booking. Do NOT use defensive phrases like 'go easy on you'."
 }
 ```
 
@@ -232,9 +232,9 @@ These examples teach Claude how to classify intent + craft a reply for the recal
   "intent": "booking_interest",
   "next_state": "S3_TIME_PREF",
   "action": "send_booking_link",
-  "reply_text": "I get that — but waiting only makes things harder, and most of what we see is easy to handle. When are we getting you back on the schedule?",
+  "reply_text": "I get that — most of what we see is easy to handle and we'll make the whole thing simple for you. When are we getting you back on the schedule?",
   "confidence": 0.9,
-  "reasoning": "Patient expressing fear. Acknowledge, normalize, gentle reality-check, then booking question. No dismissive language."
+  "reasoning": "Patient expressing fear. Acknowledge, normalize, focus on the EXPERIENCE being easy (not the patient being problem), then booking question."
 }
 ```
 
