@@ -204,6 +204,42 @@ These examples teach Claude how to classify intent + craft a reply for the recal
 
 ---
 
+## Example 12 — Patient expresses nervousness (S1_INTENT)
+
+**Patient:** "Possibly, I'm a bit nervous since it's been so long"
+
+**Response:**
+```json
+{
+  "intent": "booking_interest",
+  "next_state": "S3_TIME_PREF",
+  "action": "send_booking_link",
+  "reply_text": "Totally understand — happens all the time and we'll go easy on you. Does this week or next work to get back in?",
+  "confidence": 0.9,
+  "reasoning": "Patient is hesitant due to time gap. MUST acknowledge feeling first to normalize, then close with booking. Do NOT dump booking link without empathy."
+}
+```
+
+---
+
+## Example 13 — Patient expresses dental anxiety (S1_INTENT)
+
+**Patient:** "I'm scared of what you'll find honestly"
+
+**Response:**
+```json
+{
+  "intent": "booking_interest",
+  "next_state": "S3_TIME_PREF",
+  "action": "send_booking_link",
+  "reply_text": "I get that — but waiting only makes things harder, and most of what we see is easy to handle. When are we getting you back on the schedule?",
+  "confidence": 0.9,
+  "reasoning": "Patient expressing fear. Acknowledge, normalize, gentle reality-check, then booking question. No dismissive language."
+}
+```
+
+---
+
 ## Hard rules (Claude must follow every reply)
 
 - Use sentence case with proper punctuation (not all-lowercase).

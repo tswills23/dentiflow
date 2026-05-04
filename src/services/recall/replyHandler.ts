@@ -26,10 +26,15 @@ import { notifyEscalation } from '../execution/staffNotifier';
 import type { Practice, Patient } from '../../types/database';
 
 // Actions whose reply text MUST come from the deterministic template path,
-// even when Claude generated something usable. Slot strings, booking links,
-// opt-out confirmations, and emergency escalations cannot be invented by AI.
+// even when Claude generated something usable. Slot strings, opt-out
+// confirmations, emergency escalations, and slot-data-dependent replies
+// cannot be invented by AI.
+//
+// NOTE: send_booking_link is NOT in this set. Claude writes the empathy/
+// acknowledgment text; we post-process to ensure the booking URL is included.
+// If Claude's reply omits the URL, we append it. This lets Claude respond
+// with emotional intelligence while guaranteeing the link is present.
 const DETERMINISTIC_ACTIONS = new Set([
-  'send_booking_link',
   'show_balanced_slots',
   'show_default_slots',
   'confirm_slot',
@@ -40,6 +45,9 @@ const DETERMINISTIC_ACTIONS = new Set([
   'handoff_urgent',
   'handoff_wrong_number',
 ]);
+
+// Actions that need the booking URL appended to Claude's reply if missing.
+const BOOKING_LINK_ACTIONS = new Set(['send_booking_link']);
 
 // =============================================================================
 // Main Entry Point
@@ -230,12 +238,32 @@ export async function handleRecallReply(
     transition = getTransition(sequence.booking_stage as RecallStage, aiDecision.intent!);
 
     if (DETERMINISTIC_ACTIONS.has(transition.action)) {
-      // Critical / slot / link actions — text MUST come from template, ignore Claude's reply
+      // Critical / slot actions — text MUST come from template, ignore Claude's reply
       const result = await executeAction(transition.action, sequence, typedPatient, typedPractice, messageBody, classification);
       replyText = result.replyText;
       updatedFields = result.updatedFields;
+    } else if (BOOKING_LINK_ACTIONS.has(transition.action)) {
+      // Use Claude's empathetic text but GUARANTEE the booking URL is present.
+      // Claude writes the acknowledgment / drive-to-book line; we ensure the link
+      // is appended. This protects against Claude inventing a fake URL while
+      // preserving emotional intelligence.
+      const bookingLinkUrl = sequence.booking_link_token
+        ? `${process.env.BACKEND_URL}/r/${sequence.booking_link_token}`
+        : null;
+
+      if (bookingLinkUrl) {
+        // Strip any URLs Claude may have invented; keep only the real one.
+        const cleanedClaudeReply = aiDecision.replyText!.replace(/https?:\/\/\S+/gi, '').trim();
+        replyText = `${cleanedClaudeReply} ${bookingLinkUrl}`;
+        updatedFields = {};
+      } else {
+        // No link available — fall back to template
+        const result = await executeAction(transition.action, sequence, typedPatient, typedPractice, messageBody, classification);
+        replyText = result.replyText;
+        updatedFields = result.updatedFields;
+      }
     } else {
-      // Conversational action — use Claude's text
+      // Conversational action — use Claude's text directly
       replyText = aiDecision.replyText!;
       updatedFields = {};
     }

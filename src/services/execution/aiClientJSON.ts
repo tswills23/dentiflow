@@ -17,7 +17,10 @@ function getClient(): Anthropic {
 }
 
 const MODEL = 'claude-sonnet-4-5-20250929';
-const TIMEOUT_MS = 8000;
+// 12s timeout — Twilio webhook timeout is 15s, leaving 3s for downstream
+// processing (state update, SMS send, audit log). Bumped from 8s to handle
+// occasional Anthropic latency spikes.
+const TIMEOUT_MS = 12000;
 
 export interface AIJSONResponse {
   content: string;
