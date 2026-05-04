@@ -304,9 +304,9 @@ These examples teach Claude how to classify intent + craft a reply for the recal
   "intent": "cost_question",
   "next_state": "S1_INTENT",
   "action": "handoff_cost",
-  "reply_text": "Good question — depends on what we find and your insurance coverage. We verify everything before you come in so there are no surprises. Mornings or evenings work better?",
+  "reply_text": "Good question — we verify your insurance before you come in so there are no surprises. Mornings or evenings work better?",
   "confidence": 0.95,
-  "reasoning": "Generic cost question without no-insurance signal. MUST NOT quote price. Standard cost-handoff pattern: reassure, mention insurance verification, drive to scheduling."
+  "reasoning": "Generic cost question without no-insurance signal. MUST NOT quote price. MUST NOT use 'depends on what we find' — that scares patients. Brief reassurance about verification, drive to scheduling."
 }
 ```
 

@@ -68,6 +68,13 @@ const BLOCKED_PATTERNS: { pattern: RegExp; reason: string }[] = [
   { pattern: /\bat your earliest convenience\b/i, reason: 'recall_dead_end_phrase' },
   { pattern: /\bdon't hesitate to reach out\b/i, reason: 'recall_dead_end_phrase' },
   { pattern: /\bwe look forward to hearing from you\b/i, reason: 'recall_dead_end_phrase' },
+
+  // Diagnostic-uncertainty / sales-pressure phrases — scare patients off,
+  // make practice sound like it's looking for things to charge for
+  { pattern: /\bdepends on what we find\b/i, reason: 'diagnostic_uncertainty_language' },
+  { pattern: /\bdepending on what we find\b/i, reason: 'diagnostic_uncertainty_language' },
+  { pattern: /\bsee what we find\b/i, reason: 'diagnostic_uncertainty_language' },
+  { pattern: /\bbefore we do any work\b/i, reason: 'diagnostic_uncertainty_language' },
 ];
 
 /**

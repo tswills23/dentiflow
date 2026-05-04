@@ -76,7 +76,8 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S3_TIME_PREF:cancel': 'EXIT_CANCELLED',
   'S3_TIME_PREF:reschedule': 'S3_TIME_PREF',
   'S3_TIME_PREF:urgent': 'S7_HANDOFF',
-  'S3_TIME_PREF:cost_question': 'S7_HANDOFF',
+  // Cost question stays in S3 — AI handles cost handoff inline, conversation continues
+  'S3_TIME_PREF:cost_question': 'S3_TIME_PREF',
   'S3_TIME_PREF:unclear': 'S3_TIME_PREF',
   'S3_TIME_PREF:identify_practice': 'S3_TIME_PREF',
 
@@ -92,7 +93,8 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S4_AVAILABILITY:cancel': 'EXIT_CANCELLED',
   'S4_AVAILABILITY:reschedule': 'S3_TIME_PREF',
   'S4_AVAILABILITY:urgent': 'S7_HANDOFF',
-  'S4_AVAILABILITY:cost_question': 'S7_HANDOFF',
+  // Cost question stays in S3 — bounce back, AI handles cost inline
+  'S4_AVAILABILITY:cost_question': 'S3_TIME_PREF',
   'S4_AVAILABILITY:unclear': 'S3_TIME_PREF',
   'S4_AVAILABILITY:identify_practice': 'S4_AVAILABILITY',
 
@@ -108,7 +110,8 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S5_CONFIRMATION:not_now': 'EXIT_DEFERRED',
   'S5_CONFIRMATION:reschedule': 'S3_TIME_PREF',
   'S5_CONFIRMATION:urgent': 'S7_HANDOFF',
-  'S5_CONFIRMATION:cost_question': 'S7_HANDOFF',
+  // Cost question bounces back to S3, AI handles inline
+  'S5_CONFIRMATION:cost_question': 'S3_TIME_PREF',
   'S5_CONFIRMATION:unclear': 'S5_CONFIRMATION',
   'S5_CONFIRMATION:identify_practice': 'S5_CONFIRMATION',
 };
@@ -210,7 +213,9 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
 const POLICY_OVERRIDES: Record<PolicyFlag, { stage: RecallStage; action: string }> = {
   opt_out: { stage: 'EXIT_OPT_OUT', action: 'opt_out_silent' },
   urgent_medical: { stage: 'S7_HANDOFF', action: 'handoff_urgent' },
-  cost_question: { stage: 'S7_HANDOFF', action: 'handoff_cost' },
+  // Cost questions stay in S1_INTENT — AI handles cost replies inline.
+  // No human handoff needed; conversation continues.
+  cost_question: { stage: 'S1_INTENT', action: 'handoff_cost' },
   wrong_number: { stage: 'S7_HANDOFF', action: 'handoff_wrong_number' },
   needs_human: { stage: 'S7_HANDOFF', action: 'handoff_general' },
 };
