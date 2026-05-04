@@ -149,24 +149,27 @@ export async function generateRecallReply(input: RecallAIInput): Promise<RecallA
     }
   }
 
-  // 2. Hourly cap check (skipped in eval — would query and pollute prod audit)
-  if (!input.evalMode?.bypassHourlyCap) {
-    const cap = parseInt(process.env.RECALL_LLM_HOURLY_CAP || '50', 10);
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count: recentCount } = await db
-      .from('recall_reply_audit')
-      .select('id', { count: 'exact', head: true })
-      .eq('practice_id', input.practice.id)
-      .eq('used_llm', true)
-      .gte('created_at', oneHourAgo);
+  // 2-3. Run hourly cap query and prompt build in PARALLEL — they have no
+  // data dependency on each other. Saves ~50-150ms per request.
+  const cap = parseInt(process.env.RECALL_LLM_HOURLY_CAP || '50', 10);
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const capCheckPromise = input.evalMode?.bypassHourlyCap
+    ? Promise.resolve({ count: 0 } as { count: number | null })
+    : db
+        .from('recall_reply_audit')
+        .select('id', { count: 'exact', head: true })
+        .eq('practice_id', input.practice.id)
+        .eq('used_llm', true)
+        .gte('created_at', oneHourAgo);
 
-    if ((recentCount ?? 0) >= cap) {
-      return { ...baseFallback, fallbackReason: 'hourly_cap_exceeded' };
-    }
+  const promptPromise = buildSystemPrompt(input.practice, input.evalMode?.directives);
+
+  const [capResult, systemPrompt] = await Promise.all([capCheckPromise, promptPromise]);
+
+  if ((capResult.count ?? 0) >= cap) {
+    return { ...baseFallback, fallbackReason: 'hourly_cap_exceeded' };
   }
 
-  // 3. Build prompt and call Claude
-  const systemPrompt = await buildSystemPrompt(input.practice, input.evalMode?.directives);
   const userMessage = buildUserMessage(input);
 
   const aiResponse = await generateStructuredJSON(
@@ -301,7 +304,8 @@ async function buildSystemPrompt(
   practice: Practice,
   directiveOverrides?: { recallPersona: string; recallReplyRules: string; recallReplyExamples: string }
 ): Promise<string> {
-  const dirs = directiveOverrides ?? await loadDirectives(practice.id);
+  // Pass the already-loaded practice so loadDirectives skips its own DB fetch.
+  const dirs = directiveOverrides ?? await loadDirectives(practice.id, practice);
   const { doctorName } = extractProviderNames(practice);
 
   // Self-pay checkup pricing range — only quoted to patients who explicitly

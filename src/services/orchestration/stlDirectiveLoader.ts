@@ -49,19 +49,27 @@ function interpolateDirective(template: string, practice: Practice): string {
     .replace(/\{\{new_patient_special\}\}/g, (config as Record<string, string>).new_patient_special || '');
 }
 
-export async function loadDirectives(practiceId: string): Promise<DirectiveContext> {
-  // Load practice from database
-  const { data: practice, error } = await supabase
-    .from('practices')
-    .select('*')
-    .eq('id', practiceId)
-    .single();
+export async function loadDirectives(
+  practiceId: string,
+  preloadedPractice?: Practice
+): Promise<DirectiveContext> {
+  // Use pre-loaded practice when caller already has it (saves a redundant
+  // DB roundtrip). Falls back to fetch when called without the practice.
+  let typedPractice: Practice;
+  if (preloadedPractice && preloadedPractice.id === practiceId) {
+    typedPractice = preloadedPractice;
+  } else {
+    const { data: practice, error } = await supabase
+      .from('practices')
+      .select('*')
+      .eq('id', practiceId)
+      .single();
 
-  if (error || !practice) {
-    throw new Error(`Practice not found: ${practiceId}`);
+    if (error || !practice) {
+      throw new Error(`Practice not found: ${practiceId}`);
+    }
+    typedPractice = practice as unknown as Practice;
   }
-
-  const typedPractice = practice as unknown as Practice;
 
   // Load system directives
   const systemDir = path.join(DIRECTIVES_DIR, 'system');

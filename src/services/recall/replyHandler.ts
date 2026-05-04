@@ -158,18 +158,19 @@ export async function handleRecallReply(
     return errorResult(sequenceId, patient.id, 'Debounced — recent outbound');
   }
 
-  // 3. Increment reply count
-  await supabase
+  // 3. Increment reply count + replies metric (fire-and-forget — these
+  // are observability writes, not load-bearing. Don't block the response.)
+  supabase
     .from('recall_sequences')
     .update({ reply_count: (sequence.reply_count || 0) + 1 })
-    .eq('id', sequenceId);
+    .eq('id', sequenceId)
+    .then(({ error }) => { if (error) console.error('[replyHandler] reply_count update failed:', error.message); });
 
-  // Increment recall_replies metric
-  await supabase.rpc('increment_recall_metric', {
+  supabase.rpc('increment_recall_metric', {
     p_practice_id: practiceId,
     p_date: new Date().toISOString().split('T')[0],
     p_field: 'recall_replies',
-  });
+  }).then(({ error }) => { if (error) console.error('[replyHandler] replies metric rpc failed:', error.message); });
 
   // 4. Three-branch routing:
   //    (a) Critical intent (opt_out / urgent / wrong_number / S4 slot) → keyword path UNCHANGED.

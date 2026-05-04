@@ -53,12 +53,23 @@ export async function generateStructuredJSON(
     const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
+      // System prompt sent as a structured block with cache_control: ephemeral.
+      // Anthropic caches the system prompt for 5 min, dropping cached-read cost
+      // from $3/MTok to $0.30/MTok and reducing latency 25-40% on cache hits.
+      // The recall system prompt (~5,700 tokens, stable per practice) is the
+      // ideal caching target.
       const response = await getClient().messages.create(
         {
           model: MODEL,
           max_tokens: maxTokens,
           temperature: 0,
-          system: systemPrompt,
+          system: [
+            {
+              type: 'text',
+              text: systemPrompt,
+              cache_control: { type: 'ephemeral' },
+            },
+          ],
           messages,
         },
         { signal: controller.signal }
@@ -71,9 +82,14 @@ export async function generateStructuredJSON(
         .map((block) => block.text)
         .join('');
 
-      const usage = response.usage as Anthropic.Usage & { cache_read_input_tokens?: number };
+      const usage = response.usage as Anthropic.Usage & {
+        cache_read_input_tokens?: number;
+        cache_creation_input_tokens?: number;
+      };
       const latencyMs = Date.now() - start;
-      console.log(`[aiClientJSON] tokens in=${usage.input_tokens} out=${usage.output_tokens} cache=${usage.cache_read_input_tokens || 0} latency=${latencyMs}ms`);
+      const cacheRead = usage.cache_read_input_tokens || 0;
+      const cacheWrite = usage.cache_creation_input_tokens || 0;
+      console.log(`[aiClientJSON] tokens in=${usage.input_tokens} out=${usage.output_tokens} cache_read=${cacheRead} cache_write=${cacheWrite} latency=${latencyMs}ms`);
 
       return {
         content: text,
