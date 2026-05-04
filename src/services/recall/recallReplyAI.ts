@@ -545,15 +545,21 @@ function isValidReplyShape(reply: string, allowedBookingLink: string | null): bo
   // Must start with capital letter (sentence case rule)
   if (!/^[A-Z]/.test(reply)) return false;
 
-  // Must end with proper punctuation
-  if (!/[.?!]$/.test(reply.trim())) return false;
+  // Must end with proper punctuation OR a URL (Claude often closes a
+  // booking-link reply with the URL as the last token, which is fine).
+  const trimmed = reply.trim();
+  const endsWithPunctuation = /[.?!]$/.test(trimmed);
+  const endsWithUrl = /https?:\/\/\S+$/.test(trimmed);
+  if (!endsWithPunctuation && !endsWithUrl) return false;
 
   // No URLs allowed except the practice's booking link (if any)
   const urlMatches = reply.match(/https?:\/\/\S+/gi);
   if (urlMatches) {
     if (!allowedBookingLink) return false;
     for (const url of urlMatches) {
-      if (!url.startsWith(allowedBookingLink)) return false;
+      // Strip trailing punctuation from URL before comparing
+      const cleanUrl = url.replace(/[.,;:!?]+$/, '');
+      if (!cleanUrl.startsWith(allowedBookingLink)) return false;
     }
   }
 
