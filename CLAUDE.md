@@ -63,7 +63,8 @@ All patient-facing SMS — both hardcoded recall replies and STL AI prompt — m
 - Never say "Our team" / "Our staff" — say "I" or "we"
 - Personalize with time-since-last-visit when available ("It's been about 6 months since your last cleaning")
 - Round `months_overdue` to whole number — no "6.2 months"
-- Specific reason for outreach beats vague warmth: "your file came across my desk this morning" > "just thinking about you"
+- Specific reason for outreach beats vague warmth — but NEVER reference charts, files, or patient records (partner directive 2026-05-05: anxiety risk). Use schedule/openings/cancellation framing instead. e.g. "had a cancellation this morning and you were one of the first we thought of" > "just thinking about you"
+- Hygienist voice = collective "we/us" (not "I/me") — the `{{Hygienist Name}}` variable renders as "hygiene team", so singular-I clashes with the rendered output
 
 Cost questions: acknowledge, reassure via "we verify insurance before you come in so there are no surprises", pivot to time preference.
 
@@ -78,6 +79,20 @@ Wrong-number: apologize, remove from list, exit. Do NOT try to convert.
 Booking confirmation: don't invent dates the patient didn't mention. "Perfect, see you then. Give us a call if anything changes."
 
 Handoff fallbacks: every handoff that references `practice.phone` must handle null — fall through to "someone from the team will reach out" copy.
+
+## Recall Templates (PARTNER-LOCKED 2026-05-05)
+
+[src/services/recall/templates.ts](src/services/recall/templates.ts) is the canonical bank: 18 recall templates (3 voices × 3 days × 2 variants) + 4 no-show templates. Partners reviewed and approved every variant on 2026-05-05. **Do not add, remove, or rewrite copy without explicit partner re-approval** — even small wording changes need to go back through review.
+
+Variant selection is deterministic by phone hash mod 2, so each patient gets a consistent voice across Day 0/1/3.
+
+Hard rules baked into the locked set:
+- No "chart", "file", "patient record", or "reviewing" language anywhere — partners flagged these as anxiety-spiking
+- Doctor voice: "I" allowed (single dentist). Hygienist voice: "we/us" only (renders as "hygiene team")
+- Day 0 = open loop, no booking link. Day 1 + Day 3 = booking link required
+- Day 3 = complimentary first-visit-back offer (cost barrier removal)
+
+If new copy is needed (new sequence type, new offer, etc.), generate it as a separate proposal for partner review — don't drop it into `templates.ts` directly.
 
 ## Railway Deploy Gotchas
 

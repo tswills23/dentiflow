@@ -239,7 +239,7 @@ export interface RecallTemplate {
   body: string;
 }
 
-export type TemplateVariant = 'v1' | 'v2' | 'v3' | 'v4' | 'v5';
+export type TemplateVariant = 'v1' | 'v2';
 
 export type TemplateBank = Record<
   RecallVoice,
