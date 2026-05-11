@@ -924,6 +924,7 @@ export type Database = {
           created_at: string | null
           defer_until: string | null
           exit_reason: string | null
+          experiment_arm: string | null
           id: string
           last_sent_at: string | null
           link_clicked_at: string | null
@@ -950,6 +951,7 @@ export type Database = {
           created_at?: string | null
           defer_until?: string | null
           exit_reason?: string | null
+          experiment_arm?: string | null
           id?: string
           last_sent_at?: string | null
           link_clicked_at?: string | null
@@ -976,6 +978,7 @@ export type Database = {
           created_at?: string | null
           defer_until?: string | null
           exit_reason?: string | null
+          experiment_arm?: string | null
           id?: string
           last_sent_at?: string | null
           link_clicked_at?: string | null

@@ -50,7 +50,10 @@ export async function runSequenceOrchestrator(
   // 2. Auto-exit Day 3 sequences that have timed out
   await autoExitTimedOut(practiceId, now, result, options?.location);
 
-  // 3. Re-enter deferred sequences whose defer_until has passed
+  // 3. Auto-exit Arm B (offer_only) sequences whose 7-day window has passed
+  await autoExitOfferArm(practiceId, now, result, options?.location);
+
+  // 4. Re-enter deferred sequences whose defer_until has passed
   await reEnterDeferred(practiceId, now, result, options?.location);
 
   console.log(
@@ -86,6 +89,18 @@ async function processReadySequences(
 
   for (const seq of sequences as RecallSequence[]) {
     try {
+      // Arm B (offer_only) is single-send. Outreach engine sets next_send_at=null
+      // and defer_until=now+7d on Day 0 send. If we somehow see one here with
+      // next_send_at set, hard-stop it before any follow-up can fire.
+      if (seq.experiment_arm === 'offer_only') {
+        await supabase
+          .from('recall_sequences')
+          .update({ next_send_at: null })
+          .eq('id', seq.id);
+        result.errors.push(`Arm B sequence ${seq.id} had next_send_at set — cleared without sending`);
+        continue;
+      }
+
       const nextDay = NEXT_DAY_MAP[seq.sequence_day];
 
       if (nextDay === null || nextDay === undefined) {
@@ -162,6 +177,56 @@ async function autoExitTimedOut(
       action: 'auto_exit',
       result: 'sent',
       metadata: { reason: 'no_response_after_day3' },
+    });
+
+    result.autoExited++;
+  }
+}
+
+async function autoExitOfferArm(
+  practiceId: string,
+  now: Date,
+  result: OrchestrateResult,
+  location?: string
+): Promise<void> {
+  // Arm B (offer_only): single Day 0 send, then defer_until = send + 7 days.
+  // After 7 days with no booking, mark sequence completed and stop.
+  // Reply handler still works during the window because sequence_status stays 'active'.
+  let query = supabase
+    .from('recall_sequences')
+    .select('*, patients!inner(location)')
+    .eq('practice_id', practiceId)
+    .eq('sequence_status', 'active')
+    .eq('experiment_arm', 'offer_only')
+    .not('defer_until', 'is', null)
+    .lte('defer_until', now.toISOString());
+
+  if (location) {
+    query = query.ilike('patients.location', `%${location}%`);
+  }
+
+  const { data: sequences, error } = await query;
+
+  if (error || !sequences?.length) return;
+
+  for (const seq of sequences as RecallSequence[]) {
+    await supabase
+      .from('recall_sequences')
+      .update({
+        sequence_status: 'completed',
+        exit_reason: 'no_response_auto_exit',
+        next_send_at: null,
+        defer_until: null,
+      })
+      .eq('id', seq.id);
+
+    await logAutomation({
+      practiceId,
+      patientId: seq.patient_id,
+      automationType: 'recall',
+      action: 'auto_exit',
+      result: 'sent',
+      metadata: { reason: 'offer_arm_7d_no_response', experiment_arm: 'offer_only' },
     });
 
     result.autoExited++;

@@ -8,11 +8,12 @@
 
 import { supabase } from '../../lib/supabase';
 import { assignVoiceFromLastVisit } from './voiceAssignment';
-import type { SequenceAgentResult, SequenceDay } from '../../types/recall';
+import type { SequenceAgentResult, SequenceDay, ExperimentArm } from '../../types/recall';
 
 export async function runSequenceAgent(
   practiceId: string,
-  patientIds: string[]
+  patientIds: string[],
+  options?: { experimentArmByPatient?: Record<string, ExperimentArm> }
 ): Promise<SequenceAgentResult> {
   const result: SequenceAgentResult = {
     created: 0,
@@ -54,6 +55,8 @@ export async function runSequenceAgent(
       const lastVisit = patient.last_visit_date ? new Date(patient.last_visit_date) : null;
       const { segment, voice, monthsOverdue } = assignVoiceFromLastVisit(lastVisit);
 
+      const experimentArm = options?.experimentArmByPatient?.[patientId] ?? null;
+
       const { data: seq, error: insertErr } = await supabase
         .from('recall_sequences')
         .insert({
@@ -66,6 +69,7 @@ export async function runSequenceAgent(
           sequence_status: 'paused',
           booking_stage: 'S0_OPENING',
           next_send_at: null,
+          experiment_arm: experimentArm,
         })
         .select('id')
         .single();

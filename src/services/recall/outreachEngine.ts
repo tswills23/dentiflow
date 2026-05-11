@@ -10,6 +10,7 @@ import { sendSMS } from '../execution/smsService';
 import { saveMessage } from '../execution/conversationStore';
 import { logAutomation } from '../execution/metricsTracker';
 import { selectTemplate, renderTemplate, getTemplateId } from './templates';
+import { OFFER_DAY0, OFFER_TEMPLATE_ID } from './offerTemplates';
 import type { RecallSequence, OutreachResult, SequenceDay } from '../../types/recall';
 import type { Practice, Patient, Provider } from '../../types/database';
 
@@ -178,17 +179,23 @@ async function sendOutreachSMS(
   }
   const bookingLink = `${BACKEND_URL}/r/${bookingLinkToken}`;
 
-  // Select and render template
-  const template = selectTemplate(
-    seq.assigned_voice,
-    seq.sequence_day as SequenceDay,
-    patient.phone
-  );
-  const templateId = getTemplateId(
-    seq.assigned_voice,
-    seq.sequence_day as SequenceDay,
-    patient.phone
-  );
+  // Select and render template — Arm B (offer_only) uses fixed offer copy on Day 0,
+  // Arm A (control_voice) and non-experiment sequences use the partner-locked template bank.
+  const isOfferArm = seq.experiment_arm === 'offer_only';
+  const template = isOfferArm
+    ? OFFER_DAY0
+    : selectTemplate(
+        seq.assigned_voice,
+        seq.sequence_day as SequenceDay,
+        patient.phone
+      );
+  const templateId = isOfferArm
+    ? OFFER_TEMPLATE_ID
+    : getTemplateId(
+        seq.assigned_voice,
+        seq.sequence_day as SequenceDay,
+        patient.phone
+      );
   // Use patient location as display name when available, otherwise practice name
   const displayName = patient.location || practice.name;
 
@@ -233,16 +240,20 @@ async function sendOutreachSMS(
     metadata: { templateId, sequenceDay: seq.sequence_day, voice: seq.assigned_voice },
   });
 
-  // Update sequence
+  // Update sequence.
+  // Arm B (offer_only) is single-send: no follow-up scheduled, defer_until set so
+  // the sweeper auto-exits after 7 days if no reply (reply handler still works during the window).
   const now = new Date().toISOString();
   const nextSendAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // +24h for Day 1
+  const deferUntil7d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
   await supabase
     .from('recall_sequences')
     .update({
       last_sent_at: now,
       template_id: templateId,
-      next_send_at: seq.sequence_day < 3 ? nextSendAt : null,
+      next_send_at: isOfferArm ? null : (seq.sequence_day < 3 ? nextSendAt : null),
+      defer_until: isOfferArm ? deferUntil7d : seq.defer_until,
     })
     .eq('id', seq.id);
 

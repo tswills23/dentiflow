@@ -71,6 +71,7 @@ export type OverdueSegment = 'lt_6' | 'gte_6_lt_12' | 'gte_12';
 
 export type SequenceStatus = 'active' | 'paused' | 'completed' | 'exited';
 export type SequenceDay = 0 | 1 | 3;
+export type ExperimentArm = 'control_voice' | 'offer_only';
 
 // =============================================================================
 // Time Preferences
@@ -155,6 +156,7 @@ export interface RecallSequence {
   booking_link_token: string | null;
   link_clicked_at: string | null;
   link_followup_sent: boolean;
+  experiment_arm: ExperimentArm | null;
   created_at: string;
   updated_at: string;
 }
