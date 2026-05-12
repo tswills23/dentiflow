@@ -21,16 +21,30 @@ import type {
 // Keyword Definitions (NO OVERLAPS between intents)
 // =============================================================================
 
-const OPT_OUT_KEYWORDS = [
-  // FCC-canonical opt-out keywords (47 CFR § 64.1200(a)(10)) — these MUST be present
+// FCC-canonical single-word opt-out keywords — match ONLY when they are
+// effectively the entire message. "Stop in Thursday" / "end of month" /
+// "quit hurting" / "cancel my appointment" must NOT trigger opt_out.
+// See SINGLE_WORD_OPT_OUT_TOKENS check below.
+const SINGLE_WORD_OPT_OUT_TOKENS = [
   'stop', 'stopall', 'unsubscribe', 'quit', 'end', 'cancel', 'revoke',
-  // Phrasal variants
+];
+
+// Multi-word opt-out phrases — these are unambiguous regardless of surrounding text
+const OPT_OUT_KEYWORDS = [
   'opt out', 'opt-out', 'optout', 'remove me',
   'stop emailing', 'stop texting', 'stop contacting', 'stop messaging',
   'dont contact', "don't contact", 'do not contact', 'leave me alone',
   'take me off', 'remove from list', 'no more emails', 'no more',
   // NOTE: "spam" removed — "is this spam?" is a curiosity question, not a STOP request
 ];
+
+// Returns true if the message is *effectively* a single TCPA opt-out token
+// (the token alone, possibly with punctuation/exclamation). "STOP", "stop.",
+// "Stop!", "STOP " all match. "stop in Thursday" and "end of month" do NOT.
+function isStandaloneOptOut(text: string): boolean {
+  const cleaned = text.toLowerCase().trim().replace(/[^\w]/g, '');
+  return SINGLE_WORD_OPT_OUT_TOKENS.includes(cleaned);
+}
 
 const URGENT_KEYWORDS = [
   'pain', 'painful', 'hurts', 'hurt', 'hurting', 'ache', 'aching',
@@ -339,8 +353,13 @@ export function classifyIntent(
   }
 
   // 1. ALWAYS CHECK: Opt-out (highest priority, any stage)
-  if (matchAny(textLower, OPT_OUT_KEYWORDS)) {
-    return { intent: 'opt_out', confidence: 'high', matchedKeywords: getMatches(textLower, OPT_OUT_KEYWORDS), rawText: text };
+  //    Single-word TCPA tokens (stop/end/cancel/quit/etc.) must be standalone
+  //    so we don't mis-opt-out "stop in Thursday" or "end of month".
+  if (isStandaloneOptOut(text) || matchAny(textLower, OPT_OUT_KEYWORDS)) {
+    const matched = isStandaloneOptOut(text)
+      ? [text.toLowerCase().trim().replace(/[^\w]/g, '')]
+      : getMatches(textLower, OPT_OUT_KEYWORDS);
+    return { intent: 'opt_out', confidence: 'high', matchedKeywords: matched, rawText: text };
   }
 
   // 2. URGENT BEFORE COST — "my tooth hurts, how much" must escalate to emergency,
@@ -515,6 +534,10 @@ export function classifyCriticalIntent(
   currentStage: RecallStage
 ): { intent: CriticalIntent; matched: string[] } | null {
   const t = text.toLowerCase().trim();
+  // Single-word TCPA tokens require standalone match. Multi-word phrases match anywhere.
+  if (isStandaloneOptOut(text)) {
+    return { intent: 'opt_out', matched: [t.replace(/[^\w]/g, '')] };
+  }
   if (matchAny(t, OPT_OUT_KEYWORDS)) {
     return { intent: 'opt_out', matched: getMatches(t, OPT_OUT_KEYWORDS) };
   }
