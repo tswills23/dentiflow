@@ -28,7 +28,7 @@ dotenv.config({ path: resolve(__dirname, '..', '.env') });
 
 const DEFAULT_PRACTICE_ID = process.env.DEFAULT_PRACTICE_ID || 'a3f04cf9-54aa-4bd6-939a-d0417c42d941';
 const LOCATION = 'Village Dental';
-const TARGET_TOTAL = 500;
+const TARGET_TOTAL = 400; // Fresh VD patients with no prior sequence (verified 2026-05-12)
 const ASSIGN_SEED = '2026-05-11-village-recall-ab'; // deterministic shuffle seed
 
 interface Args {

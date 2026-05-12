@@ -111,24 +111,29 @@ async function evaluateWindow(window: MonitorWindow): Promise<void> {
   const alertPhone = process.env.ALERT_PHONE_NUMBER;
   const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
 
-  // Threshold 1 — validator block: AUTO-DISABLE LLM for this practice
+  // Threshold 1 — validator block: AUTO-DISABLE LLM for this practice (unless bypassed)
   if (window.validator_blocks >= 1) {
+    const autoDisable = process.env.RECALL_LLM_MONITOR_AUTODISABLE !== 'false';
     console.error(
-      `[recallReplyMonitor] CRITICAL: ${window.validator_blocks} validator block(s) at ${window.practice_name} — auto-disabling LLM`
+      `[recallReplyMonitor] ${autoDisable ? 'CRITICAL' : 'WARN'}: ${window.validator_blocks} validator block(s) at ${window.practice_name}${autoDisable ? ' — auto-disabling LLM' : ' — auto-disable bypassed (RECALL_LLM_MONITOR_AUTODISABLE=false), alerting only'}`
     );
-    const { error: disableErr } = await db
-      .from('practices')
-      .update({ recall_llm_enabled: false })
-      .eq('id', window.practice_id);
-    if (disableErr) {
-      console.error('[recallReplyMonitor] auto-disable failed:', disableErr.message);
+
+    if (autoDisable) {
+      const { error: disableErr } = await db
+        .from('practices')
+        .update({ recall_llm_enabled: false })
+        .eq('id', window.practice_id);
+      if (disableErr) {
+        console.error('[recallReplyMonitor] auto-disable failed:', disableErr.message);
+      }
     }
 
     if (alertPhone && twilioFrom) {
       const reasons = [...new Set(window.validator_block_reasons)].join(', ');
+      const verb = autoDisable ? 'auto-disabled' : 'block detected (LLM still active)';
       await sendSMS(
         alertPhone,
-        `[ALERT] Recall LLM auto-disabled at ${window.practice_name}. ${window.validator_blocks} validator block(s) in last 15min. Reasons: ${reasons}. Check audit table.`,
+        `[ALERT] Recall LLM ${verb} at ${window.practice_name}. ${window.validator_blocks} validator block(s) in last 15min. Reasons: ${reasons}. Check audit table.`,
         twilioFrom
       ).catch((e) => console.error('[recallReplyMonitor] alert SMS failed:', e));
     }
