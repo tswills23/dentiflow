@@ -244,7 +244,17 @@ export function selectTemplate(
   // MD5 hash of phone → deterministic variant selection (mod 2)
   const hash = createHash('md5').update(patientPhone).digest('hex');
   const hashInt = parseInt(hash.substring(0, 8), 16);
-  const variantNum = (hashInt % 2) + 1;
+  let variantNum = (hashInt % 2) + 1;
+
+  // Mid-experiment override (2026-05-13): doctor Day 1 v1 reads too jargon-y
+  // ("things I wish I'd seen earlier — they never announced themselves").
+  // Route all doctor Day 1 sends to v2 ("rather you come in and leave with
+  // good news than keep waiting") which is plainer and converts as well.
+  // Doctor Day 0 and Day 3 variants remain split per phone hash.
+  if (assignedVoice === 'doctor' && sequenceDay === 1) {
+    variantNum = 2;
+  }
+
   const variantId = `v${variantNum}` as TemplateVariant;
 
   return TEMPLATES[assignedVoice][sequenceDay][variantId];
@@ -278,6 +288,10 @@ export function getTemplateId(
 ): string {
   const hash = createHash('md5').update(patientPhone).digest('hex');
   const hashInt = parseInt(hash.substring(0, 8), 16);
-  const variantNum = (hashInt % 2) + 1;
+  let variantNum = (hashInt % 2) + 1;
+  // Match selectTemplate override — doctor Day 1 always reports v2.
+  if (assignedVoice === 'doctor' && sequenceDay === 1) {
+    variantNum = 2;
+  }
   return `${assignedVoice}_day${sequenceDay}_v${variantNum}`;
 }
