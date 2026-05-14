@@ -255,6 +255,14 @@ export function selectTemplate(
     variantNum = 2;
   }
 
+  // Partner directive (2026-05-14): turn off doctor voice for Day 3 — all
+  // doctor-voice patients receive the office voice Day 3 offer instead.
+  // Variant split (v1/v2) stays per phone hash.
+  if (assignedVoice === 'doctor' && sequenceDay === 3) {
+    const variantId = `v${variantNum}` as TemplateVariant;
+    return TEMPLATES.office[3][variantId];
+  }
+
   const variantId = `v${variantNum}` as TemplateVariant;
 
   return TEMPLATES[assignedVoice][sequenceDay][variantId];
@@ -292,6 +300,10 @@ export function getTemplateId(
   // Match selectTemplate override — doctor Day 1 always reports v2.
   if (assignedVoice === 'doctor' && sequenceDay === 1) {
     variantNum = 2;
+  }
+  // Match selectTemplate override — doctor Day 3 routes to office voice.
+  if (assignedVoice === 'doctor' && sequenceDay === 3) {
+    return `office_day3_v${variantNum}`;
   }
   return `${assignedVoice}_day${sequenceDay}_v${variantNum}`;
 }
