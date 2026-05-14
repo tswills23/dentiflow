@@ -136,15 +136,15 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, {{Practice Name}} again. You probably feel fine — most people do. That's actually when it's easiest to stay that way. Pick a time: {{Booking Link}}`,
       },
     },
-    // Day 3 — Remove inertia + complimentary visit + booking link
+    // Day 3 — Remove inertia + 30% off offer + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. First visit back is on us, no strings. Grab a time: {{Booking Link}}`,
+        body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in. Grab a time: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and a covered visit. Grab it if you want it: {{Booking Link}}`,
+        body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and 30% off when you come back in. Grab it if you want it: {{Booking Link}}`,
       },
     },
   },
@@ -177,15 +177,15 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, hygiene team at {{Practice Name}}. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: {{Booking Link}}`,
       },
     },
-    // Day 3 — Acknowledge avoidance + barrier removal + booking link
+    // Day 3 — Acknowledge avoidance + 30% off offer + booking link
     3: {
       v1: {
         subject: '',
-        body: `Hey {{First Name}}, hygiene team here. Last thing from us. If you've been putting it off, we're not here to make you feel bad about it. Just come in. First visit is covered: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team here. Last thing from us. If you've been putting it off, we're not here to make you feel bad about it. Just come in — 30% off when you come back in: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We've made it free. Everything else is easy: {{Booking Link}}`,
+        body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off when you come back in. Everything else is easy: {{Booking Link}}`,
       },
     },
   },
