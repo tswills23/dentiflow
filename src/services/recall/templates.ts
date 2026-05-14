@@ -239,7 +239,8 @@ const TEMPLATES: TemplateBank = {
 export function selectTemplate(
   assignedVoice: RecallVoice,
   sequenceDay: SequenceDay,
-  patientPhone: string
+  patientPhone: string,
+  experimentArm?: string | null
 ): RecallTemplate {
   // MD5 hash of phone → deterministic variant selection (mod 2)
   const hash = createHash('md5').update(patientPhone).digest('hex');
@@ -255,10 +256,15 @@ export function selectTemplate(
     variantNum = 2;
   }
 
-  // Partner directive (2026-05-14): turn off doctor voice for Day 3 — all
-  // doctor-voice patients receive the office voice Day 3 offer instead.
-  // Variant split (v1/v2) stays per phone hash.
-  if (assignedVoice === 'doctor' && sequenceDay === 3) {
+  // Partner directive (2026-05-14): for the Village Dental A/B test only,
+  // doctor voice is off for Day 3 — those patients receive the office voice
+  // Day 3 offer instead. Scoped to A/B sequences (experiment_arm set) so
+  // post-test campaigns retain all three voices on Day 3.
+  if (
+    assignedVoice === 'doctor' &&
+    sequenceDay === 3 &&
+    experimentArm === 'control_voice'
+  ) {
     const variantId = `v${variantNum}` as TemplateVariant;
     return TEMPLATES.office[3][variantId];
   }
@@ -292,7 +298,8 @@ export function renderTemplate(
 export function getTemplateId(
   assignedVoice: RecallVoice,
   sequenceDay: SequenceDay,
-  patientPhone: string
+  patientPhone: string,
+  experimentArm?: string | null
 ): string {
   const hash = createHash('md5').update(patientPhone).digest('hex');
   const hashInt = parseInt(hash.substring(0, 8), 16);
@@ -301,8 +308,13 @@ export function getTemplateId(
   if (assignedVoice === 'doctor' && sequenceDay === 1) {
     variantNum = 2;
   }
-  // Match selectTemplate override — doctor Day 3 routes to office voice.
-  if (assignedVoice === 'doctor' && sequenceDay === 3) {
+  // Match selectTemplate override — doctor Day 3 routes to office voice
+  // for the A/B test only.
+  if (
+    assignedVoice === 'doctor' &&
+    sequenceDay === 3 &&
+    experimentArm === 'control_voice'
+  ) {
     return `office_day3_v${variantNum}`;
   }
   return `${assignedVoice}_day${sequenceDay}_v${variantNum}`;

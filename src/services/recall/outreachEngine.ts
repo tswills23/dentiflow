@@ -187,14 +187,16 @@ async function sendOutreachSMS(
     : selectTemplate(
         seq.assigned_voice,
         seq.sequence_day as SequenceDay,
-        patient.phone
+        patient.phone,
+        seq.experiment_arm
       );
   const templateId = isOfferArm
     ? OFFER_TEMPLATE_ID
     : getTemplateId(
         seq.assigned_voice,
         seq.sequence_day as SequenceDay,
-        patient.phone
+        patient.phone,
+        seq.experiment_arm
       );
   // Use patient location as display name when available, otherwise practice name
   const displayName = patient.location || practice.name;
