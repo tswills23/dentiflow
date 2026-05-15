@@ -135,11 +135,9 @@ async function sendLinkFollowups(practiceId: string): Promise<void> {
     if (!patient?.phone) continue;
 
     const firstName = patient.first_name || 'there';
-    const displayName = patient.location
-      ? `${practice.name} ${patient.location}`
-      : practice.name;
+    const displayName = patient.location || practice.name;
 
-    const followupText = `Hey ${firstName}, were you able to grab a time at ${displayName}? Reply YES if you're all set, or let us know if you need help!`;
+    const followupText = `Hey ${firstName}, were you able to grab a time at ${displayName}? Reply YES if you're all set — or let me know if anything got in the way.`;
 
     const sendResult = await sendSMS(patient.phone, followupText, practice.twilio_phone);
 
