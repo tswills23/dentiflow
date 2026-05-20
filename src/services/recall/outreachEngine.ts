@@ -15,6 +15,9 @@ import type { RecallSequence, OutreachResult, SequenceDay } from '../../types/re
 import type { Practice, Patient, Provider } from '../../types/database';
 
 const BACKEND_URL = process.env.BACKEND_URL;
+if (!BACKEND_URL) {
+  throw new Error('BACKEND_URL env var is required — recall booking links will be malformed without it.');
+}
 
 // Extract doctor/hygienist display names from practice_config.providers
 export function extractProviderNames(practice: Practice): { doctorName: string; hygienistName: string } {
