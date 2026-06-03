@@ -18,3 +18,4 @@ supabase/.temp/
 
 # CallRail recordings — PHI (patient call audio + transcripts). NEVER commit.
 callrail-puller/recordings/
+scripts/.callback-sheet-id.txt
