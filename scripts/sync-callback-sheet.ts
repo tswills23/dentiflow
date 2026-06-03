@@ -88,7 +88,9 @@ async function gfetch(token: string, url: string, method: string, body?: unknown
   // 3. Clear old data, then write current values.
   await gfetch(token, `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`'${TAB}'!A1:Z100000`)}:clear`, 'POST', {});
   const range = `'${TAB}'!A1:F${values.length}`;
-  await gfetch(token, `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`, 'PUT', { range, values });
+  // RAW (not USER_ENTERED) so values like "+1 (630)..." or "+1773..." are stored as
+  // literal text — otherwise Sheets treats a leading +/=/- as a formula and errors.
+  await gfetch(token, `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`, 'PUT', { range, values });
 
   console.log(`Synced ${rows.length} callback request(s).`);
   console.log(`Sheet: ${spreadsheetUrl}`);
