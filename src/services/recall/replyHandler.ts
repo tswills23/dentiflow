@@ -626,8 +626,24 @@ async function executeAction(
     case 'handoff_general': {
       // Patient wants a human (callback or records/admin). Log to the office's
       // call list so someone follows up. Best-effort — never block the reply.
-      const lower = messageBody.toLowerCase();
-      const requestType = /record|chart/.test(lower) ? 'records' : 'callback';
+      // Capture ALL of the patient's recall replies (not just the triggering one)
+      // so the office sees the full context — e.g. "set an apt with u | call me".
+      let context = messageBody;
+      try {
+        const { data: inbound } = await supabase
+          .from('conversations')
+          .select('message_body')
+          .eq('practice_id', practice.id)
+          .eq('patient_id', patient.id)
+          .eq('automation_type', 'recall')
+          .eq('direction', 'inbound')
+          .order('created_at', { ascending: true })
+          .limit(10);
+        const parts = (inbound || []).map(m => (m.message_body || '').trim()).filter(Boolean);
+        if (!parts.some(p => p === messageBody.trim())) parts.push(messageBody.trim());
+        if (parts.length) context = parts.join(' | ');
+      } catch { /* fall back to single message */ }
+      const requestType = /record|chart/.test(context.toLowerCase()) ? 'records' : 'callback';
       try {
         await supabase.from('callback_requests').insert({
           practice_id: practice.id,
@@ -635,7 +651,7 @@ async function executeAction(
           patient_name: [patient.first_name, patient.last_name].filter(Boolean).join(' ') || null,
           phone: patient.phone || null,
           request_type: requestType,
-          message: messageBody,
+          message: context,
         });
       } catch (e) {
         console.error('[replyHandler] callback_requests insert failed:', e instanceof Error ? e.message : e);
