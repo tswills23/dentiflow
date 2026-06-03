@@ -218,15 +218,15 @@ const TEMPLATES: TemplateBank = {
         body: `Hey {{First Name}}, Dr. {{Doctor Name}} again. I'd rather you come in and leave with good news than keep waiting. Grab a time: {{Booking Link}}`,
       },
     },
-    // Day 3 — Clinical close + remove last barrier + booking link
+    // Day 3 — Clinical close + 30% off offer + booking link
     3: {
       v1: {
         subject: '',
-        body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. First visit's on us: {{Booking Link}}`,
+        body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. 30% off when you come back in: {{Booking Link}}`,
       },
       v2: {
         subject: '',
-        body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've waived the cost for your visit back. If there's ever a time to come in, it's now: {{Booking Link}}`,
+        body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've taken 30% off your visit back. If there's ever a time to come in, it's now: {{Booking Link}}`,
       },
     },
   },
