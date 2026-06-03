@@ -86,6 +86,62 @@ const DECLINE_KEYWORDS = [
   'not for me', "i'll pass", 'ill pass',
 ];
 
+// Patient wants a human to call/handle it, OR is asking for records/admin help.
+// These should NOT get the self-serve booking link — they go to a human handoff
+// and (for call requests) onto the office's call list.
+const CALLBACK_KEYWORDS = [
+  'call me', 'give me a call', 'can you call', 'could you call', 'please call',
+  'call me back', 'call back', 'give me a ring', 'gimme a call',
+  'talk to someone', 'speak to someone', 'speak with someone',
+  'talk to a person', 'talk to a human', 'talk to a real',
+  'set an apt with', 'set an appointment with you', 'set up an appointment with you',
+  'book it for me', 'just book it for me',
+];
+
+const RECORDS_KEYWORDS = [
+  'my records', 'dental records', 'send my records', 'my dental records',
+  'my chart', 'medical records', 'transfer my records', 'get my records',
+  'records you have', 'records that you', 'copy of my records',
+];
+
+// Patient has moved / relocated and can't come anymore → warm exit, no booking push.
+const MOVED_KEYWORDS = [
+  'moved', 'relocated', 'moving away', 'move away', 'out of state',
+  'no longer in the area', 'not in the area', 'in the area anymore',
+  'not close to the area', 'not being close to the area', 'not close to',
+  "don't live", 'dont live', 'no longer live', "i've moved", 'ive moved',
+  'left the area', 'too far away', 'far away now',
+];
+
+// Patient was recently seen / is already current → acknowledge, don't push booking.
+const ALREADY_HANDLED_KEYWORDS = [
+  'just had my teeth cleaned', 'had my teeth cleaned', 'just got my teeth cleaned',
+  'got my teeth cleaned', 'just had a cleaning', 'just had my cleaning',
+  'just had a checkup', 'just had my checkup',
+  'just came in', 'already came in', 'recently came in', 'was just in',
+  'just been in', 'already been in', 'just saw the dentist', 'already saw the dentist',
+  'just went to the dentist', 'already went in',
+];
+
+// A message that is essentially just a phone number = "here's my number, call me".
+function isBarePhoneNumber(text: string): boolean {
+  const digits = text.replace(/\D/g, '');
+  const letters = text.replace(/[^a-zA-Z]/g, '');
+  return (digits.length === 10 || digits.length === 11) && letters.length <= 2;
+}
+
+// Deterministic detection for human-handoff / moved / already-seen — stage-independent.
+// Returns the intent, or null if none apply. Used by both the main classifier and
+// the pre-LLM critical filter so these sensitive cases are handled reliably, not by the LLM.
+function classifyHumanOrExit(textLower: string, rawText: string): RecallIntent | null {
+  if (matchAny(textLower, CALLBACK_KEYWORDS) || matchAny(textLower, RECORDS_KEYWORDS) || isBarePhoneNumber(rawText)) {
+    return 'needs_human';
+  }
+  if (matchAny(textLower, MOVED_KEYWORDS)) return 'moved';
+  if (matchAny(textLower, ALREADY_HANDLED_KEYWORDS)) return 'already_handled';
+  return null;
+}
+
 const CONFIRM_KEYWORDS = [
   'that works', 'perfect',
   'confirmed', 'confirm', 'book it',
@@ -383,6 +439,14 @@ export function classifyIntent(
     return { intent: 'booked_confirmation', confidence: 'high', matchedKeywords: getMatches(textLower, BOOKED_CONFIRMATION_KEYWORDS), rawText: text };
   }
 
+  // 3c. HUMAN HANDOFF / MOVED / ALREADY-SEEN (stage-independent, checked before
+  //     booking_interest so "set an apt with you" / "just came in" don't get read
+  //     as booking interest and pushed the self-serve link).
+  const humanOrExit = classifyHumanOrExit(textLower, text);
+  if (humanOrExit) {
+    return { intent: humanOrExit, confidence: 'high', matchedKeywords: [humanOrExit], rawText: text };
+  }
+
   // 4. STAGE-SPECIFIC: S4_AVAILABILITY
   if (currentStage === 'S4_AVAILABILITY') {
     const slotMatch = checkSlotSelection(textClean);
@@ -527,7 +591,9 @@ export function extractSlotNumber(text: string): number | null {
 // the keyword classifier + state machine + template path runs unchanged.
 // =============================================================================
 
-export type CriticalIntent = 'opt_out' | 'urgent' | 'wrong_number' | 'slot_selection';
+export type CriticalIntent =
+  | 'opt_out' | 'urgent' | 'wrong_number' | 'slot_selection'
+  | 'needs_human' | 'moved' | 'already_handled';
 
 export function classifyCriticalIntent(
   text: string,
@@ -546,6 +612,12 @@ export function classifyCriticalIntent(
   }
   if (matchAny(t, WRONG_NUMBER_KEYWORDS)) {
     return { intent: 'wrong_number', matched: getMatches(t, WRONG_NUMBER_KEYWORDS) };
+  }
+  // Human-handoff / moved / already-seen — handled deterministically (not by the LLM)
+  // because the LLM has proven unreliable on these and a wrong reply here is costly.
+  const humanOrExit = classifyHumanOrExit(t, text);
+  if (humanOrExit) {
+    return { intent: humanOrExit as CriticalIntent, matched: [humanOrExit] };
   }
   if (currentStage === 'S4_AVAILABILITY') {
     const clean = t.replace(/[^\w\s]/g, '');

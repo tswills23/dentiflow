@@ -51,6 +51,9 @@ export type RecallIntent =
   | 'reschedule'
   | 'cancel'
   | 'identify_practice'
+  | 'needs_human'
+  | 'moved'
+  | 'already_handled'
   | 'unclear';
 
 export type IntentConfidence = 'high' | 'medium' | 'low';

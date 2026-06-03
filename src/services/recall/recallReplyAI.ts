@@ -109,7 +109,7 @@ const VALID_INTENTS = new Set<RecallIntent>([
   'opt_out', 'urgent', 'not_now', 'decline', 'slot_selection',
   'confirm', 'asking_availability', 'preferences', 'booking_interest',
   'booked_confirmation', 'cost_question', 'reschedule', 'cancel',
-  'identify_practice', 'unclear',
+  'identify_practice', 'needs_human', 'moved', 'already_handled', 'unclear',
 ]);
 
 const VALID_STAGES = new Set<RecallStage>([
@@ -319,7 +319,7 @@ async function buildSystemPrompt(
   const SCHEMA_BLOCK = `Respond with ONLY a single JSON object matching this exact schema. No prose, no code fences, no commentary before or after.
 
 {
-  "intent": "<one of: opt_out | urgent | not_now | decline | slot_selection | confirm | asking_availability | preferences | booking_interest | booked_confirmation | cost_question | reschedule | cancel | identify_practice | unclear>",
+  "intent": "<one of: opt_out | urgent | not_now | decline | slot_selection | confirm | asking_availability | preferences | booking_interest | booked_confirmation | cost_question | reschedule | cancel | identify_practice | needs_human | moved | already_handled | unclear>",
   "next_state": "<one of: S0_OPENING | S1_INTENT | S3_TIME_PREF | S4_AVAILABILITY | S5_CONFIRMATION | S6_COMPLETED | S7_HANDOFF | EXIT_OPT_OUT | EXIT_DEFERRED | EXIT_DECLINED | EXIT_CANCELLED>",
   "action": "<short action name, e.g. identify_practice, explain_reason, send_booking_link>",
   "reply_text": "<the SMS reply, 1-320 characters, sentence case, must follow voice rules>",

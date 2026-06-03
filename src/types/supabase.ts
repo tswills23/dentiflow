@@ -165,6 +165,42 @@ export type Database = {
           },
         ]
       }
+      callback_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          patient_id: string | null
+          patient_name: string | null
+          phone: string | null
+          practice_id: string
+          request_type: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          patient_id?: string | null
+          patient_name?: string | null
+          phone?: string | null
+          practice_id: string
+          request_type?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          patient_id?: string | null
+          patient_name?: string | null
+          phone?: string | null
+          practice_id?: string
+          request_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           created_at: string

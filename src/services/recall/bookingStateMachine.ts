@@ -114,6 +114,24 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S5_CONFIRMATION:cost_question': 'S3_TIME_PREF',
   'S5_CONFIRMATION:unclear': 'S5_CONFIRMATION',
   'S5_CONFIRMATION:identify_practice': 'S5_CONFIRMATION',
+
+  // needs_human (callback/records) → human handoff. moved / already_handled →
+  // graceful exit. Applied across every stage. These are terminal.
+  'S0_OPENING:needs_human': 'S7_HANDOFF',
+  'S1_INTENT:needs_human': 'S7_HANDOFF',
+  'S3_TIME_PREF:needs_human': 'S7_HANDOFF',
+  'S4_AVAILABILITY:needs_human': 'S7_HANDOFF',
+  'S5_CONFIRMATION:needs_human': 'S7_HANDOFF',
+  'S0_OPENING:moved': 'EXIT_DECLINED',
+  'S1_INTENT:moved': 'EXIT_DECLINED',
+  'S3_TIME_PREF:moved': 'EXIT_DECLINED',
+  'S4_AVAILABILITY:moved': 'EXIT_DECLINED',
+  'S5_CONFIRMATION:moved': 'EXIT_DECLINED',
+  'S0_OPENING:already_handled': 'EXIT_DECLINED',
+  'S1_INTENT:already_handled': 'EXIT_DECLINED',
+  'S3_TIME_PREF:already_handled': 'EXIT_DECLINED',
+  'S4_AVAILABILITY:already_handled': 'EXIT_DECLINED',
+  'S5_CONFIRMATION:already_handled': 'EXIT_DECLINED',
 };
 
 // =============================================================================
@@ -204,6 +222,24 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S5_CONFIRMATION:cost_question': 'handoff_cost',
   'S5_CONFIRMATION:unclear': 'clarify_intent',
   'S5_CONFIRMATION:identify_practice': 'identify_practice',
+
+  // needs_human → office reaches out (+ logged to call list). moved / already_handled
+  // → warm acknowledgment, no booking push.
+  'S0_OPENING:needs_human': 'handoff_general',
+  'S1_INTENT:needs_human': 'handoff_general',
+  'S3_TIME_PREF:needs_human': 'handoff_general',
+  'S4_AVAILABILITY:needs_human': 'handoff_general',
+  'S5_CONFIRMATION:needs_human': 'handoff_general',
+  'S0_OPENING:moved': 'acknowledge_moved',
+  'S1_INTENT:moved': 'acknowledge_moved',
+  'S3_TIME_PREF:moved': 'acknowledge_moved',
+  'S4_AVAILABILITY:moved': 'acknowledge_moved',
+  'S5_CONFIRMATION:moved': 'acknowledge_moved',
+  'S0_OPENING:already_handled': 'acknowledge_already_seen',
+  'S1_INTENT:already_handled': 'acknowledge_already_seen',
+  'S3_TIME_PREF:already_handled': 'acknowledge_already_seen',
+  'S4_AVAILABILITY:already_handled': 'acknowledge_already_seen',
+  'S5_CONFIRMATION:already_handled': 'acknowledge_already_seen',
 };
 
 // =============================================================================

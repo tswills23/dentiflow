@@ -44,6 +44,9 @@ const DETERMINISTIC_ACTIONS = new Set([
   'opt_out_silent',
   'handoff_urgent',
   'handoff_wrong_number',
+  'handoff_general',
+  'acknowledge_moved',
+  'acknowledge_already_seen',
 ]);
 
 // Actions that need the booking URL appended to Claude's reply if missing.
@@ -285,7 +288,11 @@ export async function handleRecallReply(
 
   if (transition.isTerminal) {
     updatePayload.sequence_status = transition.nextStage === 'S6_COMPLETED' ? 'completed' : 'exited';
-    updatePayload.exit_reason = getExitReason(transition.nextStage);
+    // Respect an action-provided exit_reason (e.g. 'moved', 'already_current');
+    // otherwise derive it from the terminal stage.
+    if (updatePayload.exit_reason === undefined) {
+      updatePayload.exit_reason = getExitReason(transition.nextStage);
+    }
     updatePayload.next_send_at = null;
   }
 
@@ -616,11 +623,42 @@ async function executeAction(
         updatedFields,
       };
 
-    case 'handoff_general':
+    case 'handoff_general': {
+      // Patient wants a human (callback or records/admin). Log to the office's
+      // call list so someone follows up. Best-effort — never block the reply.
+      const lower = messageBody.toLowerCase();
+      const requestType = /record|chart/.test(lower) ? 'records' : 'callback';
+      try {
+        await supabase.from('callback_requests').insert({
+          practice_id: practice.id,
+          patient_id: patient.id,
+          patient_name: [patient.first_name, patient.last_name].filter(Boolean).join(' ') || null,
+          phone: patient.phone || null,
+          request_type: requestType,
+          message: messageBody,
+        });
+      } catch (e) {
+        console.error('[replyHandler] callback_requests insert failed:', e instanceof Error ? e.message : e);
+      }
       return {
         replyText: practice.phone
-          ? `Someone from our team will reach out — or give us a call at ${practice.phone}.`
-          : `Someone from our team will reach out shortly.`,
+          ? `Got it — someone from the office will reach out to you. If it's easier, you can also reach us at ${practice.phone}.`
+          : `Got it — someone from the office will reach out to you shortly.`,
+        updatedFields,
+      };
+    }
+
+    case 'acknowledge_moved':
+      updatedFields.exit_reason = 'moved';
+      return {
+        replyText: `Totally understand — thanks for letting us know, and best of luck with the move. We'll close out your reminders here. Take care.`,
+        updatedFields,
+      };
+
+    case 'acknowledge_already_seen':
+      updatedFields.exit_reason = 'already_current';
+      return {
+        replyText: `Perfect — sounds like you're all set. We'll catch you at your next visit. Take care.`,
         updatedFields,
       };
 
@@ -632,7 +670,7 @@ async function executeAction(
 
     case 'clarify_intent':
       return {
-        replyText: `Just to make sure — were you looking to come in for a cleaning?`,
+        replyText: `Happy to help — did you want to get in for a visit, or are you all set for now?`,
         updatedFields,
       };
 
@@ -652,7 +690,7 @@ async function executeAction(
     case 'stay_in_stage':
     default:
       return {
-        replyText: `Just to make sure — were you looking to come in for a cleaning?`,
+        replyText: `Happy to help — want me to find you a time to come in, or are you all set?`,
         updatedFields,
       };
   }
