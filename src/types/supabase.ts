@@ -928,6 +928,8 @@ export type Database = {
           id: string
           last_sent_at: string | null
           link_clicked_at: string | null
+          link_followup_count: number
+          link_followup_last_sent_at: string | null
           link_followup_sent: boolean | null
           months_overdue: number
           next_send_at: string | null
@@ -955,6 +957,8 @@ export type Database = {
           id?: string
           last_sent_at?: string | null
           link_clicked_at?: string | null
+          link_followup_count?: number
+          link_followup_last_sent_at?: string | null
           link_followup_sent?: boolean | null
           months_overdue?: number
           next_send_at?: string | null
@@ -982,6 +986,8 @@ export type Database = {
           id?: string
           last_sent_at?: string | null
           link_clicked_at?: string | null
+          link_followup_count?: number
+          link_followup_last_sent_at?: string | null
           link_followup_sent?: boolean | null
           months_overdue?: number
           next_send_at?: string | null

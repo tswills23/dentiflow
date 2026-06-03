@@ -72,7 +72,7 @@ export async function runOrchestratorForAllPractices(): Promise<{
         console.error(`[recallCron] Attribution error for ${practiceId}:`, attrErr);
       }
 
-      // Send follow-up SMS to patients who clicked the link 24h+ ago but haven't booked
+      // Send link-click follow-ups: Stage 1 at +1h, Stage 2 at +24h if no reply
       try {
         await sendLinkFollowups(practiceId);
       } catch (fuErr) {
@@ -100,22 +100,41 @@ export async function runOrchestratorForAllPractices(): Promise<{
 }
 
 /**
- * Send follow-up SMS to patients who clicked the booking link 24h+ ago
- * but haven't been marked as booked yet. Asks them to confirm.
+ * Two-stage link-click follow-up for patients who clicked the booking link
+ * but haven't been marked as booked yet.
+ *   Stage 1 (link_followup_count 0 → 1): ~1h after the click. Skipped if the
+ *     patient already replied since clicking (a live conversation is handling it).
+ *   Stage 2 (link_followup_count 1 → 2): ~24h after Stage 1, only if the patient
+ *     never replied to the Stage 1 text.
+ * Booked patients are excluded automatically — booking attribution flips their
+ * sequence_status to 'completed', and both queries filter on 'active'.
  */
 async function sendLinkFollowups(practiceId: string): Promise<void> {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const now = Date.now();
+  const stage1Cutoff = new Date(now - 60 * 60 * 1000).toISOString(); // clicked ≥1h ago
+  const stage2Cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString(); // Stage 1 sent ≥24h ago
 
-  const { data: sequences } = await supabase
+  // Stage 1 candidates: clicked the link, no follow-up sent yet.
+  const { data: stage1 } = await supabase
     .from('recall_sequences')
     .select('id, patient_id, link_clicked_at')
     .eq('practice_id', practiceId)
     .eq('sequence_status', 'active')
-    .eq('link_followup_sent', false)
+    .eq('link_followup_count', 0)
     .not('link_clicked_at', 'is', null)
-    .lte('link_clicked_at', cutoff);
+    .lte('link_clicked_at', stage1Cutoff);
 
-  if (!sequences?.length) return;
+  // Stage 2 candidates: Stage 1 sent ≥24h ago, still active.
+  const { data: stage2 } = await supabase
+    .from('recall_sequences')
+    .select('id, patient_id, link_followup_last_sent_at')
+    .eq('practice_id', practiceId)
+    .eq('sequence_status', 'active')
+    .eq('link_followup_count', 1)
+    .not('link_followup_last_sent_at', 'is', null)
+    .lte('link_followup_last_sent_at', stage2Cutoff);
+
+  if (!stage1?.length && !stage2?.length) return;
 
   const { data: practice } = await supabase
     .from('practices')
@@ -124,54 +143,101 @@ async function sendLinkFollowups(practiceId: string): Promise<void> {
     .single();
 
   if (!practice?.twilio_phone) return;
+  const practiceName = practice.name;
+  const twilioPhone = practice.twilio_phone;
 
-  for (const seq of sequences) {
-    const { data: patient } = await supabase
-      .from('patients')
-      .select('first_name, phone, location')
-      .eq('id', seq.patient_id)
-      .single();
-
-    if (!patient?.phone) continue;
-
-    const firstName = patient.first_name || 'there';
-    const displayName = patient.location || practice.name;
-
-    const followupText = `Hey ${firstName}, were you able to grab a time at ${displayName}? Reply YES if you're all set — or let me know if anything got in the way.`;
-
-    const sendResult = await sendSMS(patient.phone, followupText, practice.twilio_phone);
-
-    if (sendResult.success) {
-      await saveMessage({
-        practiceId,
-        patientId: seq.patient_id,
-        channel: 'sms',
-        direction: 'outbound',
-        messageBody: followupText,
-        automationType: 'recall',
-        twilioSid: sendResult.sid,
-        metadata: { sequenceId: seq.id, action: 'link_followup' },
-      });
-    }
-
-    // Mark followup as sent regardless of delivery
-    await supabase
-      .from('recall_sequences')
-      .update({ link_followup_sent: true })
-      .eq('id', seq.id);
-
-    await logAutomation({
-      practiceId,
-      patientId: seq.patient_id,
-      automationType: 'recall',
-      action: 'link_followup',
-      result: sendResult.success ? 'sent' : 'failed',
-      messageBody: followupText,
-      metadata: { sequenceId: seq.id },
-    });
-
-    console.log(`[recallCron] Follow-up sent for sequence ${seq.id}`);
+  // Stage 1: send the first nudge unless they've already replied since clicking.
+  for (const seq of stage1 || []) {
+    if (await hasInboundSince(practiceId, seq.patient_id, seq.link_clicked_at)) continue;
+    await sendFollowup(practiceId, practiceName, twilioPhone, seq.id, seq.patient_id, 1);
   }
+
+  // Stage 2: send the second nudge only if they never replied to Stage 1.
+  for (const seq of stage2 || []) {
+    if (await hasInboundSince(practiceId, seq.patient_id, seq.link_followup_last_sent_at)) continue;
+    await sendFollowup(practiceId, practiceName, twilioPhone, seq.id, seq.patient_id, 2);
+  }
+}
+
+/** True if the patient has any inbound message after the given timestamp. */
+async function hasInboundSince(
+  practiceId: string,
+  patientId: string,
+  sinceIso: string | null
+): Promise<boolean> {
+  if (!sinceIso) return false;
+  const { data } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('practice_id', practiceId)
+    .eq('patient_id', patientId)
+    .eq('direction', 'inbound')
+    .gt('created_at', sinceIso)
+    .limit(1);
+  return !!data?.length;
+}
+
+/** Send a single follow-up touch and advance the cadence counter. */
+async function sendFollowup(
+  practiceId: string,
+  practiceName: string,
+  twilioPhone: string,
+  sequenceId: string,
+  patientId: string,
+  stage: 1 | 2
+): Promise<void> {
+  const { data: patient } = await supabase
+    .from('patients')
+    .select('first_name, phone, location')
+    .eq('id', patientId)
+    .single();
+
+  if (!patient?.phone) return;
+
+  const firstName = patient.first_name || 'there';
+  const displayName = patient.location || practiceName;
+
+  const followupText =
+    stage === 1
+      ? `Hey ${firstName}, were you able to grab a time at ${displayName}? Reply YES if you're all set — or let me know if anything got in the way.`
+      : `Hey ${firstName}, just circling back — still happy to help you find a time at ${displayName} if you didn't get a chance. Want me to text you a couple of openings?`;
+
+  const sendResult = await sendSMS(patient.phone, followupText, twilioPhone);
+
+  if (sendResult.success) {
+    await saveMessage({
+      practiceId,
+      patientId,
+      channel: 'sms',
+      direction: 'outbound',
+      messageBody: followupText,
+      automationType: 'recall',
+      twilioSid: sendResult.sid,
+      metadata: { sequenceId, action: 'link_followup', stage },
+    });
+  }
+
+  // Advance the cadence counter regardless of delivery so we don't loop.
+  await supabase
+    .from('recall_sequences')
+    .update({
+      link_followup_count: stage,
+      link_followup_last_sent_at: new Date().toISOString(),
+      link_followup_sent: true,
+    })
+    .eq('id', sequenceId);
+
+  await logAutomation({
+    practiceId,
+    patientId,
+    automationType: 'recall',
+    action: 'link_followup',
+    result: sendResult.success ? 'sent' : 'failed',
+    messageBody: followupText,
+    metadata: { sequenceId, stage },
+  });
+
+  console.log(`[recallCron] Link follow-up Stage ${stage} sent for sequence ${sequenceId}`);
 }
 
 export function startRecallCron(): void {
