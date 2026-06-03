@@ -253,8 +253,14 @@ function Recall({ practiceId }: RecallProps) {
     let filtered = sequences
 
     if (campaignStartDate) {
+      // Scope by SEND activity, not row creation. Sequences are reused across
+      // campaign rounds (e.g. a March-created sequence re-sent in June), so
+      // created_at reflects only the first round. last_sent_at is what "since
+      // this date" actually means for the contacted/funnel metrics.
       const start = new Date(campaignStartDate).getTime()
-      filtered = filtered.filter((s) => new Date(s.created_at).getTime() >= start)
+      filtered = filtered.filter(
+        (s) => s.last_sent_at !== null && new Date(s.last_sent_at).getTime() >= start
+      )
     }
 
     if (locationFilter !== 'all') {
@@ -270,7 +276,7 @@ function Recall({ practiceId }: RecallProps) {
     }
 
     return filtered
-  }, [sequences, locationFilter, voiceFilter, patients])
+  }, [sequences, locationFilter, voiceFilter, patients, campaignStartDate])
 
   // Campaign overview stats
   const stats = useMemo(() => {
@@ -351,7 +357,7 @@ function Recall({ practiceId }: RecallProps) {
     }
 
     return events
-  }, [activityLog, locationFilter, dayFilter])
+  }, [activityLog, locationFilter, dayFilter, campaignStartDate])
 
   const timeAgo = useCallback((dateStr: string): string => {
     const date = new Date(dateStr)
