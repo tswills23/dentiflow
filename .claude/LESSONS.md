@@ -16,3 +16,5 @@ short bullet so it survives and stays signal, not noise.
 ## Lessons
 
 <!-- Add entries below. Newest at top. -->
+
+- **Don't use PowerShell here-strings (`@'...'@`) in the Bash tool** — bash treats the leading `@` as a literal char, so it leaked into a git commit subject (`@ feat(...)`). For multi-line commit messages in the Bash tool, use a real heredoc: `git commit -F - <<'EOF' ... EOF`. (2026-06-04)
