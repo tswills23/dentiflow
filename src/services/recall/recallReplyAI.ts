@@ -23,6 +23,7 @@ import { generateStructuredJSON } from '../execution/aiClientJSON';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 import { validateResponse, resolvePracticeAddress } from '../execution/responseValidator';
+import { day3DeadlineTestEnabled, isDay3DeadlineArm, computeOfferDeadline } from './offerDeadline';
 import { getTransition } from './bookingStateMachine';
 import { extractProviderNames } from './outreachEngine';
 import { loadDirectives } from '../orchestration/stlDirectiveLoader';
@@ -560,11 +561,27 @@ function buildUserMessage(input: RecallAIInput): string {
 
   const practiceAddress = resolvePracticeAddress(input.practice, input.patient.location);
 
+  // Day 3 deadline A/B (treatment arm only): surface the offer expiry so the AI
+  // can answer "when does the 30% off end?" instead of dodging.
+  let offerDeadlineLine = '';
+  const day3SentAt = input.sequence?.last_sent_at;
+  const patientPhone = input.patient.phone;
+  if (
+    input.sequence?.sequence_day === 3 &&
+    day3SentAt &&
+    patientPhone &&
+    day3DeadlineTestEnabled(input.practice) &&
+    isDay3DeadlineArm(patientPhone)
+  ) {
+    const deadline = computeOfferDeadline(String(day3SentAt), input.practice, 5);
+    offerDeadlineLine = `\nOffer deadline (the 30% off is good through this date — state it ONLY if the patient asks about the offer or when it ends; never volunteer it): ${deadline}`;
+  }
+
   return `# Practice Context
 Practice: ${input.practice.name}
 Doctor: Dr. ${doctorName}
 Booking link (DO NOT invent another): ${input.bookingLinkUrl || '(none)'}
-Practice address (give this verbatim ONLY if the patient explicitly asks where you are / for the address / for directions — otherwise never mention it): ${practiceAddress || '(none on file — do not give an address)'}
+Practice address (give this verbatim ONLY if the patient explicitly asks where you are / for the address / for directions — otherwise never mention it): ${practiceAddress || '(none on file — do not give an address)'}${offerDeadlineLine}
 
 # Patient Context
 First name: ${input.patient.first_name || 'there'}

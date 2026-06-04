@@ -233,6 +233,28 @@ const TEMPLATES: TemplateBank = {
 };
 
 // =============================================================================
+// DAY 3 DEADLINE OFFER (A/B TEST — treatment arm)
+// Identical to the standard Day 3 copy except for a "good through {{Offer
+// Deadline}}" expiry. {{Offer Deadline}} auto-fills as send date + 5 days.
+// Hygienist uses v2 only (v1 dropped per partner); v1 mirrors v2 as a safety
+// net so an accidental v1 lookup still renders correct copy.
+// =============================================================================
+const DAY3_DEADLINE: Record<RecallVoice, Record<TemplateVariant, RecallTemplate>> = {
+  office: {
+    v1: { subject: '', body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in, good through {{Offer Deadline}}. Grab a time: {{Booking Link}}` },
+    v2: { subject: '', body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and 30% off if you come back in by {{Offer Deadline}}. Grab it if you want it: {{Booking Link}}` },
+  },
+  hygienist: {
+    v1: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you come back in by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
+    v2: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you come back in by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
+  },
+  doctor: {
+    v1: { subject: '', body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. 30% off when you come back in, good through {{Offer Deadline}}: {{Booking Link}}` },
+    v2: { subject: '', body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've taken 30% off your visit back, good through {{Offer Deadline}}. If there's ever a time to come in, it's now: {{Booking Link}}` },
+  },
+};
+
+// =============================================================================
 // TEMPLATE SELECTION & RENDERING
 // =============================================================================
 
@@ -240,12 +262,18 @@ export function selectTemplate(
   assignedVoice: RecallVoice,
   sequenceDay: SequenceDay,
   patientPhone: string,
-  experimentArm?: string | null
+  experimentArm?: string | null,
+  useDeadlineOffer = false
 ): RecallTemplate {
   // MD5 hash of phone → deterministic variant selection (mod 2)
   const hash = createHash('md5').update(patientPhone).digest('hex');
   const hashInt = parseInt(hash.substring(0, 8), 16);
   let variantNum = (hashInt % 2) + 1;
+
+  // Hygienist Day 3 uses v2 only — v1 dropped per partner (2026-06-04).
+  if (assignedVoice === 'hygienist' && sequenceDay === 3) {
+    variantNum = 2;
+  }
 
   // Mid-experiment override (2026-05-13): doctor Day 1 v1 reads too jargon-y
   // ("things I wish I'd seen earlier — they never announced themselves").
@@ -260,18 +288,20 @@ export function selectTemplate(
   // doctor voice is off for Day 3 — those patients receive the office voice
   // Day 3 offer instead. Scoped to A/B sequences (experiment_arm set) so
   // post-test campaigns retain all three voices on Day 3.
-  if (
-    assignedVoice === 'doctor' &&
-    sequenceDay === 3 &&
-    experimentArm === 'control_voice'
-  ) {
-    const variantId = `v${variantNum}` as TemplateVariant;
-    return TEMPLATES.office[3][variantId];
-  }
+  const day3Voice: RecallVoice =
+    assignedVoice === 'doctor' && sequenceDay === 3 && experimentArm === 'control_voice'
+      ? 'office'
+      : assignedVoice;
 
   const variantId = `v${variantNum}` as TemplateVariant;
 
-  return TEMPLATES[assignedVoice][sequenceDay][variantId];
+  // Day 3 deadline A/B (treatment arm): same copy + "good through {{Offer
+  // Deadline}}". Only applies on Day 3.
+  if (useDeadlineOffer && sequenceDay === 3) {
+    return DAY3_DEADLINE[day3Voice][variantId];
+  }
+
+  return TEMPLATES[day3Voice][sequenceDay][variantId];
 }
 
 export function renderTemplate(
@@ -280,7 +310,8 @@ export function renderTemplate(
   practiceName: string,
   doctorName: string,
   hygienistName: string,
-  bookingLink?: string
+  bookingLink?: string,
+  offerDeadline?: string
 ): string {
   let body = template.body;
 
@@ -291,6 +322,9 @@ export function renderTemplate(
   if (bookingLink) {
     body = body.replace(/\{\{Booking Link\}\}/g, bookingLink);
   }
+  if (offerDeadline) {
+    body = body.replace(/\{\{Offer Deadline\}\}/g, offerDeadline);
+  }
 
   return body;
 }
@@ -299,7 +333,8 @@ export function getTemplateId(
   assignedVoice: RecallVoice,
   sequenceDay: SequenceDay,
   patientPhone: string,
-  experimentArm?: string | null
+  experimentArm?: string | null,
+  useDeadlineOffer = false
 ): string {
   const hash = createHash('md5').update(patientPhone).digest('hex');
   const hashInt = parseInt(hash.substring(0, 8), 16);
@@ -308,14 +343,17 @@ export function getTemplateId(
   if (assignedVoice === 'doctor' && sequenceDay === 1) {
     variantNum = 2;
   }
+  // Match selectTemplate override — hygienist Day 3 is v2 only.
+  if (assignedVoice === 'hygienist' && sequenceDay === 3) {
+    variantNum = 2;
+  }
   // Match selectTemplate override — doctor Day 3 routes to office voice
   // for the A/B test only.
-  if (
-    assignedVoice === 'doctor' &&
-    sequenceDay === 3 &&
-    experimentArm === 'control_voice'
-  ) {
-    return `office_day3_v${variantNum}`;
-  }
-  return `${assignedVoice}_day${sequenceDay}_v${variantNum}`;
+  const day3Voice =
+    assignedVoice === 'doctor' && sequenceDay === 3 && experimentArm === 'control_voice'
+      ? 'office'
+      : assignedVoice;
+  // Deadline arm gets a "_dl" suffix so sends are distinguishable in logs.
+  const suffix = useDeadlineOffer && sequenceDay === 3 ? '_dl' : '';
+  return `${day3Voice}_day${sequenceDay}_v${variantNum}${suffix}`;
 }

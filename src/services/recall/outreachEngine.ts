@@ -11,6 +11,7 @@ import { saveMessage } from '../execution/conversationStore';
 import { logAutomation } from '../execution/metricsTracker';
 import { selectTemplate, renderTemplate, getTemplateId } from './templates';
 import { OFFER_DAY0, OFFER_TEMPLATE_ID } from './offerTemplates';
+import { day3DeadlineTestEnabled, isDay3DeadlineArm, computeOfferDeadline } from './offerDeadline';
 import type { RecallSequence, OutreachResult, SequenceDay } from '../../types/recall';
 import type { Practice, Patient, Provider } from '../../types/database';
 
@@ -182,6 +183,17 @@ async function sendOutreachSMS(
   }
   const bookingLink = `${BACKEND_URL}/r/${bookingLinkToken}`;
 
+  // Day 3 "30% off" deadline A/B (gated by practice_config.day3_deadline_test).
+  // When on, ~half the patients (deterministic phone hash) get the deadline copy
+  // with {{Offer Deadline}} = send date + 5 days (skipping closed days).
+  const useDeadlineOffer =
+    seq.sequence_day === 3 &&
+    day3DeadlineTestEnabled(practice) &&
+    isDay3DeadlineArm(patient.phone);
+  const offerDeadline = useDeadlineOffer
+    ? computeOfferDeadline(new Date().toISOString(), practice, 5)
+    : undefined;
+
   // Select and render template — Arm B (offer_only) uses fixed offer copy on Day 0,
   // Arm A (control_voice) and non-experiment sequences use the partner-locked template bank.
   const isOfferArm = seq.experiment_arm === 'offer_only';
@@ -191,7 +203,8 @@ async function sendOutreachSMS(
         seq.assigned_voice,
         seq.sequence_day as SequenceDay,
         patient.phone,
-        seq.experiment_arm
+        seq.experiment_arm,
+        useDeadlineOffer
       );
   const templateId = isOfferArm
     ? OFFER_TEMPLATE_ID
@@ -199,7 +212,8 @@ async function sendOutreachSMS(
         seq.assigned_voice,
         seq.sequence_day as SequenceDay,
         patient.phone,
-        seq.experiment_arm
+        seq.experiment_arm,
+        useDeadlineOffer
       );
   // Use patient location as display name when available, otherwise practice name
   const displayName = patient.location || practice.name;
@@ -212,7 +226,8 @@ async function sendOutreachSMS(
     displayName,
     doctorName,
     hygienistName,
-    bookingLink
+    bookingLink,
+    offerDeadline
   );
 
   // Send SMS
