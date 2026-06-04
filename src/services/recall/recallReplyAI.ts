@@ -22,7 +22,7 @@ import { generateStructuredJSON } from '../execution/aiClientJSON';
 // Types generated pre-migration. See memory/supabase-types-debugging.md.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
-import { validateResponse } from '../execution/responseValidator';
+import { validateResponse, resolvePracticeAddress } from '../execution/responseValidator';
 import { getTransition } from './bookingStateMachine';
 import { extractProviderNames } from './outreachEngine';
 import { loadDirectives } from '../orchestration/stlDirectiveLoader';
@@ -489,7 +489,7 @@ You MUST NEVER write any of these:
 - Diagnoses or clinical advice ("you might have", "your tooth is probably")
 - Medication recommendations or prescription language
 - Insurance acceptance claims ("we accept Cigna", "we're in-network")
-- Street addresses
+- Any street address OTHER than the exact "Practice address" given in the user-context block. If — and only if — the patient explicitly asks where you're located, for your address, or for directions, you MAY reply with that exact address copied verbatim. Never alter, abbreviate, paraphrase, or invent any part of an address, and never volunteer the address unprompted. If no Practice address is present in the context block, do not give one.
 - References to x-rays, charts, scans, or patient records
 - Past visit references with month counts other than the rounded phrase from context
 - Statements of fact not present in the user-context block
@@ -558,10 +558,13 @@ function buildUserMessage(input: RecallAIInput): string {
     overdueRounded >= 3 ? 'a few months' :
     'a bit';
 
+  const practiceAddress = resolvePracticeAddress(input.practice, input.patient.location);
+
   return `# Practice Context
 Practice: ${input.practice.name}
 Doctor: Dr. ${doctorName}
 Booking link (DO NOT invent another): ${input.bookingLinkUrl || '(none)'}
+Practice address (give this verbatim ONLY if the patient explicitly asks where you are / for the address / for directions — otherwise never mention it): ${practiceAddress || '(none on file — do not give an address)'}
 
 # Patient Context
 First name: ${input.patient.first_name || 'there'}

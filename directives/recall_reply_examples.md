@@ -132,21 +132,25 @@ These examples teach Claude how to classify intent + craft a reply for the recal
 
 ---
 
-## Example 8 — Patient asks about location (S0_OPENING)
+## Example 8 — Patient explicitly asks for the address (S0_OPENING)
 
-**Patient:** "are you near the Walmart?"
+**Patient:** "What's your address?"
+
+(Context block contains — Practice address: 958 Elk Grove Town Center, Elk Grove Village, IL 60007)
 
 **Response:**
 ```json
 {
   "intent": "identify_practice",
   "next_state": "S0_OPENING",
-  "action": "identify_practice",
-  "reply_text": "This is Village Dental. We can confirm directions when we get you scheduled — want me to find a time first?",
-  "confidence": 0.85,
-  "reasoning": "Patient wants location confirmation. Identify practice but DO NOT invent address. Pivot to booking."
+  "action": "give_address",
+  "reply_text": "We're at 958 Elk Grove Town Center, Elk Grove Village, IL 60007. Want me to get you on the schedule while I've got you?",
+  "confidence": 0.9,
+  "reasoning": "Patient explicitly asked for the address. Give the exact Practice address from the context block verbatim, then pivot to booking."
 }
 ```
+
+**If NO Practice address is present in the context block**, do not invent one — identify the practice and pivot: "This is Village Dental — we can confirm directions when we get you scheduled. Want me to find a time first?"
 
 ---
 

@@ -129,14 +129,58 @@ export function getSafeTemplate(intent: string, practice: Practice): string {
   }
 }
 
+// Normalize an address for forgiving substring matching: lowercase, strip
+// commas/periods, collapse whitespace.
+function normalizeAddr(s: string): string {
+  return s.toLowerCase().replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// All verified, configured addresses for this practice — per-location addresses
+// in practice_config.location_addresses plus the practice-level address column.
+// These are the ONLY addresses the AI is permitted to emit.
+export function getPracticeAddresses(practice: Practice): string[] {
+  const cfg = practice.practice_config as Record<string, unknown> | null | undefined;
+  const out: string[] = [];
+  const map = cfg?.location_addresses as Record<string, string> | undefined;
+  if (map) for (const v of Object.values(map)) if (typeof v === 'string' && v.trim()) out.push(v.trim());
+  if (typeof practice.address === 'string' && practice.address.trim()) out.push(practice.address.trim());
+  return out;
+}
+
+// Resolve the single address to hand the AI for a given patient location.
+// Exact location match wins; otherwise fall back to the sole configured address
+// (single-location practices) or the practice-level address column.
+export function resolvePracticeAddress(practice: Practice, location?: string | null): string | null {
+  const cfg = practice.practice_config as Record<string, unknown> | null | undefined;
+  const map = cfg?.location_addresses as Record<string, string> | undefined;
+  if (map && location && typeof map[location] === 'string' && map[location].trim()) return map[location].trim();
+  if (map) {
+    const vals = Object.values(map).filter((v): v is string => typeof v === 'string' && !!v.trim());
+    if (vals.length === 1) return vals[0].trim();
+  }
+  if (typeof practice.address === 'string' && practice.address.trim()) return practice.address.trim();
+  return null;
+}
+
 export function validateResponse(
   response: string,
   intent: string,
   practice: Practice
 ): ValidationResult {
+  // The verified practice address is allowed to appear verbatim; only invented
+  // addresses are blocked. Match on the street line (text before the first comma)
+  // since that's the portion the address_leak regex catches.
+  const normResponse = normalizeAddr(response);
+  const allowedStreetLines = getPracticeAddresses(practice)
+    .map(a => normalizeAddr(a.split(',')[0]))
+    .filter(line => line.length > 5 && /\d/.test(line));
+
   // Check against blocked patterns
   for (const { pattern, reason } of BLOCKED_PATTERNS) {
     if (pattern.test(response)) {
+      if (reason === 'address_leak' && allowedStreetLines.some(line => normResponse.includes(line))) {
+        continue; // verified practice address — not a leak
+      }
       const safeResponse = getSafeTemplate(intent, practice);
       return {
         valid: false,
