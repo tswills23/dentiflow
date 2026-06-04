@@ -16,6 +16,9 @@ nul
 supabase/.temp/
 .claude/scheduled_tasks.lock
 
+# Auto-captured command-failure log (runtime noise; LESSONS.md is the kept layer)
+.claude/failures.jsonl
+
 # CallRail recordings — PHI (patient call audio + transcripts). NEVER commit.
 callrail-puller/recordings/
 scripts/.callback-sheet-id.txt
