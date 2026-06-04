@@ -102,8 +102,10 @@ export async function runOrchestratorForAllPractices(): Promise<{
 /**
  * Two-stage link-click follow-up for patients who clicked the booking link
  * but haven't been marked as booked yet.
- *   Stage 1 (link_followup_count 0 → 1): ~1h after the click. Skipped if the
+ *   Stage 1 (link_followup_count 0 → 1): ~3h after the click. Skipped if the
  *     patient already replied since clicking (a live conversation is handling it).
+ *     Widened from 1h → 3h (Jeffrey Wilson incident 2026-06-04): a 1h nudge hit
+ *     patients who were still mid-booking and read as spam.
  *   Stage 2 (link_followup_count 1 → 2): ~24h after Stage 1, only if the patient
  *     never replied to the Stage 1 text.
  * Booked patients are excluded automatically — booking attribution flips their
@@ -111,7 +113,7 @@ export async function runOrchestratorForAllPractices(): Promise<{
  */
 async function sendLinkFollowups(practiceId: string): Promise<void> {
   const now = Date.now();
-  const stage1Cutoff = new Date(now - 60 * 60 * 1000).toISOString(); // clicked ≥1h ago
+  const stage1Cutoff = new Date(now - 3 * 60 * 60 * 1000).toISOString(); // clicked ≥3h ago
   const stage2Cutoff = new Date(now - 24 * 60 * 60 * 1000).toISOString(); // Stage 1 sent ≥24h ago
 
   // Stage 1 candidates: clicked the link, no follow-up sent yet.

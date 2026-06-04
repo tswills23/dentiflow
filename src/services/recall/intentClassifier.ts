@@ -36,6 +36,14 @@ const OPT_OUT_KEYWORDS = [
   'dont contact', "don't contact", 'do not contact', 'leave me alone',
   'take me off', 'remove from list', 'no more emails', 'no more',
   // NOTE: "spam" removed — "is this spam?" is a curiosity question, not a STOP request
+  // Over-contact / frustration phrasings (Jeffrey Wilson incident 2026-06-04): a patient
+  // annoyed at the texting frequency is a stop request. These slipped past 'stop texting'
+  // because of different word boundaries ("stop text spamming" != "stop texting"), fell to
+  // the LLM, and got a follow-up question right after asking us to stop. Honor as opt-out.
+  // Kept conservative/unambiguous to avoid false-positive permanent opt-outs.
+  'stop spamming', 'spamming me', 'text spamming', 'stop the texts', 'stop the text',
+  'quit texting', 'too many texts', 'too many text', 'you keep texting', 'keep texting me',
+  'stop sending texts', 'stop sending me text', 'stop with the text', 'enough texts',
 ];
 
 // Returns true if the message is *effectively* a single TCPA opt-out token
