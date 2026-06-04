@@ -112,6 +112,21 @@ const RECORDS_KEYWORDS = [
   'records you have', 'records that you', 'copy of my records',
 ];
 
+// Patient believes they ALREADY have an appointment ("I thought I was already set
+// for my date"). We can't see the PMS schedule, so we must NOT push another booking
+// link (Zahir Nooran incident 2026-06-04: a patient who thought he was booked got a
+// 4th "grab a time" link from the LLM). Route to a human so the office verifies the
+// appointment and confirms — never re-push the link, never falsely mark as booked.
+// Kept distinct from BOOKED_CONFIRMATION (definitive "I booked it" → S6); these are
+// the uncertain / "thought I was set" cases that need verification.
+const ALREADY_BOOKED_KEYWORDS = [
+  'already set', 'thought i was set', 'thought i was already', 'i was already set',
+  'already have an appointment', 'already have an appt', 'already have a appointment',
+  'already have a date', 'thought i had an appointment', 'thought i had an appt',
+  'thought i booked', 'thought i was booked', 'thought we were set',
+  'i have an appointment already', 'thought i had a date',
+];
+
 // Patient has moved / relocated and can't come anymore → warm exit, no booking push.
 const MOVED_KEYWORDS = [
   'moved', 'relocated', 'moving away', 'move away', 'out of state',
@@ -120,6 +135,73 @@ const MOVED_KEYWORDS = [
   "don't live", 'dont live', 'no longer live', "i've moved", 'ive moved',
   'left the area', 'too far away', 'far away now',
 ];
+
+// Month name → 0-indexed month, with common abbreviations.
+const MONTHS: Record<string, number> = {
+  january: 0, jan: 0, february: 1, feb: 1, march: 2, mar: 2, april: 3, apr: 3,
+  may: 4, june: 5, jun: 5, july: 6, jul: 6, august: 7, aug: 7,
+  september: 8, sep: 8, sept: 8, october: 9, oct: 9, november: 10, nov: 10,
+  december: 11, dec: 11,
+};
+
+// Explicit "reach back out later" framings that are TEMPORARY (not a permanent move —
+// that's MOVED_KEYWORDS). Zahir/Frank incident 2026-06-04: "won't be in Itasca until
+// July" must be captured as a timed deferral so we re-engage when they asked, instead
+// of getting a generic "is it timing or did you find somewhere else?" question.
+const DEFER_PHRASES = [
+  'out of town', 'out of the country', 'on vacation', 'traveling', 'travelling',
+  'away until', 'not be around', "won't be around", 'wont be around',
+  "won't be in town", 'wont be in town', 'not be in town', 'back in town',
+  'until the summer', 'until the fall', 'until the spring', 'until the winter',
+  'after the summer', 'after the holidays', 'after the new year',
+  'a few months', 'couple months', 'couple of months', 'few months',
+  'in a few weeks', 'in a couple weeks', 'next month', 'next year', 'later this year',
+];
+
+// Month anchored by a deferral word ("until July", "back in August"). Anchored so a bare
+// "in January" (often a booking preference) does NOT count, but explicit defers do.
+const MONTH_DEFER_RE = new RegExp(
+  `\\b(until|by|after|around|back in|come|not until|gone until|out until)\\s+(${Object.keys(MONTHS).join('|')})\\b`,
+  'i'
+);
+
+// True if the message is a deferral with a real timeframe ("until July", "out of town",
+// "in a few months"). Date-independent — see parseDeferTimeframe for the actual date.
+export function isTimeframeDefer(text: string): boolean {
+  const t = text.toLowerCase();
+  return matchAny(t, DEFER_PHRASES) || MONTH_DEFER_RE.test(t);
+}
+
+// Parse the patient's stated timeframe into a concrete re-engage date.
+// Returns null if nothing parseable (caller falls back to a sensible default).
+export function parseDeferTimeframe(text: string, now: Date = new Date()): Date | null {
+  const t = text.toLowerCase();
+
+  let m = t.match(/\bin\s+(\d{1,2})\s+weeks?\b/) || t.match(/\b(\d{1,2})\s+weeks?\b/);
+  if (m) return new Date(now.getTime() + parseInt(m[1], 10) * 7 * 86400000);
+
+  m = t.match(/\bin\s+(\d{1,2})\s+months?\b/) || t.match(/\b(\d{1,2})\s+months?\b/);
+  if (m) { const d = new Date(now); d.setMonth(d.getMonth() + parseInt(m[1], 10)); return d; }
+
+  const mm = t.match(MONTH_DEFER_RE);
+  if (mm) {
+    const month = MONTHS[mm[2].toLowerCase()];
+    const d = new Date(now.getFullYear(), month, 1);
+    if (month <= now.getMonth()) d.setFullYear(now.getFullYear() + 1); // next occurrence
+    return d;
+  }
+
+  if (/\bnext year\b/.test(t)) { const d = new Date(now); d.setFullYear(d.getFullYear() + 1); return d; }
+  if (/\bnext month\b/.test(t)) return new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  if (/\b(a few months|few months|couple months|couple of months)\b/.test(t)) { const d = new Date(now); d.setMonth(d.getMonth() + 3); return d; }
+  if (/\b(a few weeks|couple weeks|couple of weeks|in a few weeks|in a couple weeks)\b/.test(t)) return new Date(now.getTime() + 21 * 86400000);
+  if (/\b(after the summer|until the summer|in the fall|until the fall)\b/.test(t)) { const d = new Date(now.getFullYear(), 8, 1); if (now.getMonth() >= 8) d.setFullYear(now.getFullYear() + 1); return d; }
+  if (/\b(after the holidays|after the new year|until the new year|until the winter)\b/.test(t)) return new Date(now.getFullYear() + 1, 0, 15);
+  if (/\b(in the spring|until the spring)\b/.test(t)) { const d = new Date(now.getFullYear(), 2, 1); if (now.getMonth() >= 2) d.setFullYear(now.getFullYear() + 1); return d; }
+  if (/\blater this year\b/.test(t)) { const d = new Date(now); d.setMonth(d.getMonth() + 3); return d; }
+
+  return null;
+}
 
 // Patient was recently seen / is already current → acknowledge, don't push booking.
 const ALREADY_HANDLED_KEYWORDS = [
@@ -142,7 +224,12 @@ function isBarePhoneNumber(text: string): boolean {
 // Returns the intent, or null if none apply. Used by both the main classifier and
 // the pre-LLM critical filter so these sensitive cases are handled reliably, not by the LLM.
 function classifyHumanOrExit(textLower: string, rawText: string): RecallIntent | null {
-  if (matchAny(textLower, CALLBACK_KEYWORDS) || matchAny(textLower, RECORDS_KEYWORDS) || isBarePhoneNumber(rawText)) {
+  if (
+    matchAny(textLower, CALLBACK_KEYWORDS) ||
+    matchAny(textLower, RECORDS_KEYWORDS) ||
+    matchAny(textLower, ALREADY_BOOKED_KEYWORDS) ||
+    isBarePhoneNumber(rawText)
+  ) {
     return 'needs_human';
   }
   if (matchAny(textLower, MOVED_KEYWORDS)) return 'moved';
@@ -455,6 +542,13 @@ export function classifyIntent(
     return { intent: humanOrExit, confidence: 'high', matchedKeywords: [humanOrExit], rawText: text };
   }
 
+  // 3d. TIMED DEFERRAL — "back in July" / "out of town" / "in a few months". Captured
+  //     before booking_interest so a clear deferral isn't read as interest, and so we
+  //     re-engage at their timeframe instead of asking a redundant timing question.
+  if (isTimeframeDefer(text)) {
+    return { intent: 'deferred', confidence: 'high', matchedKeywords: ['deferred_timeframe'], rawText: text };
+  }
+
   // 4. STAGE-SPECIFIC: S4_AVAILABILITY
   if (currentStage === 'S4_AVAILABILITY') {
     const slotMatch = checkSlotSelection(textClean);
@@ -601,7 +695,7 @@ export function extractSlotNumber(text: string): number | null {
 
 export type CriticalIntent =
   | 'opt_out' | 'urgent' | 'wrong_number' | 'slot_selection'
-  | 'needs_human' | 'moved' | 'already_handled';
+  | 'needs_human' | 'moved' | 'already_handled' | 'deferred';
 
 export function classifyCriticalIntent(
   text: string,
@@ -626,6 +720,11 @@ export function classifyCriticalIntent(
   const humanOrExit = classifyHumanOrExit(t, text);
   if (humanOrExit) {
     return { intent: humanOrExit as CriticalIntent, matched: [humanOrExit] };
+  }
+  // Timed deferral handled deterministically so defer_until + the office log are always
+  // written (the LLM path leaves updatedFields empty and never sets defer_until).
+  if (isTimeframeDefer(text)) {
+    return { intent: 'deferred', matched: ['deferred_timeframe'] };
   }
   if (currentStage === 'S4_AVAILABILITY') {
     const clean = t.replace(/[^\w\s]/g, '');

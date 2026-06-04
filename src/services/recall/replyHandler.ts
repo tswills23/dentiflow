@@ -8,7 +8,7 @@ import { supabase } from '../../lib/supabase';
 import { sendSMS } from '../execution/smsService';
 import { saveMessage } from '../execution/conversationStore';
 import { logAutomation } from '../execution/metricsTracker';
-import { classifyIntent, classifyCriticalIntent, parsePreferences, extractSlotNumber } from './intentClassifier';
+import { classifyIntent, classifyCriticalIntent, parsePreferences, extractSlotNumber, parseDeferTimeframe } from './intentClassifier';
 import { getTransition } from './bookingStateMachine';
 import { getAvailableSlots, getDefaultSlots, slotsToDisplayList, getSlotByNumber } from './slotSelector';
 import { generateRecallReply, type RecallAIDecision } from './recallReplyAI';
@@ -47,6 +47,7 @@ const DETERMINISTIC_ACTIONS = new Set([
   'handoff_general',
   'acknowledge_moved',
   'acknowledge_already_seen',
+  'defer_to_timeframe',
 ]);
 
 // Actions that need the booking URL appended to Claude's reply if missing.
@@ -596,6 +597,39 @@ async function executeAction(
         replyText: `No worries. Is it a timing thing, or did you end up finding somewhere else?`,
         updatedFields,
       };
+
+    case 'defer_to_timeframe': {
+      // Patient gave a real timeframe ("back in July", "out of town", "in a few months").
+      // Park the sequence until that date so the re-entry cron reaches back out exactly
+      // when they asked — and log them to the office follow-up list for oversight.
+      // No either/or question: they already told us the reason.
+      const reengage = parseDeferTimeframe(messageBody) ?? new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
+      updatedFields.defer_until = reengage.toISOString();
+      updatedFields.exit_reason = 'deferred';
+
+      const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthLabel = MONTH_NAMES[reengage.getMonth()];
+
+      // Office follow-up log — best-effort, never block the reply.
+      try {
+        await supabase.from('callback_requests').insert({
+          practice_id: practice.id,
+          patient_id: patient.id,
+          patient_name: [patient.first_name, patient.last_name].filter(Boolean).join(' ') || null,
+          phone: patient.phone || null,
+          request_type: 'deferred_followup',
+          message: `[re-engage ~${reengage.toISOString().slice(0, 10)}] ${messageBody}`,
+        });
+      } catch (e) {
+        console.error('[replyHandler] deferred_followup insert failed:', e instanceof Error ? e.message : e);
+      }
+
+      return {
+        replyText: `No problem at all — we'll reach back out around ${monthLabel} when the timing's better. Take care.`,
+        updatedFields,
+      };
+    }
 
     case 'acknowledge_decline':
       return {

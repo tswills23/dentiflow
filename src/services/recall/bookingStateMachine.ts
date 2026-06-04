@@ -132,6 +132,13 @@ const TRANSITIONS: Partial<Record<TransitionKey, RecallStage>> = {
   'S3_TIME_PREF:already_handled': 'EXIT_DECLINED',
   'S4_AVAILABILITY:already_handled': 'EXIT_DECLINED',
   'S5_CONFIRMATION:already_handled': 'EXIT_DECLINED',
+
+  // deferred (timed) → park until the patient's stated timeframe, then auto re-enter.
+  'S0_OPENING:deferred': 'EXIT_DEFERRED',
+  'S1_INTENT:deferred': 'EXIT_DEFERRED',
+  'S3_TIME_PREF:deferred': 'EXIT_DEFERRED',
+  'S4_AVAILABILITY:deferred': 'EXIT_DEFERRED',
+  'S5_CONFIRMATION:deferred': 'EXIT_DEFERRED',
 };
 
 // =============================================================================
@@ -240,6 +247,12 @@ const ACTIONS: Partial<Record<TransitionKey, string>> = {
   'S3_TIME_PREF:already_handled': 'acknowledge_already_seen',
   'S4_AVAILABILITY:already_handled': 'acknowledge_already_seen',
   'S5_CONFIRMATION:already_handled': 'acknowledge_already_seen',
+
+  'S0_OPENING:deferred': 'defer_to_timeframe',
+  'S1_INTENT:deferred': 'defer_to_timeframe',
+  'S3_TIME_PREF:deferred': 'defer_to_timeframe',
+  'S4_AVAILABILITY:deferred': 'defer_to_timeframe',
+  'S5_CONFIRMATION:deferred': 'defer_to_timeframe',
 };
 
 // =============================================================================

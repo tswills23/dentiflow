@@ -54,6 +54,7 @@ export type RecallIntent =
   | 'needs_human'
   | 'moved'
   | 'already_handled'
+  | 'deferred'
   | 'unclear';
 
 export type IntentConfidence = 'high' | 'medium' | 'low';
