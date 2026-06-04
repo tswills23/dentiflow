@@ -105,7 +105,15 @@ app.use((req, _res, next) => {
 
 // Health check
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'dentiflow-stl', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    service: 'dentiflow-stl',
+    // Railway injects the deployed commit SHA into every container. Surfacing it
+    // here lets us verify a deploy actually landed (vs. a silent build failure
+    // serving the last-good container) with a plain curl — no Railway auth needed.
+    commit: (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ── Webhook routes (each has own auth) ───────────────────────────────
