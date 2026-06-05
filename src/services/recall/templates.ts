@@ -254,6 +254,13 @@ const DAY3_DEADLINE: Record<RecallVoice, Record<TemplateVariant, RecallTemplate>
   },
 };
 
+// Existing-patient reassurance (partner-approved 2026-06-05). Ascend's public
+// booking link is the new-patient funnel (/soe/new/), so returning patients see
+// a "new patient" label and some abandon. Appended to every link-bearing message
+// (Day 1 + Day 3) to preempt that drop-off. No banned words (file/chart/record),
+// no time-gap language.
+const NEW_PATIENT_NOTE = `\n\nIf it says "new patient," that's normal — just keep going.`;
+
 // =============================================================================
 // TEMPLATE SELECTION & RENDERING
 // =============================================================================
@@ -324,6 +331,11 @@ export function renderTemplate(
   }
   if (offerDeadline) {
     body = body.replace(/\{\{Offer Deadline\}\}/g, offerDeadline);
+  }
+
+  // Append the existing-patient reassurance to any message carrying a link.
+  if (bookingLink) {
+    body += NEW_PATIENT_NOTE;
   }
 
   return body;
