@@ -574,7 +574,7 @@ function buildUserMessage(input: RecallAIInput): string {
     isDay3DeadlineArm(patientPhone)
   ) {
     const deadline = computeOfferDeadline(String(day3SentAt), input.practice, 5);
-    offerDeadlineLine = `\nOffer deadline (the 30% off is good through this date — state it ONLY if the patient asks about the offer or when it ends; never volunteer it): ${deadline}`;
+    offerDeadlineLine = `\nOffer deadline (to get the 30% off they need to BOOK by this date, not complete the visit by it — state it ONLY if the patient asks about the offer or when it ends; never volunteer it): ${deadline}`;
   }
 
   return `# Practice Context

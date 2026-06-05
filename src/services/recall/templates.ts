@@ -234,23 +234,23 @@ const TEMPLATES: TemplateBank = {
 
 // =============================================================================
 // DAY 3 DEADLINE OFFER (A/B TEST — treatment arm)
-// Identical to the standard Day 3 copy except for a "good through {{Offer
-// Deadline}}" expiry. {{Offer Deadline}} auto-fills as send date + 5 days.
+// Identical to the standard Day 3 copy except for a "book by {{Offer Deadline}}"
+// deadline (BOOK by, not visit by). {{Offer Deadline}} auto-fills as send date + 5 days.
 // Hygienist uses v2 only (v1 dropped per partner); v1 mirrors v2 as a safety
 // net so an accidental v1 lookup still renders correct copy.
 // =============================================================================
 const DAY3_DEADLINE: Record<RecallVoice, Record<TemplateVariant, RecallTemplate>> = {
   office: {
-    v1: { subject: '', body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in, good through {{Offer Deadline}}. Grab a time: {{Booking Link}}` },
-    v2: { subject: '', body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and 30% off if you come back in by {{Offer Deadline}}. Grab it if you want it: {{Booking Link}}` },
+    v1: { subject: '', body: `Hey {{First Name}}, {{Practice Name}} one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in — just book by {{Offer Deadline}}. Grab a time: {{Booking Link}}` },
+    v2: { subject: '', body: `Hey {{First Name}}, last note from {{Practice Name}}. No pressure, no lecture — just an open spot and 30% off if you book by {{Offer Deadline}}. Grab it if you want it: {{Booking Link}}` },
   },
   hygienist: {
-    v1: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you come back in by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
-    v2: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you come back in by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
+    v1: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you book by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
+    v2: { subject: '', body: `Hey {{First Name}}, hygiene team one more time. The hardest part is booking. We're taking 30% off if you book by {{Offer Deadline}} — everything else is easy: {{Booking Link}}` },
   },
   doctor: {
-    v1: { subject: '', body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. 30% off when you come back in, good through {{Offer Deadline}}: {{Booking Link}}` },
-    v2: { subject: '', body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've taken 30% off your visit back, good through {{Offer Deadline}}. If there's ever a time to come in, it's now: {{Booking Link}}` },
+    v1: { subject: '', body: `{{First Name}}, Dr. {{Doctor Name}} here. Last message from me. I'd genuinely rather see you and find nothing than not see you and miss something. 30% off when you come back in — just book by {{Offer Deadline}}: {{Booking Link}}` },
+    v2: { subject: '', body: `{{First Name}}, last thing from Dr. {{Doctor Name}}. I've taken 30% off your visit back — book by {{Offer Deadline}}. If there's ever a time to come in, it's now: {{Booking Link}}` },
   },
 };
 
