@@ -53,6 +53,15 @@ const DETERMINISTIC_ACTIONS = new Set([
 // Actions that need the booking URL appended to Claude's reply if missing.
 const BOOKING_LINK_ACTIONS = new Set(['send_booking_link']);
 
+// Any outgoing reply that PROMISES a human follow-up must put the patient on the
+// office call list — regardless of how the reply was produced. The handoff_general
+// action already logs a callback, but an LLM conversational reply can promise a
+// callback ("someone from the office will reach out") without routing through it.
+// This regex is the text-level backstop that catches those. Bias toward
+// over-capture: a spurious call-list row is cheap; a missed promise is not.
+const HANDOFF_PROMISE_REGEX =
+  /\b(someone|somebody|the office|our office|the front desk|the team|our team|we|i)\b[^.!?]{0,45}\b(will|'ll|can|going to|gonna)\b[^.!?]{0,45}\b(call you|give you a (?:call|ring)|reach out|reach back|be in touch|get back to you|contact you|follow up with you)\b/i;
+
 // =============================================================================
 // Main Entry Point
 // =============================================================================
@@ -280,6 +289,11 @@ export async function handleRecallReply(
     replyText = result.replyText;
     updatedFields = result.updatedFields;
   }
+
+  // 6b. Backstop: if the final reply promises a human follow-up, make sure the
+  // patient lands on the office call list — covers LLM conversational replies that
+  // promise a callback without routing through the handoff_general action.
+  await ensureCallbackFromReplyText(typedPractice, typedPatient, replyText, messageBody, transition.action);
 
   // 7. Update sequence in DB
   const updatePayload: Record<string, unknown> = {
@@ -660,36 +674,8 @@ async function executeAction(
     case 'handoff_general': {
       // Patient wants a human (callback or records/admin). Log to the office's
       // call list so someone follows up. Best-effort — never block the reply.
-      // Capture ALL of the patient's recall replies (not just the triggering one)
-      // so the office sees the full context — e.g. "set an apt with u | call me".
-      let context = messageBody;
-      try {
-        const { data: inbound } = await supabase
-          .from('conversations')
-          .select('message_body')
-          .eq('practice_id', practice.id)
-          .eq('patient_id', patient.id)
-          .eq('automation_type', 'recall')
-          .eq('direction', 'inbound')
-          .order('created_at', { ascending: true })
-          .limit(10);
-        const parts = (inbound || []).map(m => (m.message_body || '').trim()).filter(Boolean);
-        if (!parts.some(p => p === messageBody.trim())) parts.push(messageBody.trim());
-        if (parts.length) context = parts.join(' | ');
-      } catch { /* fall back to single message */ }
-      const requestType = /record|chart/.test(context.toLowerCase()) ? 'records' : 'callback';
-      try {
-        await supabase.from('callback_requests').insert({
-          practice_id: practice.id,
-          patient_id: patient.id,
-          patient_name: [patient.first_name, patient.last_name].filter(Boolean).join(' ') || null,
-          phone: patient.phone || null,
-          request_type: requestType,
-          message: context,
-        });
-      } catch (e) {
-        console.error('[replyHandler] callback_requests insert failed:', e instanceof Error ? e.message : e);
-      }
+      const context = await buildCallbackContext(practice.id, patient.id, messageBody);
+      await logCallbackRequest(practice, patient, context);
       return {
         replyText: practice.phone
           ? `Got it — someone from the office will reach out to you. If it's easier, you can also reach us at ${practice.phone}.`
@@ -749,6 +735,74 @@ async function executeAction(
 // =============================================================================
 // Helpers
 // =============================================================================
+
+// Build the office-facing context string for a callback row: ALL of the patient's
+// recall inbound replies joined (not just the triggering one), so the office sees
+// the full thread — e.g. "Yes, I need a Saturday | It's saying I'm a new patient".
+async function buildCallbackContext(practiceId: string, patientId: string, fallbackMsg: string): Promise<string> {
+  let context = fallbackMsg;
+  try {
+    const { data: inbound } = await supabase
+      .from('conversations')
+      .select('message_body')
+      .eq('practice_id', practiceId)
+      .eq('patient_id', patientId)
+      .eq('automation_type', 'recall')
+      .eq('direction', 'inbound')
+      .order('created_at', { ascending: true })
+      .limit(10);
+    const parts = (inbound || []).map(m => (m.message_body || '').trim()).filter(Boolean);
+    if (!parts.some(p => p === fallbackMsg.trim())) parts.push(fallbackMsg.trim());
+    if (parts.length) context = parts.join(' | ');
+  } catch { /* fall back to single message */ }
+  return context;
+}
+
+// Insert a callback_requests row. /record|chart/ language routes it to the records
+// queue; everything else is a plain callback. Best-effort — never blocks the reply.
+async function logCallbackRequest(practice: Practice, patient: Patient, context: string): Promise<void> {
+  const requestType = /record|chart/.test(context.toLowerCase()) ? 'records' : 'callback';
+  try {
+    await supabase.from('callback_requests').insert({
+      practice_id: practice.id,
+      patient_id: patient.id,
+      patient_name: [patient.first_name, patient.last_name].filter(Boolean).join(' ') || null,
+      phone: patient.phone || null,
+      request_type: requestType,
+      message: context,
+    });
+  } catch (e) {
+    console.error('[replyHandler] callback_requests insert failed:', e instanceof Error ? e.message : e);
+  }
+}
+
+// Text-level backstop: if the outgoing reply promises a human follow-up, guarantee
+// the patient is on the office call list — even when the LLM produced a conversational
+// reply that never routed through the handoff_general action. handoff_general already
+// logs its own row, so skip it here. Dedupe against an existing OPEN row so a patient
+// isn't listed twice. Best-effort — never blocks the reply.
+async function ensureCallbackFromReplyText(
+  practice: Practice,
+  patient: Patient,
+  replyText: string,
+  messageBody: string,
+  action: string
+): Promise<void> {
+  if (action === 'handoff_general') return; // already logged by executeAction
+  if (!replyText || !HANDOFF_PROMISE_REGEX.test(replyText)) return;
+  try {
+    const { data: existing } = await supabase
+      .from('callback_requests')
+      .select('id')
+      .eq('practice_id', practice.id)
+      .eq('patient_id', patient.id)
+      .eq('status', 'open')
+      .limit(1);
+    if (existing && existing.length) return;
+  } catch { /* if the dedupe check fails, fall through and insert */ }
+  const context = await buildCallbackContext(practice.id, patient.id, messageBody);
+  await logCallbackRequest(practice, patient, context);
+}
 
 function getExitReason(stage: RecallStage): string {
   switch (stage) {
