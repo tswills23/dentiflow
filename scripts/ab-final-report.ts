@@ -51,9 +51,19 @@ function parseDate(raw: string): Date | null {
 function parseCSV(text: string): Array<Record<string, string>> {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  // Auto-detect header row — Dentrix exports prepend report-title rows.
+  // Scan for the first row containing 'phone' or 'appt date'.
+  let headerIdx = 0;
+  for (let i = 0; i < Math.min(lines.length, 20); i++) {
+    const lower = lines[i].toLowerCase();
+    if (lower.includes('phone') || lower.includes('appt date') || lower.includes('first name')) {
+      headerIdx = i;
+      break;
+    }
+  }
+  const headers = lines[headerIdx].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
   const rows: Array<Record<string, string>> = [];
-  for (let i = 1; i < lines.length; i++) {
+  for (let i = headerIdx + 1; i < lines.length; i++) {
     // Simple CSV parse — handles quoted fields with commas
     const cells: string[] = [];
     let cur = '', inQuotes = false;
