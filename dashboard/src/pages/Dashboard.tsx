@@ -111,12 +111,9 @@ function Dashboard({ practiceId }: DashboardProps) {
     const appointments = filteredMetrics.reduce((sum, m) => sum + (m.appointments_booked ?? 0), 0)
 
     const liveBooked = recallSequences.filter((s) => s.booking_stage === 'S6_COMPLETED').length
-    // Prefer the manually verified (Dentrix) total when set — Village has no live
-    // PMS link, so the system-captured count alone undercounts reality.
-    const reactivationBooked =
-      settings.verified_bookings && settings.verified_bookings > 0
-        ? settings.verified_bookings
-        : liveBooked
+    // Total = in-system confirmations (live) + manually verified Dentrix bookings
+    // (the verified figure is incremental — bookings found outside the SMS loop).
+    const reactivationBooked = liveBooked + (settings.verified_bookings ?? 0)
 
     const avgValue = settings.avg_patient_value ?? 0
     const revenue = reactivationBooked * avgValue

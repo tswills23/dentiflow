@@ -379,11 +379,11 @@ function Recall({ practiceId }: RecallProps) {
             </div>
             <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
               {avgValue != null && avgValue > 0
-                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((verifiedBookings ?? stats.bookedLive) * avgValue)
+                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((stats.bookedLive + (verifiedBookings ?? 0)) * avgValue)
                 : '—'}
             </p>
             <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
-              {avgValue != null && avgValue > 0 ? `${verifiedBookings ?? stats.bookedLive} × $${avgValue}` : 'set avg patient value'}
+              {avgValue != null && avgValue > 0 ? `${stats.bookedLive + (verifiedBookings ?? 0)} booked × $${avgValue}` : 'set avg patient value'}
             </p>
           </div>
         </div>
