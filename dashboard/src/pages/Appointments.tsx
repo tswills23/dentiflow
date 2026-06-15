@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useRealtime } from '../hooks/useRealtime'
+import { authHeaders } from '../lib/supabase'
 import StatusBadge, { getAppointmentVariant } from '../components/StatusBadge'
 
 interface AppointmentsProps {
@@ -57,7 +58,7 @@ function Appointments({ practiceId }: AppointmentsProps) {
     try {
       const res = await fetch(`${API_BASE}/api/noshow/mark`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ practiceId, appointmentId: apt.id }),
       })
       const data = await res.json()
@@ -80,7 +81,7 @@ function Appointments({ practiceId }: AppointmentsProps) {
     try {
       const res = await fetch(`${API_BASE}/api/appointments/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ practiceId, appointmentId: apt.id }),
       })
       const data = await res.json()

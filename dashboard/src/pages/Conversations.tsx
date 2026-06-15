@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { supabase, authHeaders } from '../lib/supabase'
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
 
 interface ConversationsProps {
   practiceId: string
@@ -67,8 +69,13 @@ function Conversations({ practiceId }: ConversationsProps) {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [newMessage, setNewMessage] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const patientsRef = useRef<Patient[]>([])
+  const selectedPatientIdRef = useRef<string | null>(selectedPatientId)
+  useEffect(() => { patientsRef.current = patients }, [patients])
+  useEffect(() => { selectedPatientIdRef.current = selectedPatientId }, [selectedPatientId])
 
   useEffect(() => {
     if (!practiceId) return
@@ -117,6 +124,47 @@ function Conversations({ practiceId }: ConversationsProps) {
     }
 
     fetchPatients()
+  }, [practiceId])
+
+  // Live inbox: a new message for ANY patient bumps that thread to the top and
+  // flags it unread (unless it's the open thread). The open-thread effect below
+  // handles rendering inside the selected conversation.
+  useEffect(() => {
+    if (!practiceId) return
+
+    const channel = supabase
+      .channel(`inbox_${practiceId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'conversations',
+          filter: `practice_id=eq.${practiceId}`,
+        },
+        (payload) => {
+          const msg = payload.new as Message
+          const patient = patientsRef.current.find((p) => p.id === msg.patient_id)
+          if (!patient) return // unknown patient (rare) — next full load will pick it up
+          setPreviews((prev) => {
+            const next = new Map(prev)
+            const isInbound = msg.direction === 'inbound'
+            const isOpen = selectedPatientIdRef.current === msg.patient_id
+            next.set(msg.patient_id, {
+              patient,
+              lastMessage: msg.message_body,
+              lastMessageTime: msg.created_at,
+              unread: isInbound && !isOpen,
+            })
+            return next
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [practiceId])
 
   useEffect(() => {
@@ -203,21 +251,31 @@ function Conversations({ practiceId }: ConversationsProps) {
     if (!newMessage.trim() || !selectedPatientId || sending) return
 
     setSending(true)
+    setSendError(null)
     try {
-      const { error } = await supabase.from('conversations').insert({
-        practice_id: practiceId,
-        patient_id: selectedPatientId,
-        direction: 'outbound',
-        message_body: newMessage.trim(),
-        ai_generated: false,
-        channel: 'sms',
+      // Route through the backend so the message actually goes out via Twilio
+      // and clears the response validator (HIPAA gate) — never a direct DB write.
+      const res = await fetch(`${API_BASE}/api/conversations/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(await authHeaders()),
+        },
+        body: JSON.stringify({
+          practiceId,
+          patientId: selectedPatientId,
+          messageBody: newMessage.trim(),
+        }),
       })
-
-      if (!error) {
-        setNewMessage('')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setSendError(data.error || 'Failed to send message')
+        return
       }
-    } catch (err) {
-      console.error('Error sending message:', err)
+      // The sent row arrives via the realtime subscription on the open thread.
+      setNewMessage('')
+    } catch {
+      setSendError('Could not reach the server. Message not sent.')
     } finally {
       setSending(false)
     }
@@ -339,7 +397,18 @@ function Conversations({ practiceId }: ConversationsProps) {
               return (
                 <button
                   key={patient.id}
-                  onClick={() => setSelectedPatientId(patient.id)}
+                  onClick={() => {
+                    setSelectedPatientId(patient.id)
+                    if (preview?.unread) {
+                      setPreviews((prev) => {
+                        const p = prev.get(patient.id)
+                        if (!p) return prev
+                        const next = new Map(prev)
+                        next.set(patient.id, { ...p, unread: false })
+                        return next
+                      })
+                    }
+                  }}
                   style={{
                     width: '100%',
                     textAlign: 'left',
@@ -377,7 +446,10 @@ function Conversations({ practiceId }: ConversationsProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="truncate" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)', margin: 0 }}>
+                        <p className="truncate flex items-center gap-2" style={{ fontSize: 13, fontWeight: preview?.unread ? 600 : 500, color: 'var(--text-primary)', margin: 0 }}>
+                          {preview?.unread && (
+                            <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', flexShrink: 0 }} />
+                          )}
                           {patientDisplayName(patient)}
                         </p>
                         {preview && (
@@ -386,7 +458,7 @@ function Conversations({ practiceId }: ConversationsProps) {
                           </span>
                         )}
                       </div>
-                      <p className="truncate" style={{ fontSize: 12, color: 'var(--text-faint)', margin: '2px 0 0' }}>
+                      <p className="truncate" style={{ fontSize: 12, color: preview?.unread ? 'var(--text-muted)' : 'var(--text-faint)', fontWeight: preview?.unread ? 500 : 400, margin: '2px 0 0' }}>
                         {preview ? preview.lastMessage : patient.phone}
                       </p>
                     </div>
@@ -509,6 +581,11 @@ function Conversations({ practiceId }: ConversationsProps) {
 
             {/* Input */}
             <div style={{ padding: '14px 24px', borderTop: '0.5px solid var(--border-default)', background: 'var(--bg-card)' }}>
+              {sendError && (
+                <div style={{ marginBottom: 10, padding: '8px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--red-dim, rgba(248,113,113,0.12))', color: 'var(--red, #f87171)', fontSize: 12, fontFamily: "'Outfit', sans-serif" }}>
+                  {sendError}
+                </div>
+              )}
               <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                 <input
                   type="text"

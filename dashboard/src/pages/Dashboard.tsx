@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useRealtime } from '../hooks/useRealtime'
+import { useDashboardSettings } from '../hooks/useDashboardSettings'
 
 interface DashboardProps {
   practiceId: string
@@ -12,24 +14,7 @@ interface MetricsDaily {
   date: string
   new_leads: number
   appointments_booked: number
-  estimated_revenue_recovered: number
-  avg_response_time_ms: number
   total_responses: number
-  under_60s_count: number
-  recall_sent: number
-  recall_replies: number
-  recall_booked: number
-  recall_opt_outs: number
-  recall_links_clicked: number
-}
-
-interface AutomationLogEntry {
-  id: string
-  practice_id: string
-  created_at: string
-  event_type: string
-  description: string
-  patient_name?: string
 }
 
 type Period = 'weekly' | 'monthly'
@@ -62,34 +47,22 @@ function useCountUp(target: number, duration: number = 800): number {
 interface RecallSequence {
   id: string
   practice_id: string
-  patient_id: string
-  sequence_status: string
   booking_stage: string
-  reply_count: number
-  opt_out: boolean
   last_sent_at: string | null
-  link_clicked_at: string | null
-  created_at: string
 }
 
 function Dashboard({ practiceId }: DashboardProps) {
   const [period, setPeriod] = useState<Period>('monthly')
-  const [activityLog, setActivityLog] = useState<AutomationLogEntry[]>([])
-  const [activityLoading, setActivityLoading] = useState(true)
   const [recallSequences, setRecallSequences] = useState<RecallSequence[]>([])
   const [recallLoading, setRecallLoading] = useState(true)
+
+  const { settings } = useDashboardSettings(practiceId)
 
   const dateRange = useMemo(() => {
     const end = new Date()
     const start = new Date()
-    if (period === 'weekly') {
-      start.setDate(end.getDate() - 7)
-    } else {
-      start.setDate(end.getDate() - 30)
-    }
+    start.setDate(end.getDate() - (period === 'weekly' ? 7 : 30))
     return {
-      start: start.toISOString(),
-      end: end.toISOString(),
       startDate: start.toISOString().split('T')[0],
       endDate: end.toISOString().split('T')[0],
     }
@@ -102,12 +75,10 @@ function Dashboard({ practiceId }: DashboardProps) {
   })
 
   const filteredMetrics = useMemo(() => {
-    return metrics.filter(
-      (m) => m.date >= dateRange.startDate && m.date <= dateRange.endDate
-    )
+    return metrics.filter((m) => m.date >= dateRange.startDate && m.date <= dateRange.endDate)
   }, [metrics, dateRange])
 
-  // Fetch recall sequences directly — single source of truth (same as Recall page)
+  // Reactivation bookings are campaign-to-date (not period-scoped) — fetch all.
   useEffect(() => {
     if (!practiceId) return
 
@@ -119,7 +90,7 @@ function Dashboard({ practiceId }: DashboardProps) {
       while (true) {
         const { data, error } = await supabase
           .from('recall_sequences')
-          .select('id, practice_id, patient_id, sequence_status, booking_stage, reply_count, opt_out, last_sent_at, link_clicked_at, created_at')
+          .select('id, practice_id, booking_stage, last_sent_at')
           .eq('practice_id', practiceId)
           .range(from, from + PAGE_SIZE - 1)
 
@@ -136,78 +107,24 @@ function Dashboard({ practiceId }: DashboardProps) {
   }, [practiceId])
 
   const stats = useMemo(() => {
-    // STL + no-show KPIs from metrics_daily (still valid source for these)
-    const revenue = filteredMetrics.reduce((sum, m) => sum + (m.estimated_revenue_recovered ?? 0), 0)
     const leads = filteredMetrics.reduce((sum, m) => sum + (m.new_leads ?? 0), 0)
     const appointments = filteredMetrics.reduce((sum, m) => sum + (m.appointments_booked ?? 0), 0)
-    const totalResponses = filteredMetrics.reduce((sum, m) => sum + (m.total_responses ?? 0), 0)
-    const weightedSum = filteredMetrics.reduce((sum, m) => sum + (m.avg_response_time_ms ?? 0) * (m.total_responses ?? 0), 0)
-    const avgResponseTime = totalResponses > 0 ? weightedSum / totalResponses : 0
-    const totalUnder60s = filteredMetrics.reduce((sum, m) => sum + (m.under_60s_count ?? 0), 0)
-    const under60Percentage = totalResponses > 0 ? (totalUnder60s / totalResponses) * 100 : 0
-    const noshowTotal = filteredMetrics.reduce((sum, m) => sum + ((m as unknown as Record<string, number>).noshow_total ?? 0), 0)
-    const noshowRecovered = filteredMetrics.reduce((sum, m) => sum + ((m as unknown as Record<string, number>).noshow_recovered ?? 0), 0)
-    const noshowRecoveryRate = noshowTotal > 0 ? (noshowRecovered / noshowTotal) * 100 : 0
 
-    // Recall KPIs from recall_sequences — same source of truth as Recall page
-    // Filter to sequences created within the selected period
-    const periodSeqs = recallSequences.filter(
-      (s) => s.created_at >= dateRange.start && s.created_at <= dateRange.end
-    )
-    const recallSent = periodSeqs.filter((s) => s.last_sent_at !== null).length
-    const recallLinksClicked = periodSeqs.filter((s) => s.link_clicked_at !== null).length
-    const recallReplies = periodSeqs.filter((s) => s.reply_count > 0).length
-    const recallBooked = periodSeqs.filter((s) => s.booking_stage === 'S6_COMPLETED').length
-    const recallOptOuts = periodSeqs.filter((s) => s.opt_out || s.booking_stage === 'EXIT_OPT_OUT').length
-    const recallReplyRate = recallSent > 0 ? (recallReplies / recallSent) * 100 : 0
-    const recallBookingRate = recallReplies > 0 ? (recallBooked / recallReplies) * 100 : 0
-    const recallClickRate = recallSent > 0 ? (recallLinksClicked / recallSent) * 100 : 0
+    const liveBooked = recallSequences.filter((s) => s.booking_stage === 'S6_COMPLETED').length
+    // Prefer the manually verified (Dentrix) total when set — Village has no live
+    // PMS link, so the system-captured count alone undercounts reality.
+    const reactivationBooked =
+      settings.verified_bookings && settings.verified_bookings > 0
+        ? settings.verified_bookings
+        : liveBooked
 
-    return { revenue, leads, appointments, avgResponseTime, under60Percentage, recallSent, recallLinksClicked, recallReplies, recallBooked, recallOptOuts, recallReplyRate, recallBookingRate, recallClickRate, noshowTotal, noshowRecovered, noshowRecoveryRate }
-  }, [filteredMetrics, recallSequences, dateRange])
+    const avgValue = settings.avg_patient_value ?? 0
+    const revenue = reactivationBooked * avgValue
+
+    return { leads, appointments, reactivationBooked, avgValue, revenue }
+  }, [filteredMetrics, recallSequences, settings])
 
   const animatedRevenue = useCountUp(stats.revenue, 800)
-
-  useEffect(() => {
-    if (!practiceId) return
-
-    async function fetchLog() {
-      setActivityLoading(true)
-      const { data, error } = await supabase
-        .from('automation_log')
-        .select('*')
-        .eq('practice_id', practiceId)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (!error && data) {
-        setActivityLog(data as AutomationLogEntry[])
-      }
-      setActivityLoading(false)
-    }
-
-    fetchLog()
-
-    const channel = supabase
-      .channel('automation_log_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'automation_log',
-          filter: `practice_id=eq.${practiceId}`,
-        },
-        (payload) => {
-          setActivityLog((prev) => [payload.new as AutomationLogEntry, ...prev.slice(0, 9)])
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [practiceId])
 
   const formatCurrency = useCallback((amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -218,60 +135,29 @@ function Dashboard({ practiceId }: DashboardProps) {
     }).format(amount)
   }, [])
 
-  function formatResponseTime(ms: number): string {
-    const seconds = ms / 1000
-    if (seconds < 60) return `${seconds.toFixed(1)}s`
-    const minutes = Math.floor(seconds / 60)
-    const remaining = Math.round(seconds % 60)
-    return `${minutes}m ${remaining}s`
-  }
-
-  function getEventDotClass(eventType: string): string {
-    switch (eventType) {
-      case 'appointment_booked': return 'dot-accent'
-      case 'lead_created': return 'dot-blue'
-      case 'follow_up': return 'dot-amber'
-      case 'emergency': return 'dot-red'
-      case 'sms_sent': return 'dot-accent'
-      case 'ai_response': return 'dot-blue'
-      default: return 'dot-blue'
-    }
-  }
-
-  function timeAgo(dateStr: string): string {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    const diffHours = Math.floor(diffMins / 60)
-    if (diffHours < 24) return `${diffHours}h ago`
-    const diffDays = Math.floor(diffHours / 24)
-    return `${diffDays}d ago`
-  }
-
-  const responseTimeSec = stats.avgResponseTime / 1000
-
   if (metricsLoading || recallLoading) {
     return (
       <div style={{ padding: '24px 32px' }}>
         <div className="space-y-6">
           <div className="card" style={{ height: 160, opacity: 0.3 }} />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
               <div key={i} className="card" style={{ height: 120, opacity: 0.3 }} />
             ))}
           </div>
-          <div className="card" style={{ height: 300, opacity: 0.3 }} />
         </div>
       </div>
     )
   }
 
+  const cardBase = {
+    textDecoration: 'none' as const,
+    display: 'block' as const,
+  }
+
   return (
     <div style={{ padding: '24px 32px' }}>
-      {/* Revenue Hero Card */}
+      {/* Revenue Hero Card — reactivation revenue recovered (campaign to date) */}
       <div
         className="card animate-fade-in"
         style={{
@@ -285,31 +171,41 @@ function Dashboard({ practiceId }: DashboardProps) {
             <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: 0 }}>
               Revenue Recovered
             </p>
-            <p className="font-metric" style={{ fontSize: 56, color: 'var(--text-primary)', margin: '8px 0 0', lineHeight: 1 }}>
-              {formatCurrency(animatedRevenue)}
+            {stats.avgValue > 0 ? (
+              <p className="font-metric" style={{ fontSize: 56, color: 'var(--text-primary)', margin: '8px 0 0', lineHeight: 1 }}>
+                {formatCurrency(animatedRevenue)}
+              </p>
+            ) : (
+              <Link
+                to="/reactivation"
+                style={{ fontSize: 22, color: 'var(--accent)', margin: '12px 0 0', display: 'inline-block', textDecoration: 'none' }}
+              >
+                Set patient value to see revenue →
+              </Link>
+            )}
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+              {stats.reactivationBooked} patient{stats.reactivationBooked === 1 ? '' : 's'} reactivated
+              {stats.avgValue > 0 ? ` × ${formatCurrency(stats.avgValue)} avg value` : ''}
             </p>
-            <div className="flex items-center gap-2 mt-2">
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent)' }}>
-                <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-                {period === 'weekly' ? 'Last 7 days' : 'Last 30 days'}
-              </span>
-            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: 0 }}>
-              Chairs Filled
+              Patients Reactivated
             </p>
             <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', margin: '8px 0 0', lineHeight: 1 }}>
-              {stats.appointments}
+              {stats.reactivationBooked}
             </p>
-            <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>appointments booked</p>
+            <p style={{ fontSize: 12, color: 'var(--text-faint)', marginTop: 4 }}>booked back · campaign to date</p>
           </div>
         </div>
+      </div>
 
-        {/* Period toggle */}
-        <div className="flex items-center gap-1 mt-4">
+      {/* Section summary cards — overview; click in for detail */}
+      <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: 0 }}>
+          This {period === 'weekly' ? 'Week' : 'Month'}
+        </p>
+        <div className="flex items-center gap-1">
           {(['weekly', 'monthly'] as Period[]).map((p) => (
             <button
               key={p}
@@ -332,17 +228,30 @@ function Dashboard({ practiceId }: DashboardProps) {
         </div>
       </div>
 
-      {/* Speed-to-Lead Section Label */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-        Speed-to-Lead
-      </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Reactivations booked → detail */}
+        <Link to="/reactivation" className="card card-hover animate-fade-in" style={{ ...cardBase, padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="dot dot-accent" />
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Reactivations Booked</span>
+            </div>
+            <span style={{ fontSize: 16, color: 'var(--text-faint)' }}>→</span>
+          </div>
+          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
+            {stats.reactivationBooked}
+          </p>
+          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>campaign to date · view funnel</p>
+        </Link>
 
-      {/* STL Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>New leads</span>
+        {/* New leads → leads */}
+        <Link to="/leads" className="card card-hover animate-fade-in" style={{ ...cardBase, padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="dot dot-blue" />
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>New Leads</span>
+            </div>
+            <span style={{ fontSize: 16, color: 'var(--text-faint)' }}>→</span>
           </div>
           <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
             {stats.leads}
@@ -350,172 +259,24 @@ function Dashboard({ practiceId }: DashboardProps) {
           <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
             {period === 'weekly' ? 'this week' : 'this month'} via SMS + voice
           </p>
-        </div>
+        </Link>
 
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Booked</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.appointments}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>new patient appointments</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Responses</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
-            {filteredMetrics.reduce((sum, m) => sum + (m.total_responses ?? 0), 0)}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>total AI responses sent</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '150ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-red" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Avg Response</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--red)', lineHeight: 1, margin: 0 }}>
-            {formatResponseTime(stats.avgResponseTime)}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>first response time</p>
-        </div>
-      </div>
-
-      {/* Reactivation Section Label */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-        Reactivation
-      </p>
-
-      {/* Reactivation KPI Cards — 3 metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-amber" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Patients Contacted</span>
+        {/* Appointments booked → appointments */}
+        <Link to="/appointments" className="card card-hover animate-fade-in" style={{ ...cardBase, padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="dot dot-amber" />
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Appointments Booked</span>
+            </div>
+            <span style={{ fontSize: 16, color: 'var(--text-faint)' }}>→</span>
           </div>
           <p className="font-metric" style={{ fontSize: 32, color: 'var(--amber)', lineHeight: 1, margin: 0 }}>
-            {stats.recallSent}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>unique patients reached</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Replied</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
-            {stats.recallReplies}
+            {stats.appointments}
           </p>
           <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
-            {stats.recallSent > 0 ? `${((stats.recallReplies / stats.recallSent) * 100).toFixed(0)}% reply rate` : 'reply rate'}
+            {period === 'weekly' ? 'this week' : 'this month'}
           </p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Clicked Booking Link</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {stats.recallLinksClicked}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
-            {stats.recallSent > 0 ? `${((stats.recallLinksClicked / stats.recallSent) * 100).toFixed(0)}% of patients contacted` : 'of patients contacted'}
-          </p>
-        </div>
-      </div>
-
-      {/* Two-column: Activity Feed + Response Speed */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Activity Feed */}
-        <div className="lg:col-span-3 card animate-fade-in" style={{ padding: '1.5rem', animationDelay: '200ms' }}>
-          <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 16px' }}>
-            Live Activity
-          </p>
-          {activityLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} style={{ height: 20, background: 'rgba(255,255,255,0.03)', borderRadius: 4 }} />
-              ))}
-            </div>
-          ) : activityLog.length > 0 ? (
-            <div style={{ maxHeight: 340, overflowY: 'auto' }}>
-              {activityLog.map((entry, idx) => (
-                <div
-                  key={entry.id}
-                  className="flex items-start gap-3"
-                  style={{
-                    padding: '10px 0',
-                    borderBottom: idx < activityLog.length - 1 ? '0.5px solid var(--border-default)' : 'none',
-                  }}
-                >
-                  <span className={`dot ${getEventDotClass(entry.event_type)}`} style={{ marginTop: 5 }} />
-                  <div className="flex-1 min-w-0">
-                    <p style={{ fontSize: 13, color: 'var(--text-primary)', margin: 0, lineHeight: 1.4 }}>
-                      {entry.description}
-                    </p>
-                    <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                      {timeAgo(entry.created_at)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center" style={{ height: 160, color: 'var(--text-faint)', fontSize: 13 }}>
-              No recent activity
-            </div>
-          )}
-        </div>
-
-        {/* Response Speed */}
-        <div className="lg:col-span-2 card animate-fade-in" style={{ padding: '1.5rem', animationDelay: '250ms' }}>
-          <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 24px' }}>
-            Response Speed
-          </p>
-          <div className="flex flex-col items-center">
-            <div className="text-center mb-6">
-              <span className="font-metric" style={{ fontSize: 64, color: 'var(--accent)', lineHeight: 1 }}>
-                {responseTimeSec > 0 ? responseTimeSec.toFixed(1) : '0.0'}
-              </span>
-              <span style={{ fontSize: 24, color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif", marginLeft: 4 }}>s</span>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 4 }}>average first response</p>
-            </div>
-
-            <div style={{ width: '100%', maxWidth: 240 }}>
-              <div className="flex items-center justify-between mb-2">
-                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>SMS</span>
-                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{responseTimeSec > 0 ? (responseTimeSec * 0.8).toFixed(1) : '0.0'}s</span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, marginBottom: 12 }}>
-                <div style={{ height: 4, background: 'var(--accent)', borderRadius: 2, width: `${Math.min(80, 100)}%`, transition: 'width 0.5s ease' }} />
-              </div>
-
-              <div className="flex items-center justify-between mb-2">
-                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>Voice</span>
-                <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>{responseTimeSec > 0 ? (responseTimeSec * 1.4).toFixed(1) : '0.0'}s</span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, marginBottom: 16 }}>
-                <div style={{ height: 4, background: 'var(--blue)', borderRadius: 2, width: `${Math.min(60, 100)}%`, transition: 'width 0.5s ease' }} />
-              </div>
-            </div>
-
-            <div className="text-center" style={{ borderTop: '0.5px solid var(--border-default)', paddingTop: 16, width: '100%' }}>
-              <span style={{ fontSize: 18, fontWeight: 600, color: 'var(--accent)' }}>
-                {Math.round(stats.under60Percentage)}%
-              </span>
-              <span style={{ fontSize: 12, color: 'var(--text-faint)', marginLeft: 6 }}>
-                responded under 60 seconds
-              </span>
-            </div>
-          </div>
-        </div>
+        </Link>
       </div>
     </div>
   )

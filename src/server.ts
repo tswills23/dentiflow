@@ -5,6 +5,7 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import twilio from 'twilio';
+import { supabase } from './lib/supabase';
 import { smsWebhook } from './routes/smsWebhook';
 import { formWebhook } from './routes/formWebhook';
 import { missedCallWebhook } from './routes/missedCallWebhook';
@@ -12,6 +13,7 @@ import recallRoutes from './routes/recallRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import noshowRoutes from './routes/noshowRoutes';
 import appointmentRoutes from './routes/appointmentRoutes';
+import conversationRoutes from './routes/conversationRoutes';
 import pmsWebhookRoutes from './routes/pmsWebhookRoutes';
 import bookingRedirectRoute from './routes/bookingRedirectRoute';
 import { startRecallCron } from './services/recall/recallCron';
@@ -78,23 +80,54 @@ function validateTwilioSignature(req: Request, res: Response, next: NextFunction
   next();
 }
 
-// ── Admin API key middleware ──────────────────────────────────────────
-function requireApiKey(req: Request, res: Response, next: NextFunction): void {
+// ── Auth middleware for dashboard-facing API routes ───────────────────
+// Accepts EITHER a server-to-server admin key (scripts, internal callers) OR a
+// logged-in dashboard user's Supabase session JWT. For the JWT path we verify
+// the user belongs to the practiceId they're acting on — so no admin secret has
+// to be embedded in the public dashboard bundle.
+async function requireApiKey(req: Request, res: Response, next: NextFunction): Promise<void> {
   const expected = process.env.ADMIN_API_KEY;
 
-  // Dev mode: no key configured → allow all
+  // 1. Valid admin key → allow (scripts / internal).
+  const key = req.headers['x-api-key'] as string | undefined;
+  if (expected && key === expected) {
+    next();
+    return;
+  }
+
+  // 2. Valid Supabase user session → allow if a member of the target practice.
+  const authHeader = req.headers['authorization'];
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (token) {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (!error && data.user) {
+      const practiceId = req.body?.practiceId;
+      if (!practiceId) {
+        next();
+        return;
+      }
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('auth_user_id', data.user.id)
+        .eq('practice_id', practiceId)
+        .maybeSingle();
+      if (profile) {
+        next();
+        return;
+      }
+      res.status(403).json({ error: 'Forbidden — not a member of this practice' });
+      return;
+    }
+  }
+
+  // 3. Dev mode: no key configured and no credentials → allow (local only).
   if (!expected) {
     next();
     return;
   }
 
-  const key = req.headers['x-api-key'] as string;
-  if (key !== expected) {
-    res.status(401).json({ error: 'Unauthorized — invalid or missing API key' });
-    return;
-  }
-
-  next();
+  res.status(401).json({ error: 'Unauthorized — invalid or missing credentials' });
 }
 
 // Request logging (debug)
@@ -126,6 +159,7 @@ app.use('/webhooks/pms', pmsWebhookRoutes); // Has API key / HMAC auth built in
 app.use('/api/recall', requireApiKey, recallRoutes);
 app.use('/api/noshow', requireApiKey, noshowRoutes);
 app.use('/api/appointments', requireApiKey, appointmentRoutes);
+app.use('/api/conversations', requireApiKey, conversationRoutes);
 
 // Review routes — mix of public (referral) + admin (action endpoints)
 app.use('/api/reviews', reviewRoutes);

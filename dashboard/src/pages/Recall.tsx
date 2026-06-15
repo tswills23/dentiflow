@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
+import { useDashboardSettings } from '../hooks/useDashboardSettings'
 
 interface RecallProps {
   practiceId: string
@@ -9,85 +10,78 @@ interface RecallSequence {
   id: string
   practice_id: string
   patient_id: string
-  assigned_voice: 'office' | 'hygienist' | 'doctor'
-  segment_overdue: string
-  sequence_day: number
   sequence_status: 'active' | 'paused' | 'completed' | 'exited'
   booking_stage: string
   reply_count: number
   opt_out: boolean
-  defer_until: string | null
-  exit_reason: string | null
   last_sent_at: string | null
   link_clicked_at: string | null
   created_at: string
-  updated_at: string
 }
 
 interface PatientInfo {
   id: string
-  first_name: string | null
-  last_name: string | null
   location: string | null
 }
-
-interface ActivityEvent {
-  id: string
-  practice_id: string
-  patient_id: string | null
-  automation_type: string
-  action: string | null
-  result: string
-  message_body: string | null
-  service_context: string | null
-  metadata: Record<string, unknown>
-  created_at: string
-  patient_name?: string
-  patient_location?: string
-}
-
-// Booking stage labels for the funnel
-const FUNNEL_STAGES = [
-  { key: 'sent', label: 'Patients Contacted', description: 'Unique patients reached' },
-  { key: 'replied', label: 'Replied', description: 'Got a reply' },
-  { key: 'clicked', label: 'Clicked Booking Link', description: 'Clicked booking link' },
-] as const
 
 function Recall({ practiceId }: RecallProps) {
   const [sequences, setSequences] = useState<RecallSequence[]>([])
   const [patients, setPatients] = useState<Map<string, PatientInfo>>(new Map())
-  const [activityLog, setActivityLog] = useState<ActivityEvent[]>([])
   const [loading, setLoading] = useState(true)
-  const [activityLoading, setActivityLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Filters
   const [locationFilter, setLocationFilter] = useState<string>('all')
-  const [voiceFilter, setVoiceFilter] = useState<string>('all')
-  const [dayFilter, setDayFilter] = useState<string>('all')
   const [campaignStartDate, setCampaignStartDate] = useState<string>(() => {
     return localStorage.getItem('recall_campaign_start') ?? ''
   })
 
-  // Fetch all recall sequences
+  const { settings, save: saveSettings } = useDashboardSettings(practiceId)
+
+  // Settings editor (verified Dentrix bookings + avg patient value)
+  const [editingSettings, setEditingSettings] = useState(false)
+  const [verifiedInput, setVerifiedInput] = useState('')
+  const [asOfInput, setAsOfInput] = useState('')
+  const [valueInput, setValueInput] = useState('')
+  const [savingSettings, setSavingSettings] = useState(false)
+
+  function openSettingsEditor() {
+    setVerifiedInput(settings.verified_bookings != null ? String(settings.verified_bookings) : '')
+    setAsOfInput(settings.verified_as_of ?? '')
+    setValueInput(settings.avg_patient_value != null ? String(settings.avg_patient_value) : '')
+    setEditingSettings(true)
+  }
+
+  async function handleSaveSettings() {
+    setSavingSettings(true)
+    await saveSettings({
+      verified_bookings: verifiedInput.trim() === '' ? undefined : Number(verifiedInput),
+      verified_as_of: asOfInput.trim() === '' ? undefined : asOfInput,
+      avg_patient_value: valueInput.trim() === '' ? undefined : Number(valueInput),
+    })
+    setSavingSettings(false)
+    setEditingSettings(false)
+  }
+
+  // Fetch all recall sequences (+ patient locations for the location filter)
   useEffect(() => {
     if (!practiceId) return
 
     async function fetchData() {
       setLoading(true)
+      setError(null)
 
-      // Fetch all sequences with pagination (Supabase default cap is 1000)
       const allSeqs: RecallSequence[] = []
       const PAGE_SIZE = 1000
       let from = 0
       while (true) {
         const { data: seqData, error: seqError } = await supabase
           .from('recall_sequences')
-          .select('*')
+          .select('id, practice_id, patient_id, sequence_status, booking_stage, reply_count, opt_out, last_sent_at, link_clicked_at, created_at')
           .eq('practice_id', practiceId)
           .range(from, from + PAGE_SIZE - 1)
 
         if (seqError) {
-          console.error('Error fetching sequences:', seqError)
+          setError('Could not load reactivation data. Please retry.')
           setLoading(false)
           return
         }
@@ -100,22 +94,17 @@ function Recall({ practiceId }: RecallProps) {
 
       setSequences(allSeqs)
 
-      // Fetch patient info for all patients in sequences
-      const patientIds = [...new Set(allSeqs.map((s: RecallSequence) => s.patient_id))]
+      const patientIds = [...new Set(allSeqs.map((s) => s.patient_id))]
       if (patientIds.length > 0) {
-        // Batch fetch in chunks of 500
         const patientMap = new Map<string, PatientInfo>()
         for (let i = 0; i < patientIds.length; i += 500) {
           const chunk = patientIds.slice(i, i + 500)
           const { data: patData } = await supabase
             .from('patients')
-            .select('id, first_name, last_name, location')
+            .select('id, location')
             .in('id', chunk)
-
           if (patData) {
-            for (const p of patData as PatientInfo[]) {
-              patientMap.set(p.id, p)
-            }
+            for (const p of patData as PatientInfo[]) patientMap.set(p.id, p)
           }
         }
         setPatients(patientMap)
@@ -126,29 +115,21 @@ function Recall({ practiceId }: RecallProps) {
 
     fetchData()
 
-    // Realtime subscription for recall_sequences
+    // Realtime: keep live booking/reply counts current.
     const channel = supabase
       .channel(`recall_sequences_changes_${practiceId}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'recall_sequences',
-          filter: `practice_id=eq.${practiceId}`,
-        },
+        { event: '*', schema: 'public', table: 'recall_sequences', filter: `practice_id=eq.${practiceId}` },
         (payload) => {
           setSequences((current) => {
             const newRecord = payload.new as RecallSequence
             const oldRecord = payload.old as RecallSequence & { id: string }
-
             switch (payload.eventType) {
               case 'INSERT':
                 return [newRecord, ...current]
               case 'UPDATE':
-                return current.map((item) =>
-                  item.id === newRecord.id ? newRecord : item
-                )
+                return current.map((item) => (item.id === newRecord.id ? newRecord : item))
               case 'DELETE':
                 return current.filter((item) => item.id !== oldRecord.id)
               default:
@@ -164,82 +145,6 @@ function Recall({ practiceId }: RecallProps) {
     }
   }, [practiceId])
 
-  // Fetch activity log (recall-specific)
-  useEffect(() => {
-    if (!practiceId) return
-
-    async function fetchActivity() {
-      setActivityLoading(true)
-      const { data, error } = await supabase
-        .from('automation_log')
-        .select('*')
-        .eq('practice_id', practiceId)
-        .in('automation_type', ['recall_outreach', 'recall_reply', 'recall_booking', 'recall_opt_out', 'recall_deferred', 'recall_emergency', 'recall_day0', 'recall_day1', 'recall_day3', 'recall_cron', 'recall_link_click', 'recall_link_followup', 'recall_booking_attributed'])
-        .order('created_at', { ascending: false })
-        .limit(50)
-
-      if (!error && data) {
-        // Enrich with patient names
-        const events = data as ActivityEvent[]
-        const pIds = [...new Set(events.filter((e) => e.patient_id).map((e) => e.patient_id!))]
-
-        if (pIds.length > 0) {
-          const { data: patData } = await supabase
-            .from('patients')
-            .select('id, first_name, last_name, location')
-            .in('id', pIds)
-
-          if (patData) {
-            const pMap = new Map<string, PatientInfo>()
-            for (const p of patData as PatientInfo[]) {
-              pMap.set(p.id, p)
-            }
-            for (const e of events) {
-              if (e.patient_id) {
-                const pat = pMap.get(e.patient_id)
-                if (pat) {
-                  e.patient_name = [pat.first_name, pat.last_name].filter(Boolean).join(' ')
-                  e.patient_location = pat.location ?? undefined
-                }
-              }
-            }
-          }
-        }
-
-        setActivityLog(events)
-      }
-      setActivityLoading(false)
-    }
-
-    fetchActivity()
-
-    // Realtime for new activity
-    const channel = supabase
-      .channel(`recall_activity_${practiceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'automation_log',
-          filter: `practice_id=eq.${practiceId}`,
-        },
-        (payload) => {
-          const newEvent = payload.new as ActivityEvent
-          // Only include recall events
-          if (newEvent.automation_type?.startsWith('recall')) {
-            setActivityLog((prev) => [newEvent, ...prev.slice(0, 49)])
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [practiceId])
-
-  // Available locations from patient data
   const locations = useMemo(() => {
     const locs = new Set<string>()
     patients.forEach((p) => {
@@ -248,15 +153,12 @@ function Recall({ practiceId }: RecallProps) {
     return [...locs].sort()
   }, [patients])
 
-  // Filter sequences by location / voice / campaign start
+  // Filter by campaign-start (via last_sent_at — sequences are reused across rounds)
+  // and location.
   const filteredSequences = useMemo(() => {
     let filtered = sequences
 
     if (campaignStartDate) {
-      // Scope by SEND activity, not row creation. Sequences are reused across
-      // campaign rounds (e.g. a March-created sequence re-sent in June), so
-      // created_at reflects only the first round. last_sent_at is what "since
-      // this date" actually means for the contacted/funnel metrics.
       const start = new Date(campaignStartDate).getTime()
       filtered = filtered.filter(
         (s) => s.last_sent_at !== null && new Date(s.last_sent_at).getTime() >= start
@@ -264,142 +166,51 @@ function Recall({ practiceId }: RecallProps) {
     }
 
     if (locationFilter !== 'all') {
-      const patientIdsAtLocation = new Set<string>()
+      const idsAtLocation = new Set<string>()
       patients.forEach((p) => {
-        if (p.location === locationFilter) patientIdsAtLocation.add(p.id)
+        if (p.location === locationFilter) idsAtLocation.add(p.id)
       })
-      filtered = filtered.filter((s) => patientIdsAtLocation.has(s.patient_id))
-    }
-
-    if (voiceFilter !== 'all') {
-      filtered = filtered.filter((s) => s.assigned_voice === voiceFilter)
+      filtered = filtered.filter((s) => idsAtLocation.has(s.patient_id))
     }
 
     return filtered
-  }, [sequences, locationFilter, voiceFilter, patients, campaignStartDate])
+  }, [sequences, locationFilter, patients, campaignStartDate])
 
-  // Campaign overview stats
+  // KPIs — deduped by patient (household dups + multi-round rows exist).
   const stats = useMemo(() => {
-    const total = filteredSequences.length
-    const active = filteredSequences.filter((s) =>
-      s.sequence_status === 'active' && !['S6_COMPLETED', 'EXIT_OPT_OUT', 'EXIT_DEFERRED', 'EXIT_DECLINED', 'EXIT_CANCELLED'].includes(s.booking_stage)
-    ).length
-    const booked = filteredSequences.filter((s) => s.booking_stage === 'S6_COMPLETED').length
-    const noResponse = filteredSequences.filter((s) =>
-      (s.sequence_status === 'completed' || s.sequence_status === 'exited') && s.exit_reason === 'no_response'
-    ).length
-    const optedOut = filteredSequences.filter((s) =>
-      s.booking_stage === 'EXIT_OPT_OUT' || s.opt_out
-    ).length
-    const deferred = filteredSequences.filter((s) =>
-      s.booking_stage === 'EXIT_DEFERRED' || (s.defer_until !== null && s.sequence_status !== 'completed')
-    ).length
+    const contacted = new Set<string>()
+    const replied = new Set<string>()
+    const clicked = new Set<string>()
+    const booked = new Set<string>()
 
-    const withReplies = filteredSequences.filter((s) => s.reply_count > 0).length
-    const withSent = filteredSequences.filter((s) => s.last_sent_at !== null).length
-    const responseRate = withSent > 0 ? (withReplies / withSent) * 100 : 0
-    const bookingRate = withReplies > 0 ? (booked / withReplies) * 100 : 0
+    for (const s of filteredSequences) {
+      if (s.last_sent_at !== null) contacted.add(s.patient_id)
+      if (s.reply_count > 0) replied.add(s.patient_id)
+      if (s.link_clicked_at !== null) clicked.add(s.patient_id)
+      if (s.booking_stage === 'S6_COMPLETED') booked.add(s.patient_id)
+    }
 
-    return { total, withReplies, withSent }
+    return {
+      contacted: contacted.size,
+      replied: replied.size,
+      clicked: clicked.size,
+      bookedLive: booked.size,
+    }
   }, [filteredSequences])
 
-  // Funnel data
+  // Funnel — every stage measured as a share of Contacted, so a stage that
+  // isn't strictly downstream (clicking a link without replying) can't exceed 100%.
   const funnelData = useMemo(() => {
-    const sent = filteredSequences.filter((s) => s.last_sent_at !== null).length
-    const replied = filteredSequences.filter((s) => s.reply_count > 0).length
-    const clicked = filteredSequences.filter((s) => s.link_clicked_at !== null).length
-
     return [
-      { ...FUNNEL_STAGES[0], count: sent },
-      { ...FUNNEL_STAGES[1], count: replied },
-      { ...FUNNEL_STAGES[2], count: clicked },
+      { key: 'contacted', label: 'Contacted', count: stats.contacted },
+      { key: 'replied', label: 'Replied', count: stats.replied },
+      { key: 'clicked', label: 'Clicked Link', count: stats.clicked },
+      { key: 'booked', label: 'Booked', count: stats.bookedLive },
     ]
-  }, [filteredSequences])
+  }, [stats])
 
-
-  // Performance by voice tier
-  const voicePerformance = useMemo(() => {
-    const tiers: Array<'office' | 'hygienist' | 'doctor'> = ['office', 'hygienist', 'doctor']
-    return tiers.map((voice) => {
-      const voiceSeqs = filteredSequences.filter((s) => s.assigned_voice === voice)
-      const total = voiceSeqs.length
-      const sent = voiceSeqs.filter((s) => s.last_sent_at !== null).length
-      const replied = voiceSeqs.filter((s) => s.reply_count > 0).length
-      const booked = voiceSeqs.filter((s) => s.booking_stage === 'S6_COMPLETED').length
-      const responseRate = sent > 0 ? (replied / sent) * 100 : 0
-      const bookingRate = replied > 0 ? (booked / replied) * 100 : 0
-      return { voice, total, sent, replied, booked, responseRate, bookingRate }
-    })
-  }, [filteredSequences])
-
-
-  // Filtered activity by location / voice / day / campaign start
-  const filteredActivity = useMemo(() => {
-    let events = activityLog
-
-    if (campaignStartDate) {
-      const start = new Date(campaignStartDate).getTime()
-      events = events.filter((e) => new Date(e.created_at).getTime() >= start)
-    }
-
-    if (locationFilter !== 'all') {
-      events = events.filter((e) => e.patient_location === locationFilter)
-    }
-
-    if (dayFilter !== 'all') {
-      events = events.filter((e) => {
-        const type = e.automation_type
-        if (dayFilter === '0') return type === 'recall_day0' || type === 'recall_outreach'
-        if (dayFilter === '1') return type === 'recall_day1'
-        if (dayFilter === '3') return type === 'recall_day3'
-        return true
-      })
-    }
-
-    return events
-  }, [activityLog, locationFilter, dayFilter, campaignStartDate])
-
-  const timeAgo = useCallback((dateStr: string): string => {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    if (diffMins < 1) return 'Just now'
-    if (diffMins < 60) return `${diffMins}m ago`
-    const diffHours = Math.floor(diffMins / 60)
-    if (diffHours < 24) return `${diffHours}h ago`
-    const diffDays = Math.floor(diffHours / 24)
-    return `${diffDays}d ago`
-  }, [])
-
-  function getEventIcon(type: string): { dot: string; label: string } {
-    switch (type) {
-      case 'recall_day0':
-      case 'recall_outreach':
-        return { dot: 'dot-amber', label: 'Day 0 Sent' }
-      case 'recall_day1':
-        return { dot: 'dot-amber', label: 'Day 1 Sent' }
-      case 'recall_day3':
-        return { dot: 'dot-amber', label: 'Day 3 Sent' }
-      case 'recall_reply':
-        return { dot: 'dot-blue', label: 'Reply' }
-      case 'recall_booking':
-      case 'recall_booking_attributed':
-        return { dot: 'dot-accent', label: 'Booked' }
-      case 'recall_link_click':
-        return { dot: 'dot-blue', label: 'Link Clicked' }
-      case 'recall_link_followup':
-        return { dot: 'dot-amber', label: 'Follow-up' }
-      case 'recall_opt_out':
-        return { dot: 'dot-red', label: 'Opted Out' }
-      case 'recall_deferred':
-        return { dot: 'dot-amber', label: 'Deferred' }
-      case 'recall_emergency':
-        return { dot: 'dot-red', label: 'Emergency' }
-      default:
-        return { dot: 'dot-blue', label: 'Reactivation' }
-    }
-  }
+  const verifiedBookings = settings.verified_bookings ?? null
+  const avgValue = settings.avg_patient_value ?? null
 
   if (loading) {
     return (
@@ -417,38 +228,50 @@ function Recall({ practiceId }: RecallProps) {
     )
   }
 
-  const maxFunnelCount = Math.max(funnelData[0].count, 1)
+  if (error) {
+    return (
+      <div style={{ padding: '24px 32px' }}>
+        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
+          <p style={{ color: 'var(--red)', fontSize: 14, margin: '0 0 12px' }}>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: '8px 16px', borderRadius: 'var(--radius-sm)', background: 'var(--accent)', color: '#0C0F12', border: 'none', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 500 }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const maxFunnelCount = Math.max(stats.contacted, 1)
+  const selectStyle = {
+    background: 'var(--bg-card)',
+    border: '0.5px solid var(--border-default)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '6px 12px',
+    fontSize: 13,
+    color: 'var(--text-primary)',
+    fontFamily: "'Outfit', sans-serif",
+    cursor: 'pointer',
+  }
 
   return (
     <div style={{ padding: '24px 32px' }}>
-      {/* Page header + filters */}
-      <div className="flex items-center justify-between flex-wrap gap-4" style={{ marginBottom: 24 }}>
+      {/* Header + filters */}
+      <div className="flex items-center justify-between flex-wrap gap-4" style={{ marginBottom: 16 }}>
         <div>
           <h2 style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 600, fontSize: 22, color: 'var(--text-primary)', margin: 0 }}>
             Reactivation Campaign
           </h2>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', margin: '4px 0 0' }}>
-            {stats.total.toLocaleString()} patients in reactivation sequences
+            {stats.contacted.toLocaleString()} patients contacted
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Location filter */}
           {locations.length > 1 && (
-            <select
-              value={locationFilter}
-              onChange={(e) => setLocationFilter(e.target.value)}
-              style={{
-                background: 'var(--bg-card)',
-                border: '0.5px solid var(--border-default)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '6px 12px',
-                fontSize: 13,
-                color: 'var(--text-primary)',
-                fontFamily: "'Outfit', sans-serif",
-                cursor: 'pointer',
-              }}
-            >
+            <select value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} style={selectStyle}>
               <option value="all">All Locations</option>
               {locations.map((loc) => (
                 <option key={loc} value={loc}>{loc}</option>
@@ -456,155 +279,137 @@ function Recall({ practiceId }: RecallProps) {
             </select>
           )}
 
-          {/* Voice filter */}
-          <select
-            value={voiceFilter}
-            onChange={(e) => setVoiceFilter(e.target.value)}
-            style={{
-              background: 'var(--bg-card)',
-              border: '0.5px solid var(--border-default)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '6px 12px',
-              fontSize: 13,
-              color: 'var(--text-primary)',
-              fontFamily: "'Outfit', sans-serif",
-              cursor: 'pointer',
-            }}
-          >
-            <option value="all">All Voices</option>
-            <option value="office">Office</option>
-            <option value="hygienist">Hygienist</option>
-            <option value="doctor">Doctor</option>
-          </select>
-
-          {/* Campaign start date filter */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <label style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap' }}>
-              From
-            </label>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif", whiteSpace: 'nowrap' }}>From</label>
             <input
               type="date"
               value={campaignStartDate}
               onChange={(e) => {
                 setCampaignStartDate(e.target.value)
-                if (e.target.value) {
-                  localStorage.setItem('recall_campaign_start', e.target.value)
-                } else {
-                  localStorage.removeItem('recall_campaign_start')
-                }
+                if (e.target.value) localStorage.setItem('recall_campaign_start', e.target.value)
+                else localStorage.removeItem('recall_campaign_start')
               }}
-              style={{
-                background: 'var(--bg-card)',
-                border: '0.5px solid var(--border-default)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '6px 10px',
-                fontSize: 13,
-                color: campaignStartDate ? 'var(--text-primary)' : 'var(--text-faint)',
-                fontFamily: "'Outfit', sans-serif",
-                cursor: 'pointer',
-                colorScheme: 'dark',
-              }}
+              style={{ ...selectStyle, color: campaignStartDate ? 'var(--text-primary)' : 'var(--text-faint)', colorScheme: 'dark', padding: '6px 10px' }}
             />
-            {campaignStartDate && (
-              <button
-                onClick={() => {
-                  setCampaignStartDate('')
-                  localStorage.removeItem('recall_campaign_start')
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-faint)',
-                  cursor: 'pointer',
-                  fontSize: 16,
-                  lineHeight: 1,
-                  padding: '2px 4px',
-                }}
-                title="Clear date filter"
-              >
-                ×
-              </button>
-            )}
           </div>
         </div>
       </div>
 
-      {/* Section 1: Campaign Overview — 3 KPIs */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
+      {/* Stale-filter banner */}
+      {campaignStartDate && (
+        <div
+          className="flex items-center justify-between"
+          style={{ marginBottom: 24, padding: '8px 14px', borderRadius: 'var(--radius-sm)', background: 'var(--amber-dim)', color: 'var(--amber)', fontSize: 12, fontFamily: "'Outfit', sans-serif" }}
+        >
+          <span>Showing activity since {new Date(campaignStartDate).toLocaleDateString()} — numbers are filtered.</span>
+          <button
+            onClick={() => {
+              setCampaignStartDate('')
+              localStorage.removeItem('recall_campaign_start')
+            }}
+            style={{ background: 'none', border: 'none', color: 'var(--amber)', cursor: 'pointer', fontWeight: 600, fontFamily: "'Outfit', sans-serif", fontSize: 12 }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {/* KPI row */}
+      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: campaignStartDate ? '0 0 12px' : '8px 0 12px' }}>
         Campaign Overview
       </p>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '0ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-amber" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Patients Contacted</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--amber)', lineHeight: 1, margin: 0 }}>
-            {stats.withSent.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>unique patients reached</p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '50ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-blue" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Replied</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--blue)', lineHeight: 1, margin: 0 }}>
-            {stats.withReplies.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
-            {stats.withSent > 0 ? `${((stats.withReplies / stats.withSent) * 100).toFixed(0)}% reply rate` : 'reply rate'}
-          </p>
-        </div>
-
-        <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem', animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="dot dot-accent" />
-            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Clicked Booking Link</span>
-          </div>
-          <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
-            {filteredSequences.filter((s) => s.link_clicked_at !== null).length.toLocaleString()}
-          </p>
-          <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
-            {stats.withSent > 0 ? `${((filteredSequences.filter((s) => s.link_clicked_at !== null).length / stats.withSent) * 100).toFixed(0)}% of patients contacted` : 'of patients contacted'}
-          </p>
-        </div>
+        <KpiCard dot="dot-amber" color="var(--amber)" label="Patients Contacted" value={stats.contacted} sub="unique patients reached" />
+        <KpiCard dot="dot-blue" color="var(--blue)" label="Replied" value={stats.replied} sub={stats.contacted > 0 ? `${((stats.replied / stats.contacted) * 100).toFixed(0)}% reply rate` : 'reply rate'} />
+        <KpiCard dot="dot-blue" color="var(--blue)" label="Clicked Booking Link" value={stats.clicked} sub={stats.contacted > 0 ? `${((stats.clicked / stats.contacted) * 100).toFixed(0)}% of contacted` : 'of contacted'} />
       </div>
 
-      {/* Section 2: Booking Funnel */}
+      {/* Bookings — live + manually verified */}
+      <div className="flex items-center justify-between" style={{ margin: '0 0 12px' }}>
+        <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: 0 }}>
+          Bookings
+        </p>
+        {!editingSettings && (
+          <button
+            onClick={openSettingsEditor}
+            style={{ background: 'none', border: '0.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, fontFamily: "'Outfit', sans-serif", padding: '4px 10px' }}
+          >
+            Edit verified figure
+          </button>
+        )}
+      </div>
+
+      {editingSettings ? (
+        <div className="card" style={{ padding: '1.5rem', marginBottom: 24 }}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 16 }}>
+            <LabeledInput label="Verified bookings (Dentrix)" type="number" value={verifiedInput} onChange={setVerifiedInput} placeholder="e.g. 32" />
+            <LabeledInput label="Verified as of" type="date" value={asOfInput} onChange={setAsOfInput} />
+            <LabeledInput label="Avg patient value ($)" type="number" value={valueInput} onChange={setValueInput} placeholder="e.g. 300" />
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', background: 'var(--accent)', color: '#0C0F12', border: 'none', cursor: savingSettings ? 'not-allowed' : 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 500, opacity: savingSettings ? 0.6 : 1 }}
+            >
+              {savingSettings ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              onClick={() => setEditingSettings(false)}
+              style={{ padding: '8px 18px', borderRadius: 'var(--radius-sm)', background: 'transparent', color: 'var(--text-muted)', border: '0.5px solid var(--border-default)', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: 13 }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ marginBottom: 24 }}>
+          <KpiCard dot="dot-accent" color="var(--accent)" label="Booked (live)" value={stats.bookedLive} sub="confirmed in-system" />
+          <KpiCard
+            dot="dot-accent"
+            color="var(--accent)"
+            label="Verified via Dentrix"
+            value={verifiedBookings ?? 0}
+            sub={verifiedBookings == null ? 'not set — click edit' : settings.verified_as_of ? `as of ${new Date(settings.verified_as_of).toLocaleDateString()}` : 'manually verified'}
+          />
+          <div className="card" style={{ padding: '1.25rem 1.5rem' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="dot dot-accent" />
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>Revenue Recovered</span>
+            </div>
+            <p className="font-metric" style={{ fontSize: 32, color: 'var(--accent)', lineHeight: 1, margin: 0 }}>
+              {avgValue != null && avgValue > 0
+                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format((verifiedBookings ?? stats.bookedLive) * avgValue)
+                : '—'}
+            </p>
+            <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>
+              {avgValue != null && avgValue > 0 ? `${verifiedBookings ?? stats.bookedLive} × $${avgValue}` : 'set avg patient value'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Funnel */}
       <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
         Booking Funnel
       </p>
-
-      <div className="card animate-fade-in" style={{ padding: '1.5rem', marginBottom: 24, animationDelay: '100ms' }}>
+      <div className="card animate-fade-in" style={{ padding: '1.5rem' }}>
         <div className="flex flex-col gap-3">
           {funnelData.map((stage, idx) => {
             const pct = maxFunnelCount > 0 ? (stage.count / maxFunnelCount) * 100 : 0
-            const prevCount = idx > 0 ? funnelData[idx - 1].count : stage.count
-            const conversionPct = prevCount > 0 ? ((stage.count / prevCount) * 100).toFixed(0) : '—'
+            const shareOfContacted = stats.contacted > 0 ? ((stage.count / stats.contacted) * 100).toFixed(0) : '—'
             return (
               <div key={stage.key} className="flex items-center gap-4">
-                <div style={{ width: 90, flexShrink: 0, textAlign: 'right' }}>
+                <div style={{ width: 100, flexShrink: 0, textAlign: 'right' }}>
                   <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>{stage.label}</span>
                 </div>
-                <div style={{ flex: 1, position: 'relative' }}>
-                  <div
-                    style={{
-                      height: 28,
-                      background: 'rgba(255,255,255,0.03)',
-                      borderRadius: 6,
-                      overflow: 'hidden',
-                    }}
-                  >
+                <div style={{ flex: 1 }}>
+                  <div style={{ height: 28, background: 'rgba(255,255,255,0.03)', borderRadius: 6, overflow: 'hidden' }}>
                     <div
                       style={{
                         height: '100%',
                         width: `${Math.max(pct, 1)}%`,
-                        background: idx === funnelData.length - 1
-                          ? 'var(--accent)'
-                          : `rgba(52, 211, 153, ${0.15 + (0.85 * (funnelData.length - idx)) / funnelData.length})`,
+                        background: idx === funnelData.length - 1 ? 'var(--accent)' : `rgba(52, 211, 153, ${0.2 + (0.6 * (funnelData.length - idx)) / funnelData.length})`,
                         borderRadius: 6,
                         transition: 'width 0.6s ease',
                         display: 'flex',
@@ -620,124 +425,47 @@ function Recall({ practiceId }: RecallProps) {
                 </div>
                 <div style={{ width: 50, flexShrink: 0, textAlign: 'right' }}>
                   <span style={{ fontSize: 11, color: idx === 0 ? 'var(--text-faint)' : 'var(--text-muted)', fontWeight: 500 }}>
-                    {idx === 0 ? '' : `${conversionPct}%`}
+                    {idx === 0 ? '' : `${shareOfContacted}%`}
                   </span>
                 </div>
               </div>
             )
           })}
         </div>
+        <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '14px 0 0' }}>
+          Percentages are share of patients contacted.
+        </p>
       </div>
+    </div>
+  )
+}
 
-      {/* Performance by Voice */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-        Response Rate by Voice
-      </p>
-      <div className="card animate-fade-in" style={{ padding: '1.5rem', marginBottom: 24, animationDelay: '150ms' }}>
-        <div className="flex flex-col gap-0">
-          {voicePerformance.map((v, idx) => (
-            <div key={v.voice} className="flex items-center justify-between" style={{ padding: '12px 0', borderBottom: idx < voicePerformance.length - 1 ? '0.5px solid var(--border-default)' : 'none' }}>
-              <div>
-                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)', margin: 0, textTransform: 'capitalize' }}>{v.voice}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '2px 0 0' }}>{v.sent.toLocaleString()} patients contacted</p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <p className="font-metric" style={{ fontSize: 24, color: 'var(--accent)', margin: 0 }}>{v.responseRate.toFixed(1)}%</p>
-                <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '2px 0 0' }}>{v.replied} replied</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Section 4: Activity Feed */}
-      <p style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-muted)', margin: '0 0 12px' }}>
-        Activity Feed
-      </p>
-
+function KpiCard({ dot, color, label, value, sub }: { dot: string; color: string; label: string; value: number; sub: string }) {
+  return (
+    <div className="card animate-fade-in" style={{ padding: '1.25rem 1.5rem' }}>
       <div className="flex items-center gap-2 mb-3">
-        <select
-          value={dayFilter}
-          onChange={(e) => setDayFilter(e.target.value)}
-          style={{
-            background: 'var(--bg-card)',
-            border: '0.5px solid var(--border-default)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '4px 10px',
-            fontSize: 12,
-            color: 'var(--text-primary)',
-            fontFamily: "'Outfit', sans-serif",
-            cursor: 'pointer',
-          }}
-        >
-          <option value="all">All Days</option>
-          <option value="0">Day 0</option>
-          <option value="1">Day 1</option>
-          <option value="3">Day 3</option>
-        </select>
+        <span className={`dot ${dot}`} />
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }}>{label}</span>
       </div>
+      <p className="font-metric" style={{ fontSize: 32, color, lineHeight: 1, margin: 0 }}>
+        {value.toLocaleString()}
+      </p>
+      <p style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 6 }}>{sub}</p>
+    </div>
+  )
+}
 
-      <div className="card animate-fade-in" style={{ padding: '1.5rem', animationDelay: '250ms' }}>
-        {activityLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} style={{ height: 20, background: 'rgba(255,255,255,0.03)', borderRadius: 4 }} />
-            ))}
-          </div>
-        ) : filteredActivity.length > 0 ? (
-          <div style={{ maxHeight: 480, overflowY: 'auto' }}>
-            {filteredActivity.map((entry, idx) => {
-              const { dot, label } = getEventIcon(entry.automation_type)
-              return (
-                <div
-                  key={entry.id}
-                  className="flex items-start gap-3"
-                  style={{
-                    padding: '10px 0',
-                    borderBottom: idx < filteredActivity.length - 1 ? '0.5px solid var(--border-default)' : 'none',
-                  }}
-                >
-                  <span className={`dot ${dot}`} style={{ marginTop: 5 }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`badge badge-${dot.replace('dot-', '')}`}>{label}</span>
-                      {entry.patient_name && (
-                        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>
-                          {entry.patient_name}
-                        </span>
-                      )}
-                      {entry.patient_location && (
-                        <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                          {entry.patient_location}
-                        </span>
-                      )}
-                    </div>
-                    {entry.message_body && (
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 0', lineHeight: 1.4 }}>
-                        {entry.message_body.length > 120
-                          ? entry.message_body.substring(0, 120) + '...'
-                          : entry.message_body}
-                      </p>
-                    )}
-                    {entry.action && !entry.message_body && (
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '2px 0 0' }}>
-                        {entry.action}
-                      </p>
-                    )}
-                    <span style={{ fontSize: 11, color: 'var(--text-faint)' }}>
-                      {timeAgo(entry.created_at)}
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center" style={{ height: 160, color: 'var(--text-faint)', fontSize: 13 }}>
-            No reactivation activity yet
-          </div>
-        )}
-      </div>
+function LabeledInput({ label, type, value, onChange, placeholder }: { label: string; type: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <div>
+      <label style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: "'Outfit', sans-serif", display: 'block', marginBottom: 6 }}>{label}</label>
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: '100%', background: 'var(--bg-elevated)', border: '0.5px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '8px 12px', fontSize: 13, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif", outline: 'none', colorScheme: 'dark' }}
+      />
     </div>
   )
 }
