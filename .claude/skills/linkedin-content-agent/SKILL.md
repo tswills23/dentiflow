@@ -242,7 +242,7 @@ Read these files before generating anything:
 - `data/voice-rules.md` -- permanent style constraints (MUST follow all rules)
 - `data/post-types.md` -- structural requirements for the requested post type
 - Content Pillars section above -- confirm the topic maps to the specified pillar
-- Relevant source docs from `data/source-docs/` based on the pillar and topic
+- Relevant source docs from repo `docs/` (see Source Document Quick Reference below) based on the pillar and topic
 - Recent drafts in `data/drafts/` -- check recent pillar distribution to avoid clustering
 
 ### Step 2: Generate hooks
@@ -471,27 +471,9 @@ linkedin-content-agent/
     voice-rules.md                  # Permanent voice/style constraints
     post-types.md                   # 8 post type definitions
     humor-bank.md                   # Pre-approved humor lines and running bits
-    source-docs/                    # Source documents (frameworks, playbooks, data)
-      01-mvp-agent-sops.md
-      02-30-day-recall-sprint.md
-      03-speed-to-lead-breakdown.md
-      04-recall-reactivation-breakdown.md
-      05-revenue-capture-breakdown.md
-      06-intake-control-breakdown.md
-      07-pre-visit-prep-breakdown.md
-      08-retention-reentry-breakdown.md
-      09-demand-creation-breakdown.md
-      10-smart-booking-breakdown.md
-      11-dental-revenue-os-master.md
-      12-72-hour-recall-playbook.md
-      13-money-model-notes.md
-      14-sms-test-plan.md
-      15-ai-consultant-system-prompt.md
-      16-100m-money-model-blueprint.md
-      17-reviews-referrals-breakdown.md       # NEW -- Reviews + referrals system
-      18-noshow-recovery-breakdown.md         # NEW -- No-show recovery sequences
-      19-jp-roadmap-positioning.md            # NEW -- JP Middleton roadmap + market positioning
-      20-dentiflow-system-summary.md          # NEW -- Full architecture covering all modules
+    # source-docs/ was retired 2026-07-07: all business/framework docs moved to repo
+    # docs/ (business docs stay separate from LinkedIn content). They remain valid
+    # content sources -- see the Source Document Quick Reference table for paths.
     drafts/                         # Generated post drafts (text + video)
     research-log.jsonl              # Research findings
     engagement/
@@ -502,22 +484,26 @@ linkedin-content-agent/
 
 ## Source Document Quick Reference
 
-| # | Document | Best For | Primary Pillar |
+All source documents live in repo `docs/` (moved from `data/source-docs/` 2026-07-07; old doc numbers kept in the first column for continuity with older notes).
+
+| # | Document (repo path) | Best For | Primary Pillar |
 |---|----------|----------|----------------|
-| 2 | 30-Day Sprint | Framework (recall launch sequencing) | Recall |
-| 3 | Speed-to-Lead | Problem awareness, framework, contrarian (response time) | Speed-to-Lead |
-| 4 | Recall Reactivation | Framework, myth busting (patient reactivation) | Recall |
-| 5 | Revenue Capture | Problem awareness (unscheduled treatment math) | System Thinking |
-| 6 | Intake Control | Framework (appointment intake qualification) | Speed-to-Lead |
-| 9 | Demand Creation | Framework (inbound demand generation) | System Thinking |
-| 10 | Smart Booking | Framework (booking optimization) | Speed-to-Lead |
-| 11 | Revenue OS Master | Framework, playbook (9-system map) | System Thinking |
-| 12 | 72-Hour Playbook | Playbook, actionable (templates, scripts, rules) | Recall |
-| 13 | Money Model | Framework, contrarian (offer design, CAC/GP) | Acquisition/Sales |
-| 14 | SMS Test Plan | Build in public, actionable (A/B test data) | Recall |
-| 15 | AI Consultant | Story/credibility (Trevor's background) | Acquisition/Sales |
-| 16 | 100M Blueprint | Framework (offer stack, pricing ladder) | Acquisition/Sales |
-| 17 | Reviews + Referrals | Problem awareness, framework, actionable | Reviews/Referrals |
-| 18 | No-Show Recovery | Framework, actionable (confirmation sequences) | Speed-to-Lead |
-| 19 | JP Roadmap | Framework, system thinking (market positioning) | System Thinking |
-| 20 | System Summary | Build in public, framework (full architecture) | System Thinking |
+| 2 | `docs/30-day-recall-sprint.md` | Framework (recall launch sequencing) | Recall |
+| 3 | `docs/speed-to-lead-breakdown.md` | Problem awareness, framework, contrarian (response time) | Speed-to-Lead |
+| 4 | `docs/recall-reactivation-breakdown.md` | Framework, myth busting (patient reactivation) | Recall |
+| 5 | `docs/revenue-capture-breakdown.md` | Problem awareness (unscheduled treatment math) | System Thinking |
+| 6 | `docs/intake-control-breakdown.md` | Framework (appointment intake qualification) | Speed-to-Lead |
+| 9 | `docs/demand-creation-breakdown.md` | Framework (inbound demand generation) | System Thinking |
+| 10 | `docs/smart-booking-breakdown.md` | Framework (booking optimization) | Speed-to-Lead |
+| 11 | `docs/dental-revenue-os-master.md` | Framework, playbook (9-system map) | System Thinking |
+| 12 | `docs/72-hour-recall-playbook.md` | Playbook, actionable (templates, scripts, rules) | Recall |
+| 13 | `docs/money-model-notes.md` | Framework, contrarian (offer design, CAC/GP) | Acquisition/Sales |
+| 14 | `docs/sms-test-plan.md` | Build in public, actionable (A/B test data) | Recall |
+| 15 | `docs/ai-consultant-system-prompt.md` | Story/credibility (Trevor's background) | Acquisition/Sales |
+| 16 | `docs/100m-money-model-blueprint.md` | Framework (offer stack, pricing ladder) | Acquisition/Sales |
+| 17 | `docs/reviews-referrals-breakdown.md` | Problem awareness, framework, actionable | Reviews/Referrals |
+| 18 | `docs/noshow-recovery-breakdown.md` | Framework, actionable (confirmation sequences) | Speed-to-Lead |
+| 19 | `docs/jp-roadmap-positioning.md` | Framework, system thinking (market positioning) | System Thinking |
+| 20 | `docs/dentiflow-system-summary.md` | Build in public, framework (full architecture) | System Thinking |
+
+Other content-worthy business docs also in `docs/`: `mvp-agent-sops.md` (doc 1), `retention-reentry-breakdown.md` (doc 8), `pre-visit-prep-breakdown.md` (doc 7), the Cole Gordon offer docs, and the 100M trilogy HTML summaries.
