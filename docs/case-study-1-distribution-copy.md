@@ -15,19 +15,19 @@ Three channels, three audiences. All point at the same case study URL.
 
 ### Template for Scott to send
 
-> Hey [first name] — wanted to share something we did at 32 Dental. Trevor (my son, engineer) built a recall system for the practice. We just finished a 14-day A/B test — 11 dormant patients booked from his approach vs 0 from the standard recall every other vendor sends. Real data, real production.
+> Hey [first name] — wanted to share something we did at 32 Dental. We put a new patient-recall system in place at the practice. We just finished a 14-day A/B test — 11 dormant patients booked from this approach vs 0 from the standard recall every other vendor sends. Real data, real production.
 >
-> He's looking for 3 more practices to run free 14-day tests with this quarter. No charge, no contract. Thought of you. Case study walkthrough is here: [URL]
+> They're taking on 3 more practices this quarter to run the same pilot — money-back guarantee, they do all the work. Thought of you. Case study walkthrough is here: [URL]
 >
-> Worth a quick 15-min call with him?
+> Worth a quick 15-min call?
 
 ### Template for Dr. Phillip to send
 
-> Hey [first name] — we ran a recall test at Village over the last few weeks with Trevor's company. Got 11 dormant patients back on the schedule in 14 days. He's putting together a small group of practices to test this with for free this quarter. Thought you should know about it — full case study here: [URL]
+> Hey [first name] — we ran a recall test at Village over the last few weeks. Got 11 dormant patients back on the schedule in 14 days. They're taking on a small group of practices this quarter to run the same pilot — money-back guarantee. Thought you should know about it — full case study here: [URL]
 
 ### Template for Shane to send (in case strategy changes later)
 
-> Hey [first name] — we just published a case study from the recall pilot we ran at the 32 Dental locations. 11 dormant patients booked from Trevor's 3-voice sequence vs 0 from the standard recall most vendors send. 14-day test, real production data. He's running free tests for a few more practices this quarter — thought you'd want to see it. [URL]
+> Hey [first name] — we just published a case study from the recall pilot we ran at the 32 Dental locations. 11 dormant patients booked from a 3-voice sequence vs 0 from the standard recall most vendors send. 14-day test, real production data. They're taking on a few more practices for pilots this quarter — thought you'd want to see it. [URL]
 
 ### Key principles for warm referral copy
 
@@ -65,7 +65,7 @@ Three channels, three audiences. All point at the same case study URL.
 >
 > [URL]
 >
-> If you run a PPO practice or a group, the next 14-day test can be on your dormant list. Free. Comment "test" or DM me.
+> If you run a PPO practice or a group, the next pilot can run on your dormant list — if it doesn't book patients worth more than it costs, you don't pay. Comment "pilot" or DM me.
 
 ### Follow-up post #1 (Day 8 — the "why single-message recall doesn't work" angle)
 
@@ -89,7 +89,7 @@ Three channels, three audiences. All point at the same case study URL.
 >
 > He left Familia to co-found 32 Dental — three PPO locations in Elk Grove Village, Illinois.
 >
-> Last month his son's company (mine) ran a 14-day recall test at his practice.
+> Last month a recall company ran a 14-day test at his practice.
 >
 > 11 dormant patients came back in 14 days.
 >
@@ -130,14 +130,14 @@ Three channels, three audiences. All point at the same case study URL.
 >
 > 5.5% dormant-to-booked rate (industry typical is 1–3%). 24% link-click rate (industry typical is 2–5%).
 >
-> We're taking on 3 more practices this quarter for free 14-day tests. No setup fee, no contract — you keep every booking.
+> We're taking on 3 more practices this quarter for reactivation pilots — money-back guarantee: if it doesn't book patients worth more than it costs, you don't pay. You keep every booking.
 >
 > Case study + 9-min walkthrough: [URL]
 >
 > Worth a 15-min call?
 >
-> Trevor Wills
-> Founder, Dentiflow
+> [Sender name — do NOT use Trevor's name in public outreach; see narrative rule]
+> Dentiflow
 
 ### Cold LinkedIn DM (shorter)
 
@@ -145,7 +145,7 @@ Three channels, three audiences. All point at the same case study URL.
 >
 > 5.5% reactivation in 14 days. Real data, real practice (my co-founder is former CFO of Familia Dental).
 >
-> Taking on 3 more practices this quarter for free tests. Want to see the case study? [URL]
+> Taking on 3 more practices this quarter for pilots — money-back guarantee. Want to see the case study? [URL]
 
 ### Cold outreach principles
 

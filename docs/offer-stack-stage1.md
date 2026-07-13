@@ -1,6 +1,6 @@
 # Dentiflow Offer Stack — Stage 1 (Reactivation-Led)
 
-**Status:** Active plan — source of truth for the offer behind paid ads
+**Status:** SUPERSEDED 2026-07 by [dentiflow-ai-reactivation-ads.md](dentiflow-ai-reactivation-ads.md) — the free-test offer is retired; current offer is the $1,250 paid pilot → $499/mo. Kept for economics/constraints context only. Do not use this copy.
 **Date:** 2026-06-11
 **Owner:** Trevor
 
