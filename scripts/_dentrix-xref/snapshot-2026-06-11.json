@@ -1,0 +1,453 @@
+{
+  "pulledAt": "2026-06-11T14:58:26.406Z",
+  "sourceFile": "C:\\Users\\tswil/Downloads/Interactive Schedule Report Builder - recall May.csv",
+  "totals": {
+    "s6": 11,
+    "clickedNotS6": 14,
+    "noClickNotS6": 24,
+    "total": 49
+  },
+  "matched": [
+    {
+      "name": "Steven Plantz",
+      "phone": "8477077181",
+      "apptDate": "2026-06-03",
+      "apptStatus": "Checkout",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "John Piccoli",
+      "phone": "2246598920",
+      "apptDate": "2026-06-03",
+      "apptStatus": "Complete",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Daniel Szopa",
+      "phone": "6302904880",
+      "apptDate": "2026-06-03",
+      "apptStatus": "Complete",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Yoav Saada",
+      "phone": "7088007710",
+      "apptDate": "2026-06-04",
+      "apptStatus": "Unconfirmed",
+      "stage": "EXIT_DECLINED",
+      "clicked": "2026-06-03",
+      "isS6": false
+    },
+    {
+      "name": "Nicolette Percak",
+      "phone": "3128639876",
+      "apptDate": "2026-06-05",
+      "apptStatus": "Complete",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Aninda Roy",
+      "phone": "8478003965",
+      "apptDate": "2026-06-05",
+      "apptStatus": "Complete",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Jaimie Zimmerman",
+      "phone": "8156441093",
+      "apptDate": "2026-06-05",
+      "apptStatus": "Complete",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Anthony Patricelli",
+      "phone": "2245637030",
+      "apptDate": "2026-06-06",
+      "apptStatus": "Complete",
+      "stage": "S6_COMPLETED",
+      "clicked": "2026-06-03",
+      "isS6": true
+    },
+    {
+      "name": "Joshua Villanueva",
+      "phone": "7736779377",
+      "apptDate": "2026-06-06",
+      "apptStatus": "Complete",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Don Schanaberger",
+      "phone": "8473415157",
+      "apptDate": "2026-06-08",
+      "apptStatus": "Complete",
+      "stage": "S6_COMPLETED",
+      "clicked": "2026-06-03",
+      "isS6": true
+    },
+    {
+      "name": "Peter Pawlak",
+      "phone": "2244076000",
+      "apptDate": "2026-06-09",
+      "apptStatus": "Complete",
+      "stage": "S4_AVAILABILITY",
+      "clicked": "2026-06-03",
+      "isS6": false
+    },
+    {
+      "name": "Dennis Palubicki",
+      "phone": "6306078993",
+      "apptDate": "2026-06-09",
+      "apptStatus": "Complete",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Geri Thomas",
+      "phone": "6464138529",
+      "apptDate": "2026-06-12",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Alia Sagerer",
+      "phone": "8478582192",
+      "apptDate": "2026-06-12",
+      "apptStatus": "Confirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Iveenluis Resto",
+      "phone": "8474521407",
+      "apptDate": "2026-06-12",
+      "apptStatus": "Left Message",
+      "stage": "S6_COMPLETED",
+      "clicked": "2026-06-04",
+      "isS6": true
+    },
+    {
+      "name": "Anna Wiegert",
+      "phone": "8475930324",
+      "apptDate": "2026-06-12",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Zahir Nooran",
+      "phone": "6307474600",
+      "apptDate": "2026-06-13",
+      "apptStatus": "Confirmed",
+      "stage": "S7_HANDOFF",
+      "clicked": "2026-06-03",
+      "isS6": false
+    },
+    {
+      "name": "Julie Petricca",
+      "phone": "8473470937",
+      "apptDate": "2026-06-13",
+      "apptStatus": "Confirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Tina Shea",
+      "phone": "2249443491",
+      "apptDate": "2026-06-15",
+      "apptStatus": "Unconfirmed",
+      "stage": "EXIT_OPT_OUT",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Joseph O'Brien",
+      "phone": "8473341780",
+      "apptDate": "2026-06-16",
+      "apptStatus": "Unconfirmed",
+      "stage": "EXIT_OPT_OUT",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Amanda Riesterer",
+      "phone": "8479172037",
+      "apptDate": "2026-06-17",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Samantha Vercillo",
+      "phone": "6307762363",
+      "apptDate": "2026-06-18",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "2026-06-03",
+      "isS6": true
+    },
+    {
+      "name": "Lisa Peters",
+      "phone": "7082785424",
+      "apptDate": "2026-06-19",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Amy Wiater",
+      "phone": "2248170899",
+      "apptDate": "2026-06-19",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Rita Ticsay",
+      "phone": "2247661930",
+      "apptDate": "2026-06-20",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Hassan Uslu",
+      "phone": "3125866337",
+      "apptDate": "2026-06-22",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Joanne Peters",
+      "phone": "8474370616",
+      "apptDate": "2026-06-22",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Timothy Touhey",
+      "phone": "8473121407",
+      "apptDate": "2026-07-01",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Seth Novoselsky",
+      "phone": "8477588675",
+      "apptDate": "2026-07-06",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Joe Picone",
+      "phone": "2242401460",
+      "apptDate": "2026-07-21",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Frank Oldfield",
+      "phone": "8473640153",
+      "apptDate": "2026-07-23",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Kate Orbe",
+      "phone": "8476300117",
+      "apptDate": "2026-07-25",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Amber Russell",
+      "phone": "8476300341",
+      "apptDate": "2026-07-28",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "2026-06-03",
+      "isS6": true
+    },
+    {
+      "name": "Barbara Norbot",
+      "phone": "2193816442",
+      "apptDate": "2026-07-29",
+      "apptStatus": "Unconfirmed",
+      "stage": "EXIT_OPT_OUT",
+      "clicked": "2026-06-05",
+      "isS6": false
+    },
+    {
+      "name": "Bernard Troly",
+      "phone": "6307459330",
+      "apptDate": "2026-08-04",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Lynn Tsuna",
+      "phone": "8473096697",
+      "apptDate": "2026-08-05",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Jesse Sneath",
+      "phone": "2246596073",
+      "apptDate": "2026-08-06",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Raymond Vizza",
+      "phone": "8475212024",
+      "apptDate": "2026-08-22",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Michael Smith",
+      "phone": "8479774844",
+      "apptDate": "2026-09-19",
+      "apptStatus": "Unconfirmed",
+      "stage": "EXIT_OPT_OUT",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Jukka-Lyly Yrjanainen",
+      "phone": "2245781655",
+      "apptDate": "2026-10-01",
+      "apptStatus": "Unconfirmed",
+      "stage": "S6_COMPLETED",
+      "clicked": "-",
+      "isS6": true
+    },
+    {
+      "name": "Julia Werkmeister",
+      "phone": "6302170636",
+      "apptDate": "2026-10-03",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "2026-06-04",
+      "isS6": false
+    },
+    {
+      "name": "Venkatarajulu Rengarajan",
+      "phone": "3128606946",
+      "apptDate": "2026-10-09",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Natasha Petrinic",
+      "phone": "2246598354",
+      "apptDate": "2026-10-12",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Michelle Nicolet",
+      "phone": "6302444332",
+      "apptDate": "2026-10-15",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Khushin Patel",
+      "phone": "2245092549",
+      "apptDate": "2026-11-27",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Teresa Silberg",
+      "phone": "6308129688",
+      "apptDate": "2026-12-01",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Bradley Simmons",
+      "phone": "8478990763",
+      "apptDate": "2026-12-03",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Lauren Santiago",
+      "phone": "8476308593",
+      "apptDate": "2026-12-19",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    },
+    {
+      "name": "Mayra Nicolas",
+      "phone": "6305187813",
+      "apptDate": "2027-01-09",
+      "apptStatus": "Unconfirmed",
+      "stage": "S0_OPENING",
+      "clicked": "-",
+      "isS6": false
+    }
+  ]
+}

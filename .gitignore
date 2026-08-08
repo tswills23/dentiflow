@@ -22,3 +22,17 @@ supabase/.temp/
 # CallRail recordings — PHI (patient call audio + transcripts). NEVER commit.
 callrail-puller/recordings/
 scripts/.callback-sheet-id.txt
+
+# --- Moved out of this repo 2026-08-08. Guards against re-accumulation. ---
+# PHI + patient exports -> C:\Users\tswil\Dentiflow-PHI\
+imports/
+*.vtt
+# Non-dental vertical research -> C:\Users\tswil\vertical-research\
+.firecrawl/
+scratchpad/
+scripts/_reddit-voc-medspa/
+# Scratch HTML / probe output -> C:\Users\tswil\Dentiflow-Archive\
+out_*.html
+body*.html
+lov.html
+wlov.html

@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$100M Money Models — Full Reference & Dentiflow Playbook</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F0F4FA;
+    --surface: #FFFFFF;
+    --navy: #1E3A5F;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --green: #166534;
+    --green-light: #DCFCE7;
+    --red: #991B1B;
+    --red-light: #FEE2E2;
+    --text: #1A2433;
+    --text-muted: #5A6A80;
+    --border: #D1DCF0;
+    --sidebar-w: 240px;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  .shell { display: flex; min-height: 100vh; }
+
+  nav {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--navy);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+  }
+
+  nav .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 16px;
+  }
+
+  nav .logo span {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  nav .logo .sub {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    color: rgba(255,255,255,0.5);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 2px;
+  }
+
+  nav a {
+    display: block;
+    padding: 6px 20px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.4;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  nav a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+  nav .nav-section {
+    padding: 16px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  nav a.active { color: #fff; font-weight: 600; }
+
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 52px 56px 80px;
+    max-width: 900px;
+  }
+
+  h1 {
+    font-family: Georgia, serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--navy);
+    line-height: 1.2;
+    text-wrap: balance;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--navy);
+    line-height: 1.3;
+    text-wrap: balance;
+    margin-top: 52px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  h3 {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-top: 28px;
+    margin-bottom: 10px;
+    text-wrap: balance;
+  }
+
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  p { margin-bottom: 12px; max-width: 68ch; }
+
+  ul, ol { padding-left: 20px; margin-bottom: 12px; max-width: 68ch; }
+
+  li { margin-bottom: 5px; }
+
+  strong { color: var(--navy); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card-grid .card { margin-bottom: 0; }
+
+  .formula-box {
+    background: var(--blue-light);
+    border: 2px solid var(--blue);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 15px;
+  }
+
+  .formula-box .formula-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+
+  .formula-box .formula {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    color: var(--navy);
+    font-weight: bold;
+  }
+
+  .tip-box {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .tip-box .tip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 4px;
+  }
+
+  .win-box {
+    background: var(--green-light);
+    border-left: 4px solid #16A34A;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .win-box .win-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #166534;
+    margin-bottom: 4px;
+  }
+
+  .warn-box {
+    background: var(--red-light);
+    border-left: 4px solid #DC2626;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .warn-box .warn-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: #F7FAFF; }
+
+  .steps { list-style: none; padding: 0; margin: 16px 0; }
+
+  .steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .steps li .step-n {
+    width: 28px;
+    height: 28px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .steps li .step-body { flex: 1; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-green { background: var(--green-light); color: var(--green); }
+
+  .meta-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  .meta-row span { display: flex; align-items: center; gap: 6px; }
+
+  /* Dark Dentiflow section */
+  .dentiflow-section {
+    background: #0F1923;
+    margin: 60px -56px -80px;
+    padding: 60px 56px 80px;
+  }
+
+  .dentiflow-section h2 {
+    color: #93C5FD;
+    border-bottom-color: rgba(147,197,253,0.2);
+    margin-top: 40px;
+  }
+
+  .dentiflow-section h2:first-child { margin-top: 0; }
+
+  .dentiflow-section h3 { color: #E2E8F0; }
+  .dentiflow-section h4 { color: #93C5FD; }
+  .dentiflow-section p { color: #CBD5E1; }
+  .dentiflow-section ul, .dentiflow-section ol { color: #CBD5E1; }
+  .dentiflow-section strong { color: #E2E8F0; }
+
+  .dentiflow-section .card {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .dentiflow-section .card p,
+  .dentiflow-section .card ul,
+  .dentiflow-section .card li { color: #CBD5E1; }
+
+  .dentiflow-section .formula-box {
+    background: rgba(37,99,235,0.15);
+    border-color: rgba(37,99,235,0.5);
+  }
+
+  .dentiflow-section .formula-box .formula { color: #93C5FD; }
+
+  .dentiflow-section .tip-box {
+    background: rgba(180,83,9,0.15);
+    border-left-color: #D97706;
+  }
+
+  .dentiflow-section .tip-box p { color: #FCD34D; }
+  .dentiflow-section .tip-box .tip-label { color: #F59E0B; }
+
+  .dentiflow-section .win-box {
+    background: rgba(22,163,74,0.12);
+    border-left-color: #22C55E;
+  }
+
+  .dentiflow-section .win-box p,
+  .dentiflow-section .win-box ul,
+  .dentiflow-section .win-box li { color: #86EFAC; }
+
+  .dentiflow-section .win-box .win-label { color: #4ADE80; }
+
+  .dentiflow-section .badge-blue { background: rgba(37,99,235,0.2); color: #93C5FD; }
+  .dentiflow-section .badge-green { background: rgba(22,163,74,0.2); color: #4ADE80; }
+  .dentiflow-section .badge-amber { background: rgba(180,83,9,0.2); color: #FCD34D; }
+
+  .dentiflow-section table { color: #CBD5E1; }
+  .dentiflow-section th { background: rgba(255,255,255,0.1); color: #E2E8F0; }
+  .dentiflow-section td { border-bottom-color: rgba(255,255,255,0.08); }
+  .dentiflow-section tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav id="sidebar">
+  <div class="logo">
+    <span>$100M Money<br>Models</span>
+    <span class="sub">Dentiflow Reference</span>
+  </div>
+
+  <div class="nav-section">Foundation</div>
+  <a href="#overview">Overview</a>
+  <a href="#three-numbers">Three Core Numbers</a>
+  <a href="#cfa">Client-Financed Acquisition</a>
+  <a href="#money-model">The Money Model</a>
+
+  <div class="nav-section">Attraction Offers</div>
+  <a href="#win-money-back">Win Your Money Back</a>
+  <a href="#giveaways">Free Giveaways</a>
+  <a href="#decoy">Decoy Offers</a>
+  <a href="#buy-x-get-y">Buy X Get Y Free</a>
+  <a href="#pay-less-now">Pay Less Now / More Later</a>
+  <a href="#free-consumption">Free with Consumption</a>
+
+  <div class="nav-section">Upsell Offers</div>
+  <a href="#classic-upsell">Classic Upsell</a>
+  <a href="#menu-upsell">Menu Upsell</a>
+  <a href="#anchor-upsell">Anchor Upsell</a>
+  <a href="#rollover-upsell">Rollover Upsell</a>
+
+  <div class="nav-section">Downsell Offers</div>
+  <a href="#payment-plans">Payment Plans</a>
+  <a href="#trial-penalty">Trial with Penalty</a>
+  <a href="#feature-downsell">Feature Downsells</a>
+
+  <div class="nav-section">Continuity Offers</div>
+  <a href="#continuity-bonus">Continuity Bonus</a>
+  <a href="#continuity-discount">Continuity Discount</a>
+  <a href="#waived-fee">Waived Fee Offer</a>
+
+  <div class="nav-section">Build It</div>
+  <a href="#build-model">Build Your Model</a>
+
+  <div class="nav-section">Dentiflow</div>
+  <a href="#dentiflow">Dentiflow Playbook</a>
+</nav>
+
+<main>
+
+  <!-- HEADER -->
+  <h1>$100M Money Models</h1>
+  <div class="meta-row">
+    <span>Alex Hormozi</span>
+    <span>32 videos · ~6 hours</span>
+    <span>Book 3 of the $100M trilogy</span>
+    <span>Synthesized June 2026</span>
+  </div>
+
+  <p>Book 3 answers the final question in the trilogy: <strong>how do we get customers to buy?</strong> Offers tells you what to sell. Leads tells you how to find people. Money Models tells you how to structure the transaction so you make more money in 30 days than it cost you to acquire the customer — which removes cash as a constraint on growth.</p>
+
+  <div class="formula-box">
+    <div class="formula-label">The Big Idea</div>
+    <div class="formula">30-Day Gross Profit > CAC = Self-Funding Growth</div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <h2 id="overview">Overview: Why Money Models Matter</h2>
+
+  <p>Most businesses have great offers and decent leads but still struggle to scale because they run out of cash between acquiring a customer and getting paid back. Money Models solves this. The goal is <strong>Client-Financed Acquisition (CFA)</strong>: structure your offers so customers finance their own acquisition cost — you never have to carry debt to grow.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Gym Launch</h4>
+      <p>Started with $1K. Reached $17M profit in 20 months. 30-day GP:CAC ratio = 12:1. Year 1 ROAS = 100:1 ($100K spend → $10M).</p>
+    </div>
+    <div class="card">
+      <h4>Allan (software)</h4>
+      <p>Scaled from $0 to $1.7M/month in 6 months using these money model structures.</p>
+    </div>
+    <div class="card">
+      <h4>The Rental Car Lesson</h4>
+      <p>$19/day advertised → ~$400 actual transaction via car upgrade + insurance + gas + checkout. Every business has hidden upsell potential.</p>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-label">Hormozi's Rule</div>
+    <p>"Simple scales — have as few offers as possible to make maximum GP in the shortest time." Add complexity only after the core works.</p>
+  </div>
+
+  <!-- THREE NUMBERS -->
+  <h2 id="three-numbers">The Three Core Numbers</h2>
+
+  <p>Every business that scales has mastered three numbers. These are the levers of CFA.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Number</th>
+          <th>Definition</th>
+          <th>Key Insight</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>CAC</strong><br>Customer Acquisition Cost</td>
+          <td>All costs to get one customer: ad spend + payroll + commissions + software</td>
+          <td>Outreach ≈ $500 · Content ≈ $1,100 · Paid ads ≈ $3,500. "Free" is not free — it brings broke people and closes at the same rate.</td>
+        </tr>
+        <tr>
+          <td><strong>Gross Profit</strong></td>
+          <td>Revenue minus variable COGS only (not overhead)</td>
+          <td>Service businesses need 80%+ gross margin to scale. GP is the "arms race of business" — whoever can spend more to acquire wins.</td>
+        </tr>
+        <tr>
+          <td><strong>Payback Period</strong></td>
+          <td>Days until cumulative GP from customer &gt; CAC</td>
+          <td>Shorter = easier to scale. Upsell timing, enrollment fees, and layaway compress this toward zero.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="formula-box">
+    <div class="formula-label">Required Ratio</div>
+    <div class="formula">LTGP : CAC ≥ 3:1</div>
+  </div>
+
+  <h3>Improving Gross Profit</h3>
+  <p>Three levers — pick one to focus on at a time:</p>
+  <ul>
+    <li><strong>More:</strong> Sell more units of the same thing (volume)</li>
+    <li><strong>Better:</strong> Increase price or quality without proportional cost increase</li>
+    <li><strong>New:</strong> Add complementary offers that monetize existing customers</li>
+  </ul>
+
+  <h3>The Penny Gap</h3>
+  <p>The difference between free and $0.01 is enormous. 9x more people take free vs. $0.01. But free doesn't mean better customers — same close rates, only lead cost differs (Hormozi's 20-location test). Use this gap strategically, not reflexively.</p>
+
+  <h3>Discount Psychology</h3>
+  <ul>
+    <li>Four ways to frame the same discount: % off · $ off · portion off · crossed-out price</li>
+    <li>Insane discounts (50%+) change behavior; moderate discounts (10-20%) don't move the needle</li>
+    <li>Free = 100% off. The mechanics are identical — just the presentation differs</li>
+  </ul>
+
+  <!-- CFA -->
+  <h2 id="cfa">Client-Financed Acquisition (CFA)</h2>
+
+  <p>CFA is the mechanism that enables unlimited scale. Three levels:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Level 1 — Sustainable</h4>
+      <p><strong>Lifetime GP &gt; CAC.</strong> You're profitable over the customer's life. Minimum bar — not yet scalable on its own.</p>
+      <span class="badge badge-amber">Minimum</span>
+    </div>
+    <div class="card">
+      <h4>Level 2 — Self-Funding</h4>
+      <p><strong>30-Day GP &gt; CAC.</strong> Gross profit from one customer in first 30 days covers cost to get them. You can recycle your credit card. No debt while growing.</p>
+      <span class="badge badge-blue">Target</span>
+    </div>
+    <div class="card">
+      <h4>Level 3 — Limitless</h4>
+      <p><strong>30-Day GP &gt; 2× CAC.</strong> The business doubles itself on house money. Every dollar spent on ads returns two or more within 30 days.</p>
+      <span class="badge badge-green">Limitless Scale</span>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-label">Why 30 Days?</div>
+    <p>The length of the interest-free credit card window. If your 30-day GP exceeds your CAC, you never have to carry interest while growing. Gym Launch hit 12:1 in 30-day GP:CAC in year one.</p>
+  </div>
+
+  <!-- MONEY MODEL -->
+  <h2 id="money-model">The Money Model: Four Offer Types</h2>
+
+  <p>A money model is a deliberate sequence of offers designed to maximize how many customers you get, how much they pay, and how fast they pay it — all within 30 days where possible.</p>
+
+  <div class="formula-box">
+    <div class="formula-label">The Four-Prong Model</div>
+    <div class="formula">Attraction → Upsell → Downsell → Continuity</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Prong</th>
+          <th>Goal</th>
+          <th>When It Fires</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Attraction</strong></td>
+          <td>Lower CAC · Get leads to engage and become customers</td>
+          <td>Front of the funnel — what you advertise or offer first</td>
+        </tr>
+        <tr>
+          <td><strong>Upsell</strong></td>
+          <td>Maximize GP per customer in 30 days</td>
+          <td>Immediately after or shortly after first purchase</td>
+        </tr>
+        <tr>
+          <td><strong>Downsell</strong></td>
+          <td>Convert "no" into some version of "yes"</td>
+          <td>After a prospect declines an offer</td>
+        </tr>
+        <tr>
+          <td><strong>Continuity</strong></td>
+          <td>Stabilize cash flow · Maximize LTV · Boost company value</td>
+          <td>Last offer in the sequence — after all other offers are made</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Upsells often make up the <strong>majority of total profit</strong> even though they represent a minority of unit sales. McDonald's example: a burger alone = $0.25 gross profit. Burger + fries + soda = $1.75 gross profit — 8× more with the same customer acquisition cost.</p>
+
+  <!-- ════════════════════════════════════════════
+       ATTRACTION OFFERS
+  ════════════════════════════════════════════ -->
+  <h2>Attraction Offers</h2>
+  <p>Attraction offers get leads to engage — and often double as your first conversion. They work by being free or deeply discounted, with a clear path to monetization through the offers that follow. There are 6 types.</p>
+
+  <h2 id="win-money-back">1 · Win Your Money Back</h2>
+
+  <p>Set a goal for the customer. If they hit it, they get their money back as cash or store credit. The goal drives the behaviors your business needs anyway (showing up to sales consults, posting results, tracking progress).</p>
+
+  <h3>How It Works</h3>
+  <ul>
+    <li><strong>Three versions:</strong> Results-only / actions-only / both (actions + results)</li>
+    <li>78% success rate when designed correctly</li>
+    <li>At the halfway point, credit their winnings toward a long-term program — "make everyone a winner"</li>
+  </ul>
+
+  <h3>Design Criteria for the Goal</h3>
+  <ul>
+    <li>Easy to track objectively</li>
+    <li>Drives results that also advertise your business (photos, posts, referrals)</li>
+    <li>Includes mandatory sales appointments (so you can upsell)</li>
+    <li>Uses credit over cash rebate when possible — extend credit over 12 months, not lump-sum upfront</li>
+  </ul>
+
+  <div class="warn-box">
+    <div class="warn-label">Prerequisite</div>
+    <p>Only use if your refund rate is below 5%. If your product doesn't reliably get results, fix the product first.</p>
+  </div>
+
+  <h2 id="giveaways">2 · Free Giveaways</h2>
+
+  <p>Advertise a chance to win a grand prize (your flagship offer). Everyone who enters also wins a participation trophy — a 10–30% discount or partial scholarship. You get contact info, pain-point data, and a built-in sales opportunity with every entry.</p>
+
+  <h3>Structure</h3>
+  <ul>
+    <li><strong>Grand prize:</strong> Must match the scale of what you sell (a free program, not a t-shirt)</li>
+    <li><strong>Participation prize:</strong> Meaningful discount on the real offer — everyone gets something</li>
+    <li><strong>Urgency at 3 moments:</strong> to enter / to claim / to use (3–7 day deadline for claiming)</li>
+    <li><strong>Referral loop:</strong> "Refer a winner and you win too" = double prizes, double leads</li>
+  </ul>
+
+  <div class="tip-box">
+    <div class="tip-label">Sales Intel</div>
+    <p>Add eligibility questions to the entry form. "How long have you been dealing with X?" "What's your budget?" These become your sales ammo when you call to award the prize.</p>
+  </div>
+
+  <h2 id="decoy">3 · Decoy Offers</h2>
+
+  <p>Advertise a free or discounted version of your offer. When the lead engages, present both the decoy and the premium side-by-side. 70–80% take the premium. This is an assumed close — everyone buys one or the other.</p>
+
+  <h3>Steps</h3>
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Advertise the outcome</strong>, not the vehicle. "Free 21-day transformation" — not "free workout." This gives you flexibility in how you present the offer when the lead arrives.</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Ask the sorting question:</strong> "Are you here for free stuff or lasting results?" — Everyone says results. Now you have permission to pitch premium first.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>Present premium with excitement</strong>, then contrast with decoy. Let the gap do the work.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Ask which will get them to their goal faster</strong> — forces them to choose premium themselves.</span></li>
+    <li><span class="step-n">5</span><span class="step-body">If they take the decoy: <strong>surprise them with a free premium feature</strong> as goodwill, then upsell at the halfway point.</span></li>
+  </ol>
+
+  <div class="tip-box">
+    <div class="tip-label">Key Rule</div>
+    <p>The contrast between decoy and premium must be huge. If people keep taking the decoy, the premium isn't valuable enough — or the decoy is too good.</p>
+  </div>
+
+  <h2 id="buy-x-get-y">4 · Buy X Get Y Free</h2>
+
+  <p>A 33% discount sounds weak. "Buy two get one free" is the same math but converts dramatically better. This offer reframes pricing — same economics, radically different perception.</p>
+
+  <h3>The Core Principle</h3>
+  <p>More free things beats fewer expensive free things. "Buy one, get two free" beats "buy two, get one free" — even if the economics are identical. Quantity perception matters more than individual value.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Same Price, Different Framing</h4>
+      <p>Buy 3 shirts for $10 each = $30 total<br>Buy 1 shirt, get 2 free for $30 = same</p>
+      <p>The second drives dramatically more attention and response.</p>
+    </div>
+    <div class="card">
+      <h4>Duration Example</h4>
+      <p>All three are 18 months for $1,800:<br>Buy 12 get 6 free · Buy 9 get 9 free · Buy 6 get 12 free</p>
+      <p>Buy 6 get 12 converts the best — most free stuff.</p>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <div class="warn-label">Cash Management Rule</div>
+    <p>If you take prepayments for service you haven't delivered, put the cash in a separate account and pay yourself monthly as you deliver. Cap prepayments at 10% of your recurring customer base. Never use it as an emergency cash play if you can't deliver.</p>
+  </div>
+
+  <p><strong>Hyper-buyer insight:</strong> People who prepay for long durations are your most likely future buyers. They forget they already paid and their wallet replenishes. Keep making them offers.</p>
+
+  <h2 id="pay-less-now">5 · Pay Less Now or Pay More Later</h2>
+
+  <p>Two flavors: (1) Card down for $0 today → billed full price after they've consumed and are satisfied. (2) Discounted price + bonuses if they pay now and lock in. Always get the card first on the "pay later" version, then offer "pay now" as the upgrade.</p>
+
+  <h3>Key Numbers</h3>
+  <ul>
+    <li>10% of pay-later people cancel = normal. Above 10% = fix the promise, conditions, or price</li>
+    <li>Card on file eliminates the friction of a second buying decision — the biggest upsell lever you have</li>
+    <li>For recurring: offer to lock in a lower rate for life by paying now vs. going month-to-month at a higher rate</li>
+  </ul>
+
+  <h2 id="free-consumption">6 · Free with Consumption</h2>
+
+  <p>Webinars, challenges, events, books — free content that delivers real value and microwave-accelerates trust. Compress weeks of trust-building into days. The bigger the ticket, the longer the runway you need.</p>
+
+  <h3>Conversion Benchmarks</h3>
+  <ul>
+    <li>Mass market virtual event: 2–5% of opt-ins</li>
+    <li>Live webinar attendees: ~10% close rate</li>
+    <li>Strategy calls: 25%+ (your highest-intent channel)</li>
+  </ul>
+
+  <div class="tip-box">
+    <div class="tip-label">What to Teach</div>
+    <p>Teach concepts, not tactics. Tactics make them feel they can DIY it. Concepts make them want the done-for-them version. Focus on breaking three beliefs: (1) their circumstances, (2) other people, (3) themselves.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       UPSELL OFFERS
+  ════════════════════════════════════════════ -->
+  <h2>Upsell Offers</h2>
+  <p>An upsell is literally whatever you offer next. It fires immediately after the first purchase — or within the first 30 days. Upsells often represent the majority of profit even with minority of unit volume. "You may be one upsell away from making yours a dynasty."</p>
+
+  <h3>What to Upsell</h3>
+  <ul>
+    <li><strong>More:</strong> Quantity (one burger → two burgers)</li>
+    <li><strong>Better:</strong> Quality upgrade (mystery meat → sirloin)</li>
+    <li><strong>New:</strong> Complementary add-on (burger → fries + soda)</li>
+  </ul>
+
+  <h3>Five Timing Windows</h3>
+  <p>Sell at the point of greatest deprivation, not greatest satisfaction:</p>
+  <ol>
+    <li>Immediately after the sale</li>
+    <li>Next step: 24–72 hours later</li>
+    <li>After their first big win</li>
+    <li>Halfway through the program</li>
+    <li>Last chance / exit point</li>
+  </ol>
+
+  <h2 id="classic-upsell">Upsell 1 · Classic Upsell</h2>
+
+  <p><strong>Core Frame: "You can't have X without Y."</strong> Provide a service or product for free, and make the natural next purchase feel required. The closer to required it feels, the higher the uptake rate. Target: 80%+ close rate on the natural next thing.</p>
+
+  <h3>The No Sale</h3>
+  <p>Train customers to say "no" to general questions — then structure "you don't want anything else, do you?" so that saying no actually means agreeing to the assumed bundle. The fur coat storage story: "Do you want anything else?" → "No" → customer walks out with storage + conditioning + ear muffs for $30.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Storage Unit Model</h4>
+      <p>Free month of storage → must buy lock ($47) → need boxes → hand truck rental → insurance ($10/month, 90% margin). Free month created $127 average transaction.</p>
+    </div>
+    <div class="card">
+      <h4>Weight Loss Clinic</h4>
+      <p>Services priced at $5/month → second day sells $5K in supplements. The front-end service is the door; supplements are the business.</p>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-label">Benchmark</div>
+    <p>If you're not getting 80%+ close rates on your classic upsell, the natural connection between X and Y isn't clear enough. Make it feel more required (ethically).</p>
+  </div>
+
+  <h2 id="menu-upsell">Upsell 2 · Menu Upsell</h2>
+
+  <p>The most elegant upsell system. Four steps that combine into a single seamless close:</p>
+
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Unsell</strong> — Cross out what they don't need. "You're not pregnant, so we won't do the lymphatic massage." This builds goodwill and credibility before you sell anything. Employees love this — it feels like a "homie hookup" but is scripted by design.</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Prescribe</strong> — Tell them exactly what they do need and how they'll use it, as though they've already bought it. "Since your shoulder hurts, we'll heat you up first, then hit your trigger points, then do dynamic stretches." Detailed post-purchase instruction increases buy-in dramatically.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>A/B Choice</strong> — Never ask "do you want it?" Ask "do you prefer chocolate or vanilla?" Every choice is a buying choice. Add a nudge: "Most people with big dogs like beef." The illusion of choice + removal of decision friction.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Card on File Close</strong> — "Do you want to use the card you have on file?" Eliminates the second decision of reaching for a wallet. Works even in a rush — "Card on file?" "Yeah, fine." Zero friction = sale.</span></li>
+  </ol>
+
+  <h3>The Economist Decoy Trick</h3>
+  <p>When you want customers to buy both A and B: add a third option (C) that's just A at the price of A+B. Now A+B feels like a no-brainer. Example: digital $59 / print only $125 / digital+print $125 — print-only makes digital+print the obvious winner.</p>
+
+  <div class="tip-box">
+    <div class="tip-label">If you sell out</div>
+    <p>Take payment and deliver later. Set the expectation clearly ("in your hands in 7 days"). People care far more about missed expectations than delays. If you say 7 and deliver in 4, they love you. If you say 7 and deliver in 10, they hate you.</p>
+  </div>
+
+  <h2 id="anchor-upsell">Upsell 3 · Anchor Upsell</h2>
+
+  <p>Present the most expensive version first — 5–10× your main offer price. Expect the customer to gasp. Come to the rescue with the main offer, which now feels like a bargain. Works via contrast: your $2,000 suit seems reasonable after you considered a $16,000 one.</p>
+
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Present the anchor</strong> — Commit to it seriously. If you treat it like a fake, so will the customer. They must fully consider purchasing it for the anchor to work. Their brain does the heavy lifting of justifying the price.</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Get the gasp</strong> — If they don't react to the price, you didn't anchor high enough. No gasp = no anchor.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>Come to the rescue</strong> — "Do you care about [secondary feature]?" Change only secondary features between anchor and main offer. Primary features should be identical so the customer's value calculation transfers.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Close on how to pay</strong> — At this point the main offer feels like a steal. Ask which card they prefer.</span></li>
+  </ol>
+
+  <h3>Why It Pays Even When Anchors Don't Sell</h3>
+  <p>1 in 10 people buy the premium anchor → that's 10× the revenue from 10% of customers. If your main offer is $2K and the anchor is $16K: even if only 1/10 buys the anchor, it adds $1,600 to the average sale of every 10 customers — nearly doubling revenue. Plus: every customer spends more on accessories because they feel like they got a deal.</p>
+
+  <div class="tip-box">
+    <div class="tip-label">Rolls-Royce Lesson</div>
+    <p>Rolls-Royce stopped showing at car shows (where $400K seemed egregious) and started showing at yacht and jet shows (where $400K feels like candy on the way out). Everything is relative to what it's positioned next to.</p>
+  </div>
+
+  <h2 id="rollover-upsell">Upsell 4 · Rollover Upsell</h2>
+
+  <p>Credit some or all of a customer's previous purchase toward your next offer. Works in four situations: re-engaging old customers, rescuing upset customers, stealing competitors' upset customers, and upselling current customers.</p>
+
+  <h3>The Four "Whos"</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Who</th><th>How to Roll</th><th>Script</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Old customers (6+ months gone)</td>
+          <td>Win-back campaign: "I owe you money"</td>
+          <td>"Hey Sandra, I owe you $500. I want to credit it toward staying pain-free for good."</td>
+        </tr>
+        <tr>
+          <td>Your upset customers</td>
+          <td>Alternative to a refund — a do-over</td>
+          <td>"That's on me. Let's credit everything you paid toward the thing you actually wanted."</td>
+        </tr>
+        <tr>
+          <td>Competitors' upset customers</td>
+          <td>Scrape 1-star reviews, offer credit for switching</td>
+          <td>"I'll credit whatever you have left with them. You start getting benefits now, don't lose a thing."</td>
+        </tr>
+        <tr>
+          <td>Current customers</td>
+          <td>Spread credit over time toward a premium upgrade</td>
+          <td>"Since you've enjoyed X, let me credit your first purchase toward a full year at a better rate."</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Pricing Rules</h3>
+  <ul>
+    <li>Upsell must be at least 4× more than the rollover credit (= 25% max discount)</li>
+    <li>Add urgency: make the credit offer valid only in this moment ("take it now or pay full price later")</li>
+    <li>Ideal target: upsell is 5× or more expensive than the credit amount</li>
+  </ul>
+
+  <h3>The Gift Card Play</h3>
+  <p>Sell $200 gift cards for $20 (90% off). Limit 2 per person, only for others (holiday/birthday). When the friend comes in, roll the $200 card into a $1,000+ offer. You got paid $20 to acquire a hot referral who then buys a $1,000 product with $200 credit built in.</p>
+
+  <!-- ════════════════════════════════════════════
+       DOWNSELL OFFERS
+  ════════════════════════════════════════════ -->
+  <h2>Downsell Offers</h2>
+  <p>A downsell fires after a customer says no. The goal is not to lower your price — it's to find a version of "yes" that still makes you money. Never offer the same thing for less (destroys trust). Always offer something different for less.</p>
+
+  <div class="warn-box">
+    <div class="warn-label">The Cardinal Sin</div>
+    <p>The car insurance salesman lowered $5K insurance to $400. The customer didn't buy — not because of price, but because they no longer trusted the seller or the original price. You traded trust for a chance at a buck. Not worth it.</p>
+  </div>
+
+  <h2 id="payment-plans">Downsell 1 · Payment Plans</h2>
+
+  <p>People reject offers because they cost too much <em>today</em> — not because they cost too much in total. Payment plans address the timing problem, not the price problem.</p>
+
+  <h3>The Seesaw Anchor</h3>
+  <p>Present the payment plan price first ($12K), then offer a prepayment discount ($10K). Now paying in full feels like a win, not a penalty. Standard approach of "here's $10K, or $12K in payments" makes the payment plan feel like punishment.</p>
+
+  <h3>Seven-Step Downsell Flow</h3>
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Anchor with payment plan price.</strong> Present the full payment plan rate first. Offer prepay discount to "save money."</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Third-party financing.</strong> Car dealer model — financing company pays you today, customer pays them. Adding 3rd-party financing increases revenue by ~35% on average. Credit card = "would you rather I pick your payment terms or you?" → they say them → use your card.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>Half now, half on payday.</strong> "When do you get paid?" Schedule the second payment on their paycheck date. Higher likelihood of collection.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Temperature check.</strong> "Scale of 1–10, how badly do you want this?" If 8+, continue. If 7 or below, pivot to feature downsell.</span></li>
+    <li><span class="step-n">5</span><span class="step-body"><strong>Three-payment split.</strong> ⅓ now, ⅓ next paycheck, ⅓ paycheck after that. Gets 3 payments inside 30 days.</span></li>
+    <li><span class="step-n">6</span><span class="step-body"><strong>Evenly spread over service duration.</strong> Last resort — spread payments across the full term.</span></li>
+    <li><span class="step-n">7</span><span class="step-body"><strong>Free trial with penalty.</strong> Final step — covered in the next section.</span></li>
+  </ol>
+
+  <div class="tip-box">
+    <div class="tip-label">Layaway</div>
+    <p>Pay before you receive. Customer pays installments, gets the thing when paid off. Aligns incentives — they want to pay fast to get the thing. Used for high-ticket B2B: "You can fly out the moment you've paid it off." Agency went from wanting 6-month payment plan to paying in 30 days.</p>
+  </div>
+
+  <h2 id="trial-penalty">Downsell 2 · Trial with Penalty</h2>
+
+  <p>Customer gets the product or service free as long as they meet your terms. If they don't meet the terms, they pay. Turns "no" into a trial that's optimized to convert to a paying customer.</p>
+
+  <h3>Setup Process</h3>
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Offer it last.</strong> Only after all other downsells fail. Don't advertise trials — reserve them for the people who've said no to everything else.</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Always get a card.</strong> "What card can I put down just to complete your account profile?" If they bulk: "This is just how we've always done it." Works every time.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>Sell staying and paying.</strong> "If we get you the results, will you stay long term?" If no, don't do the trial. If yes, you've pre-sold continued engagement.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Get the card, then explain the fees.</strong> Explain penalties after you have payment info — much lower resistance. Have them initial next to each fee clause.</span></li>
+  </ol>
+
+  <h3>What to Do at Trial's End</h3>
+  <ul>
+    <li><strong>They love it:</strong> Auto-billing is already set up. Still pitch upgrades at the midpoint and end.</li>
+    <li><strong>They hate it:</strong> Get angry on their behalf. "That's on me." Ask to make it up to them → offer the higher-tier version. About half buy it.</li>
+    <li><strong>They didn't use it:</strong> Offer to waive the fees if they get back on track. Fees are leverage for re-engagement, not revenue.</li>
+  </ul>
+
+  <h2 id="feature-downsell">Downsell 3 · Feature Downsells</h2>
+
+  <p>Lower the price by removing features. The first removal is strategic: remove something highly valuable and lower the price only slightly — customers often re-upsell themselves back to the original. The second removal takes away something they don't care about with a big price decrease.</p>
+
+  <h3>Feature Removal Vectors (Services)</h3>
+  <ul>
+    <li>Response time (5 min → overnight)</li>
+    <li>Availability (anytime → office hours)</li>
+    <li>Sessions (4/month → 2/month)</li>
+    <li>Provider seniority (owner → junior staff)</li>
+    <li>Guarantee (unconditional → conditional → removed)</li>
+    <li>Personalization (custom → generic)</li>
+    <li>Support channel (calls → chat → email only)</li>
+  </ul>
+
+  <div class="tip-box">
+    <div class="tip-label">The Opening Move</div>
+    <p>Remove the guarantee first, lower price minimally. Many re-upsell themselves because seeing the price of the guarantee makes them want it back. This move gets more people to buy the full package than any other first downsell.</p>
+  </div>
+
+  <h3>Existing Customer Feature Downsell</h3>
+  <p>Proactively reach out to customers who aren't using all your features. Tell them you're going to lower their rate to match what they're actually using. These customers never leave — and they become your highest-LTV segment because churn is near zero. "Wow, these guys actually want me to pay less."</p>
+
+  <h3>Price + Barter</h3>
+  <p>If they absolutely can't pay less but you want to make the deal: trade price for advertising. Lower price by $100 in exchange for reviews, testimonials, daily posts, and 2 warm referrals. This also gives you cover when another customer asks for a discount: "Sure, do what Susan does." They'll usually choose to pay full price.</p>
+
+  <!-- ════════════════════════════════════════════
+       CONTINUITY OFFERS
+  ════════════════════════════════════════════ -->
+  <h2>Continuity Offers</h2>
+  <p>You sell once and get paid again and again. Continuity is the fourth pillar — deployed last because the other three generate cash today while continuity generates the recurring revenue that multiplies LTV and company value.</p>
+
+  <div class="formula-box">
+    <div class="formula-label">LTV Formula</div>
+    <div class="formula">LTV = (Price / Monthly Churn %) × Gross Margin %</div>
+  </div>
+
+  <p><strong>Reducing churn is the highest-leverage action in a continuity business.</strong> Going from 10% monthly churn to 3% = 3× LTV. "Conquering churn" — making fewer people leave each month — is the secret to massive compounding value.</p>
+
+  <h3>Continuity Business Multiples</h3>
+  <p>A $10M transactional business might trade at 4× EBITDA. A $10M recurring revenue business can trade at 8–15× EBITDA — a difference of $24M to $45M in enterprise value for the same revenue. "If they stay, buyers will pay."</p>
+
+  <h3>Recurring vs. Reoccurring</h3>
+  <ul>
+    <li><strong>Recurring:</strong> Fixed subscription. Netflix, SaaS. Predictable monthly cash.</li>
+    <li><strong>Reoccurring:</strong> Regular buyer without a contract. Coca-Cola. Track cohort re-purchase rates to prove value to buyers.</li>
+  </ul>
+
+  <h3>The Downell-the-Upsell Strategy</h3>
+  <p>Sell a premium intensive up front (high price, short duration), then offer continuity at a lower monthly rate as the "better deal" — more value for less per week. Gym Launch: $16K intensive → $200/month membership. Looks like a downgrade in price; actually converts more customers into long-term recurring revenue.</p>
+
+  <h2 id="continuity-bonus">Continuity 1 · Bonus Offers</h2>
+
+  <p>Give something that has <em>more</em> value than the first continuity payment to get someone to sign up. Advertise the bonus, not the membership. The bonus is what you're selling; the membership is how they get it.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>Newsletter Example</h4>
+      <p>$24,000 of back courses free when you try $399/month newsletter. Or skip the trial, pay $299/month today and lock in the rate for life. This combines continuity bonus + lifetime discount in one offer.</p>
+    </div>
+    <div class="card">
+      <h4>Gym Example</h4>
+      <p>$600–800 challenge given free with membership signup. "You know what, I'll give you the challenge for free if you just sign up as a member." Closed 70–80% of walkins.</p>
+    </div>
+  </div>
+
+  <h3>Pricing for Continuity vs. Cash</h3>
+  <p>Based on tested data from brick-and-mortar fitness (transfers to most service businesses):</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Standalone Price vs. Monthly Rate</th><th>% Who Choose Continuity</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1.33× monthly rate</td><td>50% continuity</td></tr>
+        <tr><td>1.66× monthly rate</td><td>60% continuity</td></tr>
+        <tr><td>2.0× monthly rate</td><td>70% continuity</td></tr>
+        <tr><td>2.3× monthly rate</td><td>80% continuity</td></tr>
+        <tr><td>2.66× monthly rate</td><td>90% continuity</td></tr>
+        <tr><td>3.0× monthly rate</td><td>~95% continuity</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>People pay a ~33% premium to avoid being on continuity. Price accordingly based on how much upfront cash you need vs. how much recurring you want.</p>
+
+  <h3>Status Titles as Continuity Bonuses</h3>
+  <p>Silver / Gold / Diamond / Double Diamond status with milestone rewards. Place first milestone just past your highest-churn month. Make later milestones progressively further apart (video game pacing). One business found customers cared more about their title than any tangible bonus — "Hi, I'm Double Diamond."</p>
+
+  <h2 id="continuity-discount">Continuity 2 · Discount Offers</h2>
+
+  <p>Give free time or a discount if they sign up and commit. Four ways to structure where the free time falls:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Structure</th><th>Cash Impact</th><th>Churn Impact</th><th>Best For</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Front-loaded:</strong> Free months up front, contract starts after</td>
+          <td>Delays cash</td>
+          <td>Higher churn (less skin in game)</td>
+          <td>Industries with enforcement (storage, cell, real estate)</td>
+        </tr>
+        <tr>
+          <td><strong>Back-loaded:</strong> Free months earned after completing contract</td>
+          <td>Full cash now</td>
+          <td>Lower churn (they must earn it)</td>
+          <td>Highest LTV play — customers earn their discount</td>
+        </tr>
+        <tr>
+          <td><strong>Spread:</strong> Discount applied across all payments</td>
+          <td>Some cash now</td>
+          <td>Moderate</td>
+          <td>Best of both worlds — advertise "3 months free," spread it over term</td>
+        </tr>
+        <tr>
+          <td><strong>First + Last:</strong> Pay first and last month upfront, get free months</td>
+          <td>Covers CAC</td>
+          <td>Low (skin in game)</td>
+          <td>Covers commissions + CAC before delivering free months</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tip-box">
+    <div class="tip-label">Contract Math Trap</div>
+    <p>When you offer 3 months free on a 12-month commitment, make the contract 12+3 = 15 months, NOT 9+3 = 12. Don't let the free time eat your commitment length. That's 33% more revenue for no additional work.</p>
+  </div>
+
+  <h3>Three Continuity Payment Hacks</h3>
+  <ul>
+    <li><strong>Bill every 4 weeks (not monthly):</strong> 13 billing cycles/year instead of 12 = 8.3% more revenue. Present as weekly price ($50/week), bill at $200/4 weeks. No measurable difference in take rates.</li>
+    <li><strong>Add 3% processing fee:</strong> "X plus a 3% processing fee." Pair with: waive fee for second payment method. Now they give you an ACH/bank account as backup. Reduces involuntary churn dramatically.</li>
+    <li><strong>ACH as second form of payment:</strong> Bank accounts change far less often than credit cards. ACH = lowest decline rates, lowest processing costs. Get card + ACH whenever possible.</li>
+  </ul>
+
+  <h3>Lifetime Discounts at Churn Points</h3>
+  <p>Offer a lifetime lower rate earned after your highest-churn month. If average customer drops at month 4, put the lifetime discount at month 5. Tell them at months 2 and 3 that it's coming. This pulls people through the emotional low of cancellation with a tangible reward in sight.</p>
+
+  <h2 id="waived-fee">Continuity 3 · Waived Fee Offer</h2>
+
+  <p>Present a startup/onboarding fee (3–5× monthly rate). Then offer to wave it entirely if they commit to 12+ months. If they cancel inside the term, they pay the fee they would have paid month-to-month. "The cost of quitting exceeds the cost of staying."</p>
+
+  <div class="formula-box">
+    <div class="formula-label">Simple Formula</div>
+    <div class="formula">Fee = Monthly Rate × 5 · Waved with 12-month Commitment</div>
+  </div>
+
+  <p>The fee does double duty: gets them to start (to avoid paying it) and gets them to stick (to avoid paying it on exit). After they complete the commitment, the fee goes away permanently — this is what makes it fair.</p>
+
+  <div class="tip-box">
+    <div class="tip-label">Justification Script</div>
+    <p>"Whenever we onboard a new customer, it takes more resources than an existing one. So we charge a one-time setup fee to deliver the best experience. If you commit long-term, we'll cover those costs for you."</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       BUILD YOUR MODEL
+  ════════════════════════════════════════════ -->
+  <h2 id="build-model">Build Your Money Model</h2>
+
+  <p>Four steps. Start with one offer per stage. Perfect each before adding complexity.</p>
+
+  <ol class="steps">
+    <li><span class="step-n">1</span><span class="step-body"><strong>Pick your Attraction Offer.</strong> Choose one of the 6. The goal is simply to get leads to engage and become customers. Focus on outcome, not vehicle.</span></li>
+    <li><span class="step-n">2</span><span class="step-body"><strong>Pick your Upsell Offer.</strong> The natural "next thing" after the attraction. Classic upsell is the easiest starting point (can't have X without Y). Target 80%+ uptake rate.</span></li>
+    <li><span class="step-n">3</span><span class="step-body"><strong>Pick your Downsell Offer.</strong> Start with payment plans. Add feature downsells once you know what customers value most.</span></li>
+    <li><span class="step-n">4</span><span class="step-body"><strong>Pick your Continuity Offer.</strong> Add last, after the other three generate cash. Downell the upsell — offer continuity at a lower monthly rate than the intensive.</span></li>
+  </ol>
+
+  <div class="card">
+    <h4>Gym Launch Money Model (Real Example)</h4>
+    <ul>
+      <li><strong>Attraction:</strong> Win Your Money Back (6-week challenge)</li>
+      <li><strong>Upsell 1:</strong> Buy X Get Y Free (prepay months of service)</li>
+      <li><strong>Upsell 2:</strong> Menu Upsell on supplements at nutrition consult</li>
+      <li><strong>Upsell 3:</strong> Continuity Bonus (challenge gifted free with membership)</li>
+      <li><strong>Downsell:</strong> Free Trial with Penalty → nutrition consult → supplement sale</li>
+      <li><strong>Result:</strong> $60 revenue/show → $960 revenue/show (16× uplift)</li>
+    </ul>
+  </div>
+
+  <div class="win-box">
+    <div class="win-label">Simple Scales</div>
+    <p>"Have as few of these as humanly possible because the fewer pieces in your business, the fewer things can break." Start with the simplest thing that accomplishes CFA. Scale only after it works reliably.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       DENTIFLOW SECTION
+  ════════════════════════════════════════════ -->
+  <section class="dentiflow-section">
+    <h2 id="dentiflow">Dentiflow — Money Models Playbook</h2>
+
+    <p>Dentiflow is a B2B SaaS that sells dental practices a proven recall/reactivation system. Baseline: 32 bookings from 657 recall texts (~4.9% conversion). Current stage: proving the model at Village/32 Dental, pursuing first arms-length paying customer. SourceClub visibility constraint in effect — no LinkedIn, no paid/public ads, warm referrals only.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Current Unit Economics (32 Dental)</div>
+      <div class="formula">657 texts · 32 bookings · ~4.9% conversion rate</div>
+    </div>
+
+    <h2>Mapping the Four Prongs to Dentiflow</h2>
+
+    <h3>Attraction Offers</h3>
+    <p>Dentiflow's primary attraction offer should remove all friction from the first "yes." The goal is to get a practice to experience the system working — once they see patients booking, the value is self-evident.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>Decoy Offer (recommended)</h4>
+        <p>Lead with a free pilot: "We'll send your first 100 recall texts at no cost — you pay nothing until you see bookings." The decoy is the free 100-text pilot. The premium is full-service recall management. Present both when they engage.</p>
+        <span class="badge badge-blue">Best Fit</span>
+      </div>
+      <div class="card">
+        <h4>Win Your Money Back</h4>
+        <p>Set a bookings goal for the first 30 days. If we don't hit it, the first month is free. Low risk for us if the system works — and it does at 4.9%.</p>
+        <span class="badge badge-green">Strong Option</span>
+      </div>
+      <div class="card">
+        <h4>Free with Consumption</h4>
+        <p>Case study video + "here's exactly what we did at 32 Dental" as the lead content. Free education compresses trust. The case study IS the attraction — not a brochure.</p>
+        <span class="badge badge-amber">In Progress</span>
+      </div>
+    </div>
+
+    <h3>Classic Upsell: "You Can't Have Recall Without ___"</h3>
+    <p>The natural upsells for a dental recall system — things the practice will need anyway, they just have to decide whether to get them from Dentiflow or elsewhere:</p>
+
+    <ul>
+      <li><strong>No-show recovery:</strong> Can't do recall without handling patients who book and don't show</li>
+      <li><strong>Review generation:</strong> Every booked patient is a review opportunity — might as well capture it</li>
+      <li><strong>Two-way SMS inbox:</strong> Patients reply; someone has to manage that</li>
+      <li><strong>PMS integration:</strong> Dentrix Ascend API access unlocks AI-booking directly — the natural "next thing" once recall is proven</li>
+    </ul>
+
+    <h3>Menu Upsell in Practice</h3>
+    <p>When a practice is signing up, apply the four-step menu close. Unsell what they don't need ("You don't need the multi-location module right now — one location first"). Prescribe what they do need ("You'll want to add no-show recovery in month 2, here's exactly how you'd use it"). A/B close ("Would you want to start with recall-only, or recall + no-show recovery bundled?"). Card on file from day one for recurring billing.</p>
+
+    <h3>Anchor Upsell</h3>
+    <p>Present a white-glove "done for you" tier first: full implementation + custom templates + monthly strategy calls + Dentrix integration at a premium price. If they bulk, step down to self-serve + support. Most take the middle. The anchor makes the mid-tier look like a deal — and a meaningful subset will buy the premium, which is where the margin is.</p>
+
+    <h3>Continuity Structure</h3>
+    <p>Dentiflow is inherently a continuity business. Patients need to be recalled monthly. The system doesn't stop working — practices don't churn unless you give them a reason to.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>Continuity Bonus</h4>
+        <p>Bonus for signing up: first campaign done-with-you (our team builds the first segment, imports, and launches together). This has real value and is something we'd do anyway — slap a price on it and give it free with the monthly subscription.</p>
+      </div>
+      <div class="card">
+        <h4>Waived Fee</h4>
+        <p>Setup/onboarding fee of 3–5× monthly rate, waved with a 6-month commitment. Increases stickiness and fronts cash to cover early delivery costs. "If you commit to 6 months, I'll cover the setup."</p>
+      </div>
+      <div class="card">
+        <h4>Bill Every 4 Weeks</h4>
+        <p>Not monthly. 13 billing cycles = 8.3% more revenue with no change in perceived value. Present as weekly ("$X/week") but bill at 4-week cadence.</p>
+      </div>
+    </div>
+
+    <h2>The 30-Day CFA Target for Dentiflow</h2>
+
+    <p>To hit Level 2 CFA (self-funding growth), first-month GP from a new customer must exceed CAC. At the SourceClub visibility constraint (warm referrals only), CAC is primarily Trevors' time + case study production. That's a low bar.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Scenario</th><th>Monthly Rate</th><th>Onboarding Fee</th><th>30-Day GP</th><th>CFA Level</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Recall only</td>
+            <td>$500/mo</td>
+            <td>$1,500 waved with 6mo commit</td>
+            <td>$500</td>
+            <td>Depends on CAC</td>
+          </tr>
+          <tr>
+            <td>Recall + No-show</td>
+            <td>$800/mo</td>
+            <td>$2,500 waved</td>
+            <td>$800</td>
+            <td>Likely Level 2</td>
+          </tr>
+          <tr>
+            <td>Full stack (with case study anchor)</td>
+            <td>$1,200/mo</td>
+            <td>$5,000 waved</td>
+            <td>$1,200</td>
+            <td>Strong Level 2</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="win-box">
+      <div class="win-label">Pricing Insight from Continuity Data</div>
+      <p>If Dentiflow offers a one-time annual option at 1.33× the monthly rate, about 50% of customers will take it. That's a lot of upfront cash to offset acquisition cost while still building recurring revenue from the other 50%. Offer both from day one.</p>
+    </div>
+
+    <h2>Offer Stack to Build Toward</h2>
+
+    <ol>
+      <li><strong>Attraction:</strong> Free 100-text pilot (decoy) OR 30-day money-back guarantee on first recall campaign</li>
+      <li><strong>Classic Upsell:</strong> "You'll need no-show recovery — patients book and don't show without it" (80% uptake target)</li>
+      <li><strong>Menu Upsell:</strong> Unsell complexity, prescribe the right tier, A/B on billing cadence, card on file from day one</li>
+      <li><strong>Anchor:</strong> White-glove done-for-you tier at 5–10× base price. Gets the gasp. Sells more mid-tier. Some buy the anchor.</li>
+      <li><strong>Downsell:</strong> Payment plan first → feature downsell (drop no-show recovery → recall only at lower rate) → free trial with penalty if needed</li>
+      <li><strong>Continuity:</strong> Monthly subscription with waived onboarding fee on 6-month commit. Buy X Get Y Free on annual prepay.</li>
+    </ol>
+
+    <h3>The Rollover Play for New Practice Acquisition</h3>
+    <p>Once there are practices to reference, the rollover upsell becomes a cold outreach tool: scrape practices that have tried and abandoned competitor recall software (check reviews of Weave, Lighthouse, RevenueWell). Approach with: "We'll credit whatever you paid for [competitor] toward your first 3 months with us. You don't lose a thing and you can see what a system that actually works looks like." This is the competitor's-upset-customers rollover — and it's a referral pipeline that compounds.</p>
+
+    <h3>Case Study IS the Free-with-Consumption Offer</h3>
+    <p>The 32 Dental case study video functions as a Free with Consumption attraction offer. The content delivers real value (proof it works, exactly how it was done). The pitch at the end: "This is what we built. We can build the same thing for you." The bigger the ticket practice (multi-location, DSO), the more content they need before buying — which validates investing in multiple case study assets.</p>
+
+    <div class="tip-box">
+      <div class="tip-label">Churn Prevention = LTV</div>
+      <p>Dentiflow's LTV is determined almost entirely by churn rate. A practice that stays 24 months at $800/month = $19,200. A practice that stays 6 months = $4,800. Every dollar spent improving results, reporting, and engagement reduces churn — and the compounding effect on LTV is massive. This is where to spend engineering time.</p>
+    </div>
+
+    <h3>The Hormozi Principle Applied</h3>
+    <p>Simple scales. The most important thing Dentiflow can do right now is not add more product — it's to get the existing money model working at one practice, prove CFA, and then replicate. One attraction offer. One upsell. One continuity term. Perfect it. Then add the next layer. The 4.9% conversion rate at 32 Dental is the proof. The next step is making that proof legible enough to close the second arms-length customer on a warm referral.</p>
+
+  </section>
+
+</main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('h2[id], h3[id]');
+  const navLinks = document.querySelectorAll('nav a[href^="#"]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

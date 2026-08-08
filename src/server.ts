@@ -16,6 +16,8 @@ import appointmentRoutes from './routes/appointmentRoutes';
 import conversationRoutes from './routes/conversationRoutes';
 import pmsWebhookRoutes from './routes/pmsWebhookRoutes';
 import bookingRedirectRoute from './routes/bookingRedirectRoute';
+import metaCapiWebhook from './routes/metaCapiWebhook';
+import legalRoutes from './routes/legalRoutes';
 import { startRecallCron } from './services/recall/recallCron';
 import { startRecallReplyMonitor } from './services/recall/recallReplyMonitor';
 import { startReviewCron } from './services/reviews/reviewCronScheduler';
@@ -154,6 +156,10 @@ app.post('/webhooks/sms', validateTwilioSignature, smsWebhook);
 app.post('/webhooks/form', formWebhook);
 app.post('/webhooks/missed-call', missedCallWebhook);
 app.use('/webhooks/pms', pmsWebhookRoutes); // Has API key / HMAC auth built in
+app.use('/webhooks/meta-capi', metaCapiWebhook); // Shared-secret auth in the route
+
+// Public legal pages (privacy policy — required to publish the Meta app)
+app.use('/', legalRoutes);
 
 // ── Protected API routes (require ADMIN_API_KEY) ─────────────────────
 app.use('/api/recall', requireApiKey, recallRoutes);

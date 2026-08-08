@@ -488,22 +488,22 @@ All source documents live in repo `docs/` (moved from `data/source-docs/` 2026-0
 
 | # | Document (repo path) | Best For | Primary Pillar |
 |---|----------|----------|----------------|
-| 2 | `docs/30-day-recall-sprint.md` | Framework (recall launch sequencing) | Recall |
-| 3 | `docs/speed-to-lead-breakdown.md` | Problem awareness, framework, contrarian (response time) | Speed-to-Lead |
-| 4 | `docs/recall-reactivation-breakdown.md` | Framework, myth busting (patient reactivation) | Recall |
-| 5 | `docs/revenue-capture-breakdown.md` | Problem awareness (unscheduled treatment math) | System Thinking |
-| 6 | `docs/intake-control-breakdown.md` | Framework (appointment intake qualification) | Speed-to-Lead |
-| 9 | `docs/demand-creation-breakdown.md` | Framework (inbound demand generation) | System Thinking |
-| 10 | `docs/smart-booking-breakdown.md` | Framework (booking optimization) | Speed-to-Lead |
-| 11 | `docs/dental-revenue-os-master.md` | Framework, playbook (9-system map) | System Thinking |
-| 12 | `docs/72-hour-recall-playbook.md` | Playbook, actionable (templates, scripts, rules) | Recall |
-| 13 | `docs/money-model-notes.md` | Framework, contrarian (offer design, CAC/GP) | Acquisition/Sales |
-| 14 | `docs/sms-test-plan.md` | Build in public, actionable (A/B test data) | Recall |
-| 15 | `docs/ai-consultant-system-prompt.md` | Story/credibility (Trevor's background) | Acquisition/Sales |
-| 16 | `docs/100m-money-model-blueprint.md` | Framework (offer stack, pricing ladder) | Acquisition/Sales |
-| 17 | `docs/reviews-referrals-breakdown.md` | Problem awareness, framework, actionable | Reviews/Referrals |
-| 18 | `docs/noshow-recovery-breakdown.md` | Framework, actionable (confirmation sequences) | Speed-to-Lead |
-| 19 | `docs/jp-roadmap-positioning.md` | Framework, system thinking (market positioning) | System Thinking |
-| 20 | `docs/dentiflow-system-summary.md` | Build in public, framework (full architecture) | System Thinking |
+| 2 | `docs/system/30-day-recall-sprint.md` | Framework (recall launch sequencing) | Recall |
+| 3 | `docs/system/speed-to-lead-breakdown.md` | Problem awareness, framework, contrarian (response time) | Speed-to-Lead |
+| 4 | `docs/system/recall-reactivation-breakdown.md` | Framework, myth busting (patient reactivation) | Recall |
+| 5 | `docs/system/revenue-capture-breakdown.md` | Problem awareness (unscheduled treatment math) | System Thinking |
+| 6 | `docs/system/intake-control-breakdown.md` | Framework (appointment intake qualification) | Speed-to-Lead |
+| 9 | `docs/system/demand-creation-breakdown.md` | Framework (inbound demand generation) | System Thinking |
+| 10 | `docs/system/smart-booking-breakdown.md` | Framework (booking optimization) | Speed-to-Lead |
+| 11 | `docs/system/dental-revenue-os-master.md` | Framework, playbook (9-system map) | System Thinking |
+| 12 | `docs/system/72-hour-recall-playbook.md` | Playbook, actionable (templates, scripts, rules) | Recall |
+| 13 | `docs/reference/money-model-notes.md` | Framework, contrarian (offer design, CAC/GP) | Acquisition/Sales |
+| 14 | `docs/eng/sms-test-plan.md` | Build in public, actionable (A/B test data) | Recall |
+| 15 | `docs/reference/ai-consultant-system-prompt.md` | Story/credibility (Trevor's background) | Acquisition/Sales |
+| 16 | `docs/reference/100m-money-model-blueprint.md` | Framework (offer stack, pricing ladder) | Acquisition/Sales |
+| 17 | `docs/system/reviews-referrals-breakdown.md` | Problem awareness, framework, actionable | Reviews/Referrals |
+| 18 | `docs/system/noshow-recovery-breakdown.md` | Framework, actionable (confirmation sequences) | Speed-to-Lead |
+| 19 | `docs/system/jp-roadmap-positioning.md` | Framework, system thinking (market positioning) | System Thinking |
+| 20 | `docs/system/dentiflow-system-summary.md` | Build in public, framework (full architecture) | System Thinking |
 
 Other content-worthy business docs also in `docs/`: `mvp-agent-sops.md` (doc 1), `retention-reentry-breakdown.md` (doc 8), `pre-visit-prep-breakdown.md` (doc 7), the Cole Gordon offer docs, and the 100M trilogy HTML summaries.

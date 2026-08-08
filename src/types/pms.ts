@@ -108,7 +108,7 @@ export interface PmsSyncResult {
   errors: string[];
 }
 
-// Adapter interface — each PMS type implements this
+// Adapter interface — each PMS type implements this (read/ingest path)
 export interface PmsAdapter {
   normalizeWebhookEvent(rawBody: Record<string, unknown>): PmsAppointmentEvent;
   verifyAuth(
@@ -120,4 +120,65 @@ export interface PmsAdapter {
     integration: PmsIntegration,
     since: Date
   ): Promise<PmsAppointmentEvent[]>;
+}
+
+// =============================================================================
+// Booking (write path) — separate capability. Not every PMS supports it, so
+// adapters opt in by implementing PmsBookingAdapter in addition to PmsAdapter.
+// =============================================================================
+
+// A bookable opening returned by the PMS availability query
+export interface PmsSlot {
+  startTime: string;        // ISO 8601
+  endTime: string;          // ISO 8601
+  providerId: string | null;   // PMS provider identifier (e.g. Open Dental ProvNum)
+  operatoryId: string | null;  // PMS operatory/chair identifier (e.g. Open Dental OpNum)
+  clinicId: string | null;     // PMS clinic/location identifier (e.g. Open Dental ClinicNum)
+}
+
+// Query for available openings
+export interface PmsSlotQuery {
+  dateStart: string;        // yyyy-MM-dd
+  dateEnd: string;          // yyyy-MM-dd
+  clinicId?: string | null; // required by some PMS when clinics are enabled
+  appointmentTypeId?: string | null;
+  isNewPatient?: boolean;
+}
+
+// Request to create/book an appointment in the PMS
+export interface PmsBookingRequest {
+  pmsPatientId: string;     // PMS patient identifier (Open Dental PatNum) — patient must already exist in PMS
+  slot: PmsSlot;            // the chosen opening (from getAvailableSlots)
+  note?: string | null;     // optional appointment note
+  appointmentTypeId?: string | null;
+  isNewPatient?: boolean;
+}
+
+// Result of a booking attempt
+export interface PmsBookingResult {
+  success: boolean;
+  pmsAppointmentId: string | null;
+  startTime: string | null;
+  error?: string;
+  rawResponse?: unknown;
+}
+
+// Adapters that can WRITE appointments implement this alongside PmsAdapter
+export interface PmsBookingAdapter {
+  getAvailableSlots(
+    integration: PmsIntegration,
+    query: PmsSlotQuery
+  ): Promise<PmsSlot[]>;
+  createAppointment(
+    integration: PmsIntegration,
+    request: PmsBookingRequest
+  ): Promise<PmsBookingResult>;
+}
+
+// Runtime guard — does this adapter support booking?
+export function supportsBooking(adapter: unknown): adapter is PmsBookingAdapter {
+  return (
+    typeof (adapter as PmsBookingAdapter)?.getAvailableSlots === 'function' &&
+    typeof (adapter as PmsBookingAdapter)?.createAppointment === 'function'
+  );
 }

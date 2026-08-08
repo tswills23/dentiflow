@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$100M Leads — Full Reference & Dentiflow Playbook</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F0F4FA;
+    --surface: #FFFFFF;
+    --navy: #1E3A5F;
+    --blue: #2563EB;
+    --blue-light: #EFF6FF;
+    --amber: #B45309;
+    --amber-light: #FEF3C7;
+    --green: #166534;
+    --green-light: #DCFCE7;
+    --red: #991B1B;
+    --red-light: #FEE2E2;
+    --text: #1A2433;
+    --text-muted: #5A6A80;
+    --border: #D1DCF0;
+    --sidebar-w: 240px;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  /* ── Layout ── */
+  .shell {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  nav {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: var(--navy);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 0 40px;
+  }
+
+  nav .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 16px;
+  }
+
+  nav .logo span {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  nav .logo .sub {
+    font-family: system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    color: rgba(255,255,255,0.5);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 2px;
+  }
+
+  nav a {
+    display: block;
+    padding: 6px 20px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.4;
+    transition: color 0.15s, background 0.15s;
+  }
+
+  nav a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+  nav .nav-section {
+    padding: 16px 20px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  nav a.active { color: #fff; font-weight: 600; }
+
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 52px 56px 80px;
+    max-width: 900px;
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-family: Georgia, serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--navy);
+    line-height: 1.2;
+    text-wrap: balance;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--navy);
+    line-height: 1.3;
+    text-wrap: balance;
+    margin-top: 52px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  h3 {
+    font-family: Georgia, serif;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--navy);
+    margin-top: 28px;
+    margin-bottom: 10px;
+    text-wrap: balance;
+  }
+
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  p { margin-bottom: 12px; max-width: 68ch; }
+
+  ul, ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+    max-width: 68ch;
+  }
+
+  li { margin-bottom: 5px; }
+
+  strong { color: var(--navy); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card-grid .card { margin-bottom: 0; }
+
+  /* ── Boxes ── */
+  .formula-box {
+    background: var(--blue-light);
+    border: 2px solid var(--blue);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 15px;
+  }
+
+  .formula-box .formula-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+
+  .formula-box .formula {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    color: var(--navy);
+    font-weight: bold;
+  }
+
+  .tip-box {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .tip-box .tip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 4px;
+  }
+
+  .win-box {
+    background: var(--green-light);
+    border-left: 4px solid #16A34A;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .win-box .win-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #166534;
+    margin-bottom: 4px;
+  }
+
+  .warn-box {
+    background: var(--red-light);
+    border-left: 4px solid #DC2626;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+    max-width: 68ch;
+  }
+
+  .warn-box .warn-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin-bottom: 20px; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: #F7FAFF; }
+
+  /* ── Step list ── */
+  .steps { list-style: none; padding: 0; margin: 16px 0; }
+
+  .steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    max-width: 68ch;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .step-body { flex: 1; }
+
+  /* ── 2×2 Matrix ── */
+  .matrix {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 20px 0;
+    max-width: 560px;
+    font-size: 14px;
+  }
+
+  .matrix .corner { background: var(--bg); }
+
+  .matrix .col-label {
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: center;
+  }
+
+  .matrix .row-label {
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+  }
+
+  .matrix .cell {
+    background: var(--surface);
+    padding: 16px 18px;
+  }
+
+  .matrix .cell strong { display: block; font-size: 15px; color: var(--blue); margin-bottom: 4px; }
+
+  /* ── Dentiflow section ── */
+  .dentiflow-section {
+    background: #0F1923;
+    color: #E2EAF4;
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin: 28px 0;
+  }
+
+  .dentiflow-section h2 {
+    color: #7FB3FF;
+    border-bottom-color: rgba(127,179,255,0.2);
+    font-family: Georgia, serif;
+  }
+
+  .dentiflow-section h3 { color: #A8C8FF; }
+  .dentiflow-section h4 { color: #7FB3FF; }
+  .dentiflow-section p, .dentiflow-section li { color: #CBD5E1; max-width: 68ch; }
+  .dentiflow-section strong { color: #E2EAF4; }
+
+  .dentiflow-section .dentiflow-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+
+  .dentiflow-section .formula-box {
+    background: rgba(37,99,235,0.15);
+    border-color: #3B82F6;
+  }
+
+  .dentiflow-section .formula-box .formula-label { color: #93C5FD; }
+  .dentiflow-section .formula-box .formula { color: #E2EAF4; }
+
+  .dentiflow-section .win-box {
+    background: rgba(22,163,74,0.15);
+    border-left-color: #4ADE80;
+  }
+
+  .dentiflow-section .win-box .win-label { color: #86EFAC; }
+  .dentiflow-section .win-box p { color: #CBD5E1; }
+
+  /* ── Divider ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .page-header .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 16px;
+    max-width: 60ch;
+    margin-bottom: 0;
+  }
+
+  /* ── Stat strip ── */
+  .stat-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    min-width: 130px;
+  }
+
+  .stat .stat-val {
+    font-family: Georgia, serif;
+    font-size: 26px;
+    font-weight: bold;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Section scroll targets ── */
+  .scroll-target { scroll-margin-top: 24px; }
+
+  /* ── Tag pills ── */
+  .tag {
+    display: inline-block;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-right: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .tag.warm { background: #FEF3C7; color: #92400E; }
+  .tag.cold { background: #EDE9FE; color: #5B21B6; }
+  .tag.content { background: #DCFCE7; color: #166534; }
+  .tag.paid { background: #FFE4E6; color: #9F1239; }
+
+  @media (max-width: 768px) {
+    nav { display: none; }
+    main { padding: 28px 20px 60px; }
+    h1 { font-size: 26px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- Sidebar Navigation -->
+<nav>
+  <div class="logo">
+    <span>$100M Leads</span>
+    <span class="sub">Alex Hormozi — Full Reference</span>
+  </div>
+
+  <div class="nav-section">Foundations</div>
+  <a href="#overview">Overview & Problem</a>
+  <a href="#lead-magnets">Lead Magnets</a>
+  <a href="#core-four">The Core Four</a>
+
+  <div class="nav-section">The Core Four</div>
+  <a href="#warm-outreach">Warm Outreach</a>
+  <a href="#content-creation">Content: Creation</a>
+  <a href="#content-monetization">Content: Monetization</a>
+  <a href="#cold-outreach">Cold Outreach</a>
+  <a href="#paid-ads-making">Paid Ads: Making Ads</a>
+  <a href="#paid-ads-money">Paid Ads: Money & Metrics</a>
+
+  <div class="nav-section">Advanced</div>
+  <a href="#more-better-new">More / Better / New</a>
+  <a href="#employees">Building a Team</a>
+
+  <div class="nav-section">Application</div>
+  <a href="#dentiflow">Dentiflow Playbook</a>
+</nav>
+
+<!-- Main Content -->
+<main>
+
+  <div class="page-header">
+    <div class="eyebrow">Full Playbook — All 11 Videos Synthesized</div>
+    <h1>$100M Leads</h1>
+    <p>Every framework, formula, and tactic from Hormozi's lead generation training — organized for reference, applied to Dentiflow.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="overview" class="scroll-target">
+    <h2>Overview & The Core Problem</h2>
+
+    <p>Every business problem, stripped down, is a leads problem. Not enough leads = not enough at-bats = not enough sales. Hormozi built Gym Launch from $0 to $46.2M exit in 5 years almost entirely on lead generation skill.</p>
+
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-val">$6.8M</div><div class="stat-label">Gym Launch Yr 1</div></div>
+      <div class="stat"><div class="stat-val">$25.9M</div><div class="stat-label">Yr 2 revenue</div></div>
+      <div class="stat"><div class="stat-val">$46.2M</div><div class="stat-label">66% sold (Yr 5)</div></div>
+      <div class="stat"><div class="stat-val">$200M+</div><div class="stat-label">Portfolio run rate Yr 6</div></div>
+    </div>
+
+    <h3>Key Definitions</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Lead</h4>
+        <p>A person you can contact — they exist in your world as a name + phone/email.</p>
+      </div>
+      <div class="card">
+        <h4>Engaged Lead</h4>
+        <p>A person who has shown interest in what you sell. They raised their hand.</p>
+      </div>
+      <div class="card">
+        <h4>Advertising</h4>
+        <p>The process of making your offer known. Nothing more, nothing less. All four methods are just different ways of doing this.</p>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-label">The Core Equation</div>
+      <div class="formula">Double engaged leads → double revenue (everything else equal)</div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-label">Hormozi's Origin Point</div>
+      <p>First Facebook ad ever: plain text, no image. "I'm looking for 5 Chino Hills residents to take part in a free six-week challenge…" $1,000 spend → $5,700 in sales. Lead gen doesn't have to be complicated.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="lead-magnets" class="scroll-target">
+    <h2>Lead Magnets</h2>
+
+    <p>A lead magnet is a complete solution to a narrow problem — given free or heavily discounted — that creates engaged leads from strangers. It solves one problem so well that it naturally reveals the next problem your core offer solves.</p>
+
+    <h3>Three Types</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Reveals a Problem</h4>
+        <p>Diagnosis, audit, assessment. Shows them something is wrong that they didn't know about. Creates urgency.</p>
+        <p><strong>Example:</strong> "Free website speed audit" → your site is slow → buy our optimization service.</p>
+      </div>
+      <div class="card">
+        <h4>Free Trial / Sample</h4>
+        <p>A taste of the real thing. Once they've experienced value, they want more.</p>
+        <p><strong>Example:</strong> Free 6-week gym challenge. After 6 weeks of progress, they want to keep going — you sell the year.</p>
+      </div>
+      <div class="card">
+        <h4>One Step of Many</h4>
+        <p>Solve step 1 for free. The natural question becomes "what's step 2?" — which you sell.</p>
+        <p><strong>Example:</strong> Free keyword research → they need you to write the content.</p>
+      </div>
+    </div>
+
+    <h3>Four Delivery Mechanisms</h3>
+    <ul>
+      <li><strong>Software</strong> — tool, calculator, dashboard, free tier</li>
+      <li><strong>Information</strong> — PDF, video, guide, masterclass, webinar</li>
+      <li><strong>Service</strong> — free consultation, done-for-you sample, audit</li>
+      <li><strong>Physical product</strong> — free + shipping, sample kit</li>
+    </ul>
+
+    <h3>Three Rules for a Good Lead Magnet</h3>
+    <ol>
+      <li><strong>Name it well</strong> — the title IS the offer. Test variants. Specificity wins. "Lose 10 lbs in 30 days" beats "weight loss tips."</li>
+      <li><strong>Make it easy to consume</strong> — offer multiple formats (video + PDF + audio). Friction = drop-off.</li>
+      <li><strong>Make it genuinely good</strong> — give away the secrets, sell the implementation. If it's mediocre, they'll assume your paid product is worse.</li>
+    </ol>
+
+    <div class="tip-box">
+      <div class="tip-label">Always Attach a CTA</div>
+      <p>Every lead magnet must end with a call to action, ideally with scarcity or urgency. "You got the free thing — here's the next step. Only X spots left."</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="core-four" class="scroll-target">
+    <h2>The Core Four</h2>
+
+    <p>There are exactly four ways one person can let other people know about their stuff. Every lead generation tactic in history maps to one of these four boxes.</p>
+
+    <div class="matrix">
+      <div class="corner"></div>
+      <div class="col-label">Warm (Know You)</div>
+      <div class="col-label">Cold (Don't Know You)</div>
+      <div class="row-label">1 : 1</div>
+      <div class="cell"><strong>Warm Outreach</strong>Reach out directly to people who know you. Fastest path to first dollar.</div>
+      <div class="cell"><strong>Cold Outreach</strong>DMs, emails, cold calls to strangers. Reliable, private, no algorithm risk.</div>
+      <div class="row-label">1 : Many</div>
+      <div class="cell"><strong>Post Content</strong>Organic posts that reach your existing audience. Compounds over time.</div>
+      <div class="cell"><strong>Paid Ads</strong>Interrupt strangers' content at scale. Fastest growth vehicle — highest risk, highest return.</div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-label">The Right Order</div>
+      <p>Start with warm outreach (fastest revenue). Add cold outreach (scalable, reliable). Build content (compounds over time). Run paid ads last (requires data + cash flow from the first three). Each prior step gives you avatar data that makes paid ads cheaper to learn.</p>
+    </div>
+
+    <div class="win-box">
+      <div class="win-label">The Rule of 100</div>
+      <p>Do 100 primary actions per day for 100 days straight in the method you've chosen. 100 outreaches/day. 100 minutes of content/day. $100/day in ads. This is the baseline, not the ceiling.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="warm-outreach" class="scroll-target">
+    <h2>Warm Outreach <span class="tag warm">1:1 · Warm</span></h2>
+
+    <p>The fastest way to get your first 5 customers. You have more warm contacts than you think. This is step zero for any business.</p>
+
+    <h3>The 5-Step Warm Outreach System</h3>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body"><strong>Build the list</strong> — every person you know: past clients, friends, family, former colleagues, social media followers, anyone in your phone contacts. No filter yet.</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body"><strong>Pick one platform</strong> — wherever they are. Don't spread across all of them to start.</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body"><strong>Warm them up</strong> — engage genuinely for a few days before pitching. Like, comment, react to their content.</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body"><strong>Reach out with the ACA Framework</strong> — Acknowledge (what they're up to), Compliment (genuine, specific), Ask (one question to move the conversation forward). Never lead with your pitch.</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body"><strong>Offer the lead magnet</strong> — when it's natural, offer the free thing. Then ask: "Do you know anyone who might benefit from this?" Referrals compound warm outreach.</div>
+      </li>
+    </ol>
+
+    <h3>The Pricing Ramp</h3>
+    <p>Start free (get 5 case studies). Then raise price 20% every 5 clients. Your confidence and proof both increase; so does what you can charge. Never stay free once you have results.</p>
+
+    <h3>The Hinge Method (Referrals)</h3>
+    <p>3-way intro: "Hey [friend], I want to connect you with [prospect] — I think you'd both get value from talking." You're the hinge. Works because both parties are already pre-sold via the relationship.</p>
+
+    <h3>The Pre-Play-Post Guarantee Tactic</h3>
+    <ul>
+      <li><strong>Pre:</strong> Tell them what you're going to do and what they'll get.</li>
+      <li><strong>Play:</strong> Do it. Deliver.</li>
+      <li><strong>Post:</strong> Recap what you just did and the result. Then ask for the next step.</li>
+    </ul>
+    <p>This builds perceived likelihood of achievement at each stage and makes close rates much higher.</p>
+
+    <h3>11 Ways to Increase Perceived Likelihood of Achievement</h3>
+    <div class="card">
+      <p>Testimonials · Case studies · Before/afters · Credentials/awards · Demonstrations · Reverse trials · Money-back guarantees · Free trials · Social proof (# of customers) · Celebrity/authority endorsements · Media features</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="content-creation" class="scroll-target">
+    <h2>Content: Creation <span class="tag content">1:Many · Warm</span></h2>
+
+    <p>Content is warm outreach at scale — it keeps creating engaged leads while you sleep. The goal is building an audience of people who know, like, and trust you before you ever pitch them.</p>
+
+    <h3>The Hook / Retain / Reward Framework</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Hook</h4>
+        <p>Gets attention. The headline, thumbnail, first sentence, or first frame. If you don't win here, nothing else matters. Spend 80% of your effort on the hook.</p>
+      </div>
+      <div class="card">
+        <h4>Retain</h4>
+        <p>Keeps them watching/reading. Deliver value continuously. Every line sells the next line.</p>
+      </div>
+      <div class="card">
+        <h4>Reward</h4>
+        <p>Pays off the hook's promise. Leaves them feeling like they got something real — and primed for your CTA.</p>
+      </div>
+    </div>
+
+    <h3>5 Topic Sources</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Source</th><th>What It Is</th><th>Example</th></tr>
+        <tr><td>Far past</td><td>Life lessons, formative experiences</td><td>"The mistake I made at 22 that cost me 3 years"</td></tr>
+        <tr><td>Recent past</td><td>Calendar: meetings, decisions, observations</td><td>"What I learned from yesterday's sales call"</td></tr>
+        <tr><td>Present</td><td>Real-time capture — what you're doing right now</td><td>"I'm mid-launch right now — here's what's working"</td></tr>
+        <tr><td>Trends</td><td>Your expert take on what's happening in the industry</td><td>"Why the new FTC rules will kill most supplement brands"</td></tr>
+        <tr><td>Manufactured</td><td>Deliberate experimentation to create content</td><td>"I tested 100 cold call openers — here's the winner"</td></tr>
+      </table>
+    </div>
+
+    <h3>7 Headline Characteristics That Drive Clicks</h3>
+    <p>A strong headline uses at least two of these: <strong>Recent</strong> (news hook) · <strong>Relevant</strong> (matters to them) · <strong>Celebrity</strong> (name drops) · <strong>Proximity</strong> (local/specific) · <strong>Conflict</strong> (tension/controversy) · <strong>Unusual</strong> (surprising/counterintuitive) · <strong>Ongoing</strong> (serialized, creates anticipation)</p>
+
+    <h3>Three Retention Structures</h3>
+    <ul>
+      <li><strong>Lists</strong> — "7 ways to…" Scannable, completable, easy to consume.</li>
+      <li><strong>Steps</strong> — Sequential process. Each step creates desire for the next.</li>
+      <li><strong>Stories</strong> — Narrative arc. Highest retention when done well.</li>
+    </ul>
+
+    <div class="tip-box">
+      <div class="tip-label">Critical Rule</div>
+      <p>Make all content for strangers. If your audience already knows you, it should still make sense to someone who has never heard of you. This forces clarity and makes content shareable.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="content-monetization" class="scroll-target">
+    <h2>Content: Monetization <span class="tag content">1:Many · Warm</span></h2>
+
+    <h3>Give:Ask Ratio</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Platform / Stage</th><th>Give:Ask Ratio</th><th>What It Means</th></tr>
+        <tr><td>TV (broadcast)</td><td>3.6 : 1</td><td>Industry standard for trust-building before selling</td></tr>
+        <tr><td>Facebook (mature)</td><td>4 : 1</td><td>More value per ask needed for older platforms</td></tr>
+        <tr><td>TikTok (growth)</td><td>~0 asks</td><td>Pure value mode — monetize later</td></tr>
+        <tr><td>Hormozi's rule</td><td>Give until they ask</td><td>Give in public, ask in private (DMs)</td></tr>
+      </table>
+    </div>
+
+    <h3>Two Ask Methods</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Integrated Ask</h4>
+        <p>CTA woven into a value piece. "If this helped, you'll love [thing]." Keeps give:ask ratio high. Use most often.</p>
+      </div>
+      <div class="card">
+        <h4>Intermittent Ask</h4>
+        <p>Occasional full-sell piece. Direct pitch. Lowers ratio temporarily — use sparingly (once every 4–10 pieces).</p>
+      </div>
+    </div>
+
+    <h3>Depth vs Width Scaling</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Depth First, Then Width</h4>
+        <p>Go deep on one platform, build a loyal audience, monetize well — then expand to more platforms with the same content. Lower risk. Hormozi's preference for new businesses.</p>
+      </div>
+      <div class="card">
+        <h4>Width First, Then Depth</h4>
+        <p>Cross-post everywhere early to find which platform resonates — then double down on the winner. Faster feedback, more diluted effort.</p>
+      </div>
+    </div>
+
+    <h3>7 Content Lessons (Hard Won)</h3>
+    <ol>
+      <li><strong>How-to → How-I</strong> — "How to lose weight" is generic. "How I lost 30 lbs while running a company" is a story with specific proof.</li>
+      <li><strong>Repeat yourself</strong> — Your best ideas need to be heard 5–7 times before they land. Say them in different ways.</li>
+      <li><strong>Puddles → Ponds → Lakes → Oceans</strong> — Start niche, expand audience as you master the niche.</li>
+      <li><strong>Content creates sales tools</strong> — Your best posts become your best sales scripts. The market writes your pitch deck for you.</li>
+      <li><strong>Free content retains paying customers</strong> — Existing customers who consume your free content churn less. It's an asset, not just acquisition.</li>
+      <li><strong>No shorter attention spans</strong> — People don't have shorter attention spans. They have higher standards. Make better content.</li>
+      <li><strong>Don't pre-schedule</strong> — Hormozi records when inspired, posts when contextually relevant. Pre-scheduled content loses timing edge.</li>
+    </ol>
+
+    <div class="win-box">
+      <div class="win-label">Data Point</div>
+      <p>78% of Gym Launch customers consumed 2+ pieces of long-form content before buying. Content doesn't just acquire — it pre-sells at scale.</p>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-label">Hormozi's Production Cadence</div>
+      <p>Records ~2 days/month. Output: ~30 short clips + 2–4 long-form pieces. The long-form generates the shorts. Batching creates consistency without daily effort.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="cold-outreach" class="scroll-target">
+    <h2>Cold Outreach <span class="tag cold">1:1 · Cold</span></h2>
+
+    <p>Reaching out to strangers who have never heard of you. Harder than warm, but powerful because it's private (competition can't see it), reliable (no algorithm), stable (no platform risk), and makes your business more sellable.</p>
+
+    <h3>The 3 Problems with Strangers</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Can't contact them</h4>
+        <p><strong>Fix:</strong> Build the list. Scrape (software), buy (brokers), or elbow grease (manually from Facebook groups, LinkedIn, directories).</p>
+      </div>
+      <div class="card">
+        <h4>Ignore you</h4>
+        <p><strong>Fix:</strong> Personalize + lead with huge fast value (your lead magnet). Scripts below 3rd-grade reading level get 50% more responses.</p>
+      </div>
+      <div class="card">
+        <h4>Not interested</h4>
+        <p><strong>Fix:</strong> Better targeting. More specific list. Wrong audience = not fixable by better copy. Fix the list first.</p>
+      </div>
+    </div>
+
+    <h3>The Voicemail Script</h3>
+    <div class="card">
+      <p>"Hey [First Name], it's [Your Name], calling in reference to [competitor / industry thing they care about]. Give me a call back at [number]."</p>
+      <p style="margin-top:10px; color: var(--text-muted); font-size: 13px;">Pattern interrupt. No sell. Creates curiosity. Works because they don't know it's a cold call.</p>
+    </div>
+
+    <h3>Cold Outreach Mechanics</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Element</th><th>Decision</th></tr>
+        <tr><td>Delivery method</td><td>Live (you do it) vs. Recorded (voicemail/email template)</td></tr>
+        <tr><td>Distribution</td><td>Manual (1-by-1) vs. Blast (automation tool)</td></tr>
+        <tr><td>Follow-up</td><td>Most sales happen on follow-up 4–7. Follow up more times in more ways.</td></tr>
+        <tr><td>Reading level</td><td>Below 3rd grade. Short words. Short sentences. 50% more responses.</td></tr>
+      </table>
+    </div>
+
+    <h3>Cold Outreach Benchmarks</h3>
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-val">100</div><div class="stat-label">calls/day target</div></div>
+      <div class="stat"><div class="stat-val">25</div><div class="stat-label">pickups from 100</div></div>
+      <div class="stat"><div class="stat-val">4</div><div class="stat-label">engaged leads/hr from pickups</div></div>
+    </div>
+
+    <h3>Why Cold Outreach Beats Content for Early Stage</h3>
+    <ul>
+      <li>No face or personal brand required — anyone can do it day one</li>
+      <li>Private — competitors can't reverse-engineer your approach</li>
+      <li>Reliable — no algorithm to fight</li>
+      <li>Platform-compliant — follows TOS when done right</li>
+      <li>Makes business more sellable — systematized process, not founder-dependent</li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="paid-ads-making" class="scroll-target">
+    <h2>Paid Ads: Making Ads <span class="tag paid">1:Many · Cold</span></h2>
+
+    <p>Paid ads interrupt strangers' content. You pay the platform (Facebook, Google, YouTube, etc.) to rent their audience. Reach is guaranteed — the question is efficiency (return vs. cost).</p>
+
+    <div class="tip-box">
+      <div class="tip-label">Mindset Shift</div>
+      <p>All ads work. The question is never "do paid ads work?" It's "how efficiently can they work for me?" This is entirely a solvable optimization problem.</p>
+    </div>
+
+    <h3>The 4 Problems Paid Ads Must Solve</h3>
+    <ol>
+      <li>Where to advertise (which platform)</li>
+      <li>Who sees the ad (targeting)</li>
+      <li>What the ad says (creative)</li>
+      <li>How to capture their information (landing page)</li>
+    </ol>
+
+    <h3>1. Where to Advertise</h3>
+    <p>Pick a platform where all 4 are true:</p>
+    <ul>
+      <li>You've used it as a consumer (understand the format)</li>
+      <li>You can target your ideal customer there</li>
+      <li>You know how to format an ad for it</li>
+      <li>Minimum spend is accessible to you</li>
+    </ul>
+
+    <div class="tip-box">
+      <div class="tip-label">Best Starting Point</div>
+      <p>Place ads where your competitors do. Replicate before you iterate. Find ads that have run the longest with the most engagement — those are proven. Study the ad library (Facebook, TikTok, Google all have them). Transcribe 50 high-performing ads. Let them swirl. Write your own version.</p>
+    </div>
+
+    <h3>2. Targeting</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Lookalike Audiences</h4>
+        <p>Upload your warm outreach list + cold outreach list to the platform. It finds people who "look like" your list at scale. Better list = better lookalike. Customer list > opt-in list > cold list.</p>
+      </div>
+      <div class="card">
+        <h4>Demographic / Interest Filters</h4>
+        <p>Layer on age, gender, income, interests, geography. Add filters, but not too many. Narrow is usually more efficient — until you hit your constraint.</p>
+      </div>
+    </div>
+
+    <div class="win-box">
+      <div class="win-label">Local Business Insight</div>
+      <p>Local ads are among the easiest to run. A 2–3 mile radius is already hyper-targeted. Don't add more than 1 demographic filter. Local trust = built-in credibility (people recognize the street name). You barely need to sell — just get them to opt in and call them.</p>
+    </div>
+
+    <h3>3. What the Ad Says — The 3-Part Structure</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Call Out (Hook)</h4>
+        <p>Gets their attention. 80% of your effort goes here. If you don't win the first 5 seconds, nothing else matters.</p>
+      </div>
+      <div class="card">
+        <h4>Value (Retain)</h4>
+        <p>Why they should care. Uses the 8-element value framework below. Makes benefits as large as possible, costs as small as possible.</p>
+      </div>
+      <div class="card">
+        <h4>Call to Action (Reward)</h4>
+        <p>Exactly what to do next. Spell it out: click this button, call this number, go to this website. Clear > clever.</p>
+      </div>
+    </div>
+
+    <h3>Call Out Types</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Type</th><th>How It Works</th><th>Example</th></tr>
+        <tr><td>Labels</td><td>Put them in a group they identify with</td><td>"Clark County homeowners" / "Gym owners in Colorado"</td></tr>
+        <tr><td>Yes Questions</td><td>Implied yes answers that make them nod</td><td>"Do you wake up with cotton mouth? Do you toss and turn at night?"</td></tr>
+        <tr><td>If-Then Statements</td><td>Conditional qualification</td><td>"If you run over $10,000/month in ads, I can save you 20%+"</td></tr>
+        <tr><td>Ridiculous Results</td><td>Bizarre/rare outcome that creates curiosity</td><td>"Massage studio booked out 2 years in advance — clients furious"</td></tr>
+      </table>
+    </div>
+
+    <h4>Non-Verbal Call Outs</h4>
+    <ul>
+      <li><strong>Contrast</strong> — Bright colors, movement, sound sticks out from the feed.</li>
+      <li><strong>Likeness</strong> — People whose features and language match the target avatar. If you want diverse customers, use diverse faces in ads.</li>
+      <li><strong>Scene</strong> — Visually show what the yes question implies. Person tossing and turning in bed = sleep problem ad. Local landmark = local trust.</li>
+    </ul>
+
+    <h3>The Value Framework: What × Who × When</h3>
+    <p>Three dimensions multiplied together give you unlimited unique ad angles from a single offer.</p>
+
+    <h4>WHAT — The 8 Value Elements</h4>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Positive (Toward)</th><th>Negative (Away From)</th></tr>
+        <tr><td>Dream outcome</td><td>Nightmare (life without it)</td></tr>
+        <tr><td>Perceived likelihood of achievement</td><td>Risk (chance it won't work)</td></tr>
+        <tr><td>Speed</td><td>Time delay (how slow current path is)</td></tr>
+        <tr><td>Ease (low skill/effort needed)</td><td>Sacrifice (what they'll give up without it)</td></tr>
+      </table>
+    </div>
+
+    <h4>WHO — Status Perspectives</h4>
+    <p>Show each "what" element from the perspective of every person whose opinion the customer cares about: spouse, kids, boss, colleagues, rivals, friends, parents. "Your wife notices you pulling your belt two notches tighter" hits differently than "you lost 20 lbs."</p>
+
+    <h4>WHEN — Timeline</h4>
+    <p>Show past (how they used to feel / what they've missed out on), present (their situation right now), and future (what their life looks like with/without your solution). Negative future visualization is especially powerful.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Unlimited Angles</div>
+      <div class="formula">8 value elements × N status perspectives × 3 timelines = unlimited unique ads</div>
+    </div>
+
+    <h3>Hook Split-Testing System</h3>
+    <p>Record 10 pieces of core value content. Record 30 different hooks separately. Paste each hook onto each value piece.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Hormozi's System</div>
+      <div class="formula">10 value pieces × 30 hooks = 300 ad variations to test</div>
+    </div>
+
+    <div class="win-box">
+      <div class="win-label">Why You Can't Scale</div>
+      <p>The top 0.1% of Facebook advertisers test 11× more creative than everyone else. Your ads don't scale because they're not good enough — not because the platform capped you. Make more volume. The platform wants your money; it hasn't capped you. Your creative quality has.</p>
+    </div>
+
+    <h3>4. Landing Pages</h3>
+    <p>Three layouts that work. Pick one and match it exactly to your ad (same colors, words, face, promise):</p>
+    <ul>
+      <li>Headline + sub-headline + form</li>
+      <li>Headline + sub-headline + image + form</li>
+      <li>Headline + sub-headline + image + 3 bullets + form</li>
+    </ul>
+    <p>More steps = fewer leads but more qualified. Fewer steps = more leads but less qualified. Adjust based on your conversion problem.</p>
+
+    <div class="tip-box">
+      <div class="tip-label">Short Domain Value</div>
+      <p>80% of acquisition.com traffic is people hand-typing the URL. Hormozi paid $370K for the domain. Short, memorable domains are systematically underpriced. The memorability compounds over time.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="paid-ads-money" class="scroll-target">
+    <h2>Paid Ads: Money & Metrics <span class="tag paid">1:Many · Cold</span></h2>
+
+    <h3>The 3 Phases of Ad Spending</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>Phase 1: Track</h4>
+        <p>Set up attribution before spending a single dollar. Without tracking you're blind. Running ads without tracking is placing casino bets without knowing the odds.</p>
+      </div>
+      <div class="card">
+        <h4>Phase 2: Lose</h4>
+        <p>Expect to lose first. Of 300 ads, ~295 won't win. But the 5 winners will make up for all of them — especially the 1 home run. Do NOT stop when you find a winner and you're still net-negative. That's the mistake.</p>
+      </div>
+      <div class="card">
+        <h4>Phase 3: Print</h4>
+        <p>Once you make more than you spend — spend as much as physically possible. There is no budget. A magic money machine that turns $1 into $2 — how much do you put in?</p>
+      </div>
+    </div>
+
+    <h3>The Master Metric: LTGP:CAC</h3>
+
+    <div class="formula-box">
+      <div class="formula-label">Key Definitions</div>
+      <div class="formula">LTGP = Lifetime Gross Profit per customer (not revenue — subtract COGS)</div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-label">The Ratio That Matters</div>
+      <div class="formula">LTGP ÷ CAC ≥ 3 : 1 = scalable · ≥ 10 : 1 = exceptional</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Ratio</th><th>Meaning</th><th>Action</th></tr>
+        <tr><td>LTGP &lt; CAC</td><td>Losing money per customer</td><td>Fix business model or targeting immediately</td></tr>
+        <tr><td>1:1 to 3:1</td><td>Profitable but slow to recoup</td><td>Add upsells to speed up cash cycle</td></tr>
+        <tr><td>3:1+</td><td>Home run — scalable</td><td>Scale aggressively</td></tr>
+        <tr><td>10:1+</td><td>Exceptional (Hormozi's target)</td><td>Reinvest everything; dominate</td></tr>
+      </table>
+    </div>
+
+    <div class="win-box">
+      <div class="win-label">Hormozi's Lifetime Numbers</div>
+      <p>Personal lifetime LTGP:CAC = 36:1. Target for portfolio companies: 10:1 minimum. Some portfolio companies running 20:1+. The benchmark is high because the business model work came first.</p>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-label">Critical: Gross Profit ≠ Revenue</div>
+      <p>A business making $500/customer LTV with 10% gross margins has $50 LTGP. Spending $100 to acquire them = losing money, even though LTV looks fine. Always work from gross profit, not top-line revenue.</p>
+    </div>
+
+    <h3>Client-Financed Acquisition (CFA)</h3>
+
+    <p>The goal: break even or better on Day 1, so you can reinvest immediately and compound — instead of waiting 3–6 months to recoup CAC.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">The Compound Math</div>
+      <div class="formula">2:1 return Day 1 → reinvest → 4× → 8× → 16× → 32× in 5 months</div>
+    </div>
+
+    <h4>How to Get to Day-1 Break Even</h4>
+    <ul>
+      <li>Add an upsell that 15–25% of customers take immediately after they buy</li>
+      <li>The upsell revenue offsets CAC without touching LTV from recurring purchases</li>
+      <li>Result: you get free customers, and all recurring revenue is pure profit from day one</li>
+    </ul>
+
+    <h4>Upsell Framework: More / Better / New</h4>
+    <ul>
+      <li><strong>More</strong> — more of what they just bought (bigger quantity, more sessions)</li>
+      <li><strong>Better</strong> — premium version of the same thing (VIP tier, done-for-you)</li>
+      <li><strong>New</strong> — complementary product (fries with the burger, Coke with the fries)</li>
+    </ul>
+
+    <h3>Diagnosing What's Broken</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Symptom</th><th>Diagnosis</th><th>Fix</th></tr>
+        <tr><td>Right people on the phone, not closing</td><td>Sales problem — not ads</td><td>Sales training / script improvement</td></tr>
+        <tr><td>Ads running, wrong people showing up</td><td>Targeting problem</td><td>Refine list, change audience filters</td></tr>
+        <tr><td>Right people, won't schedule</td><td>Offer problem or landing page problem</td><td>Better CTA, simpler form, stronger offer</td></tr>
+        <tr><td>LTGP close but CAC just won't drop</td><td>Business model issue — not ads</td><td>Raise prices, reduce COGS, add upsells</td></tr>
+      </table>
+    </div>
+
+    <h3>The Learning Budget Mindset</h3>
+    <p>Expect to lose money for 6–12 months before the paid ads machine "clicks." The money spent during that time is tuition for the skill of client acquisition — a skill worth millions once mastered. The business owner who quit at $150K spent = was 6 inches from a $30M enterprise value unlock.</p>
+
+    <h3>Budget Reverse Engineering</h3>
+    <div class="card">
+      <p>Know your max capacity? Reverse into your budget.</p>
+      <p style="margin-top: 8px;"><strong>Example:</strong> Can handle 20 new customers/month × $100 CAC = $2,000/month budget ($67/day).</p>
+      <p>Fix delivery constraint → raise capacity → raise budget. The delivery bottleneck, not the ad budget, is often the real limit.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="more-better-new" class="scroll-target">
+    <h2>Scaling: More / Better / New</h2>
+
+    <p>Once you've validated any advertising method, this is how you systematically grow it. Always exhaust the lower-leverage options before jumping to the next level.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">The Sequence</div>
+      <div class="formula">More → Better → New (then repeat at each new level)</div>
+    </div>
+
+    <h3>More</h3>
+    <p>The simplest question in business: what's stopping you from doing 10× more of what's already working? Most businesses have headroom here they've never explored.</p>
+
+    <div class="card">
+      <h4>The Rule of 100</h4>
+      <p>100 primary actions per day, 100 days in a row. For each channel:</p>
+      <ul style="margin-top: 8px;">
+        <li>Warm/cold outreach: 100 messages or calls per day</li>
+        <li>Content: 100 minutes of content creation per day</li>
+        <li>Paid ads: $100 per day (or scale proportionally)</li>
+      </ul>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-label">Before $1M/yr Annual Profit</div>
+      <p>Just do more. The business doesn't have enough volume for percentage improvements to make a meaningful difference yet. Raw volume is the lever.</p>
+    </div>
+
+    <h3>Better</h3>
+    <p>Get more leads from the same effort. The only way to get better is testing — one variable at a time.</p>
+
+    <h4>The Testing Protocol</h4>
+    <ul>
+      <li>One test per week per platform</li>
+      <li>Reason 1: Understand what worked (single variable = clear causation)</li>
+      <li>Reason 2: Split tests affect each other (more leads may be less qualified)</li>
+      <li>Reason 3: Forces prioritization of highest-impact changes</li>
+      <li>Reason 4: Long enough sample for statistical significance (use a significance calculator)</li>
+    </ul>
+
+    <h4>What to Test First: Front-to-Back Priority</h4>
+    <p>The earliest steps in your funnel have the lowest conversion percentages — meaning tiny improvements have the largest absolute impact. Fix the call-out before the landing page headline. Fix the headline before the form.</p>
+
+    <div class="formula-box">
+      <div class="formula-label">Gym Launch Example</div>
+      <div class="formula">40% growth in 18 months by testing 1% improvements — no new channels, no new methods</div>
+    </div>
+
+    <div class="tip-box">
+      <div class="tip-label">After $1M/yr Annual Profit</div>
+      <p>Flip the order: Better → More → New. At this scale, percentage improvements compound on larger volume. A 1% CTR improvement on $100K/month spend is worth more than adding 10% more volume.</p>
+    </div>
+
+    <h3>New</h3>
+    <p>After you've maxed "more" and "better" on your current approach, expand. But most businesses think they've maxed out long before they actually have.</p>
+
+    <h4>The Expansion Hierarchy (Easy → Hard)</h4>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Level</th><th>What It Is</th><th>Example</th></tr>
+        <tr><td>New placement</td><td>Different spot on the same platform</td><td>Instagram feed → Instagram stories</td></tr>
+        <tr><td>New platform</td><td>Same media type, new platform</td><td>YouTube shorts → TikTok (both short video)</td></tr>
+        <tr><td>New media type</td><td>Different format on a new platform</td><td>Long-form video → short tweets → LinkedIn articles</td></tr>
+        <tr><td>New Core Four</td><td>Entirely different method</td><td>Content-only business → building a cold outbound team</td></tr>
+      </table>
+    </div>
+
+    <div class="warn-box">
+      <div class="warn-label">The Fallacy of "Tapped Market"</div>
+      <p>"I've tapped my market" almost always means "I've tapped one channel on one platform." A $2M/year agency owner told Hormozi he'd tapped the chiropractic market. Hormozi Googled it live: $10–15B industry. If any competitor can still acquire clients in your space, you haven't tapped the market — you just haven't learned their methods yet.</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <section id="employees" class="scroll-target">
+    <h2>Building a Team (Lead-Getter Employees)</h2>
+
+    <p>Employees don't just deliver your product. Lead-getter employees do the Core Four for you. This is how you go from a high-paying job to a business.</p>
+
+    <h3>Why Employees Make You Wealthy</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h4>The Self-Employed Owner</h4>
+        <p>80 hours/week. $2M income. Net worth = cash in bank. No one else can do it like them. Business is worth nothing without them.</p>
+      </div>
+      <div class="card">
+        <h4>The Wealthy Owner</h4>
+        <p>10–20 hours/week. $2M income. Net worth = cash + $10M+ in equity. Business runs without them. Sellable at a multiple.</p>
+      </div>
+    </div>
+
+    <p>Same revenue. Same top-line. The difference is entirely who's doing the work.</p>
+
+    <h3>Recruiting = Advertising (Same Core Four)</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Getting Customers</th><th>Getting Employees</th></tr>
+        <tr><td>Warm outreach to your network</td><td>Asking your network for referrals</td></tr>
+        <tr><td>Cold outreach to strangers</td><td>Headhunting / LinkedIn cold outreach</td></tr>
+        <tr><td>Post free content</td><td>Post about your company culture / job opening</td></tr>
+        <tr><td>Run paid ads</td><td>Promote job postings (same mechanics)</td></tr>
+        <tr><td>Customer referrals</td><td>Employee referrals</td></tr>
+        <tr><td>Affiliates</td><td>Staffing agencies / talent community owners</td></tr>
+      </table>
+    </div>
+
+    <h3>Training: Document → Demonstrate → Duplicate</h3>
+    <ol class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body"><strong>Document</strong> — Film yourself doing the task. Build a checklist from what you observe, not from memory of doing it. The video becomes the training asset.</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body"><strong>Demonstrate</strong> — Do it in front of them. They observe. Real-time modeling is more effective than written instructions alone.</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body"><strong>Duplicate</strong> — They do it in front of you. You give feedback. Repeat until they can self-critique. That's mastery.</div>
+      </li>
+    </ol>
+
+    <div class="tip-box">
+      <div class="tip-label">Cut Fast</div>
+      <p>If someone is properly trained and still below expectations after 3 weeks — cut them. Keeping underperformers tanks team culture and signals to your A players that standards don't matter.</p>
+    </div>
+
+    <h3>Calculating Employee ROI</h3>
+
+    <div class="formula-box">
+      <div class="formula-label">Lead-Getter Cost Per Lead</div>
+      <div class="formula">Total payroll ÷ engaged leads generated = cost per engaged lead</div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-label">Employee-Based CAC</div>
+      <div class="formula">Cost per engaged lead × leads per customer = true CAC (same benchmark: &lt;1/3 of LTGP)</div>
+    </div>
+
+    <h4>The 3× Industry Average Diagnostic</h4>
+    <p>If your CAC is more than 3× the industry average, you have a sales or advertising problem. Diagnose with one question:</p>
+    <p><strong>"Do my engaged leads have the problem I solve AND the money to spend?"</strong></p>
+    <ul>
+      <li>No → Advertising problem (wrong audience)</li>
+      <li>Yes, but not buying → Sales problem (can't close)</li>
+      <li>Yes, but not enough of them → Advertising problem (insufficient volume)</li>
+    </ul>
+
+    <h3>Buy vs Build Talent</h3>
+    <p><strong>Build early:</strong> Train frontline people. Lower cost, takes time. Worth it while you're learning the role yourself.</p>
+    <p><strong>Buy as you scale:</strong> Director-level and up, buy experienced people. A players are worth 5× B players. Pay 25% above market for 5× output — one of the best ROI investments in any business.</p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="dentiflow-section" id="dentiflow">
+    <h2 class="scroll-target">Dentiflow Playbook — Day 1 Ready</h2>
+    <p style="color: rgba(255,255,255,0.55); font-size:13px; margin-bottom: 24px;">INTERNAL USE · How $100M Leads principles apply to Dentiflow right now</p>
+
+    <h3>Who Is the Customer?</h3>
+    <p>Dentiflow sells to <strong>dental practice owners and office managers</strong>. Everything below is B2B lead gen — getting dental practices to become paying customers. (Dentiflow's product then helps those practices get patients — a separate but aligned funnel.)</p>
+
+    <h3>The Lead Magnet (Already Exists)</h3>
+    <div class="dentiflow-card">
+      <h4>Free Recall Opportunity Audit</h4>
+      <p>Pull their lapsed patient count → calculate estimated recoverable revenue → show them exactly what they're leaving on the table. This is a Type 1 lead magnet: reveals a problem they didn't know they had.</p>
+      <p style="margin-top: 10px;"><strong>The case study IS the lead magnet proof:</strong> 32 Dental — 32 bookings from 657 texts = real numbers, real patients, real revenue. This is the "before/after picture" that makes the audit credible.</p>
+    </div>
+
+    <h3>Core Four — Applied to Dentiflow</h3>
+
+    <div class="dentiflow-card">
+      <h4>1. Warm Outreach (Start Here)</h4>
+      <ul>
+        <li>Scott's direct network from the dental industry (Familia Dental DSO background is a credibility moat)</li>
+        <li>32 Dental = family proving ground — treat it as a reference, not a customer</li>
+        <li>ACA framework: acknowledge their recall problem, compliment their practice, ask about their current reactivation process</li>
+        <li>Offer: free recall audit + the case study PDF</li>
+        <li>Goal: first 5 arm's-length paying customers</li>
+      </ul>
+    </div>
+
+    <div class="dentiflow-card">
+      <h4>2. Cold Outreach (Build Second)</h4>
+      <ul>
+        <li>Scrape dental practice contacts from Google Maps, Yelp, dental directories (ZocDoc, Healthgrades)</li>
+        <li>LinkedIn cold outreach to DSO owners and office managers</li>
+        <li>Keep messages below 3rd-grade reading level</li>
+        <li>Lead with the case study result in the hook: "32 Dental booked 32 patients from 657 texts — here's the audit that showed them how"</li>
+        <li>Target: 100 outreaches/day once the list is built</li>
+      </ul>
+    </div>
+
+    <div class="dentiflow-card">
+      <h4>3. Content (Build in Parallel)</h4>
+      <p>Platforms: LinkedIn (primary B2B channel for dental operators). Possible YouTube for practice education content.</p>
+      <ul>
+        <li>Content pillars: dental recall / patient reactivation / SMS marketing for dental / AI in dentistry / founder ops</li>
+        <li>Topic sources: Case study results (recent past) · Patient SMS conversations (present) · DSO trends (trend + expertise) · "I ran 657 texts to lapsed patients" experiments (manufactured)</li>
+        <li>Format: Short posts on case study results, longer breakdowns of what worked and why</li>
+        <li>Note: Trevor's FT job is in dentistry — Dentiflow stays low-public visibility. Favor warm referrals and content that doesn't require a big public footprint. LinkedIn OK, paid public ads = defer.</li>
+      </ul>
+    </div>
+
+    <div class="dentiflow-card">
+      <h4>4. Paid Ads (Defer Until Revenue Proves the Model)</h4>
+      <p>Platforms when ready: Facebook/Instagram (targeting dentists, dental practice owners, DSO executives). LinkedIn sponsored posts.</p>
+      <p>Prerequisite: LTGP:CAC ratio validated on warm + cold channels first. Don't run paid ads until you know what a customer is worth and what it costs to close them organically.</p>
+    </div>
+
+    <h3>Key Metrics to Track Now</h3>
+
+    <div class="formula-box">
+      <div class="formula-label">LTGP Benchmark (once pricing is set)</div>
+      <div class="formula">Annual contract value × gross margin % = LTGP · Target CAC ≤ LTGP ÷ 3</div>
+    </div>
+
+    <div class="formula-box">
+      <div class="formula-label">Client-Financed Acquisition Target</div>
+      <div class="formula">Month 1 revenue from upsell or setup fee ≥ CAC → immediate reinvestment cycle</div>
+    </div>
+
+    <h3>The Case Study Is the Most Important Asset</h3>
+    <div class="win-box">
+      <div class="win-label">Why It Matters</div>
+      <p>78% of Gym Launch customers consumed 2+ long-form content pieces before buying. The case study is Dentiflow's long-form proof piece. Every outreach, every ad, every landing page should link back to it. It answers the "perceived likelihood of achievement" element of the value equation — which is the hardest to overcome for a new product.</p>
+    </div>
+
+    <h3>More / Better / New — Dentiflow Sequence</h3>
+    <ol>
+      <li><strong>More:</strong> Hit 100 warm outreaches/day to dental contacts. Do this first, before anything else. Get the first 5 arms-length paying customers from existing network.</li>
+      <li><strong>Better:</strong> Test the audit offer vs. the case study lead magnet. Test different call-out language (DSO owners vs. independent practice owners vs. office managers).</li>
+      <li><strong>New:</strong> When organic channels are maxed — add promoted LinkedIn posts, then Facebook ads targeting dental practice decision-makers.</li>
+    </ol>
+
+    <h3>Employee Path</h3>
+    <p>Once revenue justifies it: hire a lead-getter. Their job = 100 cold outreaches/day to dental practices. Calculate ROI the same way: payroll ÷ engaged leads = true cost per lead. Compare to self-serve CAC from organic.</p>
+    <p>One SDR doing 100 outreaches/day at industry response rates (2–5%) = 2–5 engaged leads/day = 60–150/month. At a 10% close rate = 6–15 new practices/month. That's your ceiling from one person — before ads.</p>
+  </div>
+
+</main>
+</div>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('.scroll-target');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-80px 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

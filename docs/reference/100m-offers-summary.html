@@ -1,0 +1,1201 @@
+
+<title>$100M Offers — Full Summary | Alex Hormozi</title>
+<meta name="description" content="Comprehensive chapter-by-chapter notes on Alex Hormozi's $100M Offers — the Grand Slam Offer framework, value equation, pricing strategy, scarcity, urgency, bonuses, guarantees, and naming.">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #F0F4FA;
+    --surface: #FFFFFF;
+    --text: #0D1B2A;
+    --text-secondary: #475569;
+    --navy: #1E3A5F;
+    --accent: #2563EB;
+    --accent-light: #DBEAFE;
+    --amber: #B45309;
+    --amber-bg: #FFFBEB;
+    --amber-border: #FCD34D;
+    --divider: #E2E8F0;
+    --r: 6px;
+  }
+
+  body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: var(--navy);
+    color: white;
+    padding: 48px 40px 44px;
+  }
+  .header-inner { max-width: 1100px; margin: 0 auto; }
+
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #93C5FD;
+    margin: 0 0 14px;
+  }
+  .book-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: bold; line-height: 1.1;
+    margin: 0 0 10px; text-wrap: balance;
+  }
+  .book-subtitle {
+    font-family: Georgia, serif; font-size: 17px;
+    color: #93C5FD; font-style: italic; margin: 0 0 36px;
+  }
+  .book-stats {
+    display: flex; flex-wrap: wrap; gap: 40px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 28px;
+  }
+  .stat-value {
+    font-family: Georgia, serif; font-size: 24px;
+    font-weight: bold; color: white; display: block;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-size: 12px; color: #93C5FD;
+    letter-spacing: 0.04em; display: block;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    align-items: start;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar { position: sticky; top: 24px; }
+
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--text-secondary);
+    margin: 0 0 14px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .nav-section { margin-bottom: 20px; }
+  .nav-section-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    margin: 0 0 6px;
+  }
+  .nav-link {
+    display: block; font-size: 13px; color: var(--text-secondary);
+    text-decoration: none; padding: 3px 0 3px 10px;
+    margin-left: -10px; border-left: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    line-height: 1.4;
+  }
+  .nav-link:hover { color: var(--accent); border-left-color: var(--accent); }
+
+  /* ── Content ── */
+  .content { min-width: 0; max-width: 730px; }
+
+  /* ── Book sections ── */
+  .book-section { margin-bottom: 64px; }
+
+  .section-header {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 36px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--navy);
+  }
+  .section-num {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    white-space: nowrap; padding-top: 4px;
+  }
+  .section-title {
+    font-family: Georgia, serif; font-size: 21px;
+    font-weight: bold; color: var(--navy); margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ── Chapters ── */
+  .chapter { margin-bottom: 52px; scroll-margin-top: 24px; }
+
+  .chapter-title {
+    font-family: Georgia, serif; font-size: 19px;
+    font-weight: bold; color: var(--text);
+    margin: 0 0 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .ch-tag {
+    font-family: -apple-system, system-ui, sans-serif;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--text-secondary); margin-right: 8px;
+  }
+
+  h4 {
+    font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--navy);
+    margin: 28px 0 10px;
+  }
+
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  strong { font-weight: 600; }
+
+  /* ── Pull quote ── */
+  .pull-quote {
+    font-family: Georgia, serif; font-size: 18px;
+    color: var(--navy); border-left: 4px solid var(--accent);
+    margin: 24px 0; padding: 6px 20px; font-style: italic;
+    text-wrap: balance;
+  }
+  .pull-quote cite {
+    display: block; font-size: 12px; font-style: normal;
+    color: var(--text-secondary); margin-top: 8px; letter-spacing: 0.04em;
+  }
+
+  /* ── Framework box ── */
+  .framework {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 20px 24px; margin: 20px 0;
+  }
+  .framework-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin: 0 0 12px;
+  }
+  .framework p:last-child, .framework ul:last-child { margin-bottom: 0; }
+
+  /* ── Formula ── */
+  .formula-box {
+    background: var(--accent-light);
+    border: 1px solid #BFDBFE;
+    border-radius: var(--r);
+    padding: 28px 32px;
+    text-align: center; margin: 24px 0;
+  }
+  .formula-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .formula-main {
+    font-family: Georgia, serif; font-size: 17px;
+    color: var(--navy); display: flex;
+    align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .fraction {
+    display: inline-flex; flex-direction: column;
+    align-items: center; gap: 0;
+  }
+  .fnum, .fden {
+    padding: 2px 6px; font-size: 15px;
+  }
+  .fbar { width: 100%; height: 1px; background: var(--navy); margin: 2px 0; }
+  .formula-note {
+    font-size: 13px; color: var(--text-secondary);
+    margin: 14px 0 0; font-style: italic;
+  }
+
+  /* ── Pro tip ── */
+  .pro-tip {
+    background: var(--amber-bg);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 16px 20px; margin: 20px 0;
+  }
+  .pro-tip-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--amber);
+    margin: 0 0 6px;
+  }
+  .pro-tip p:last-child, .pro-tip ul:last-child { margin-bottom: 0; }
+
+  /* ── Callout ── */
+  .callout {
+    background: var(--navy); color: white;
+    border-radius: var(--r); padding: 22px 26px; margin: 24px 0;
+  }
+  .callout-title {
+    font-family: Georgia, serif; font-size: 16px;
+    font-weight: bold; color: white; margin: 0 0 8px;
+  }
+  .callout p { color: #CBD5E1; margin: 0; }
+  .callout strong { color: white; }
+
+  /* ── Math result ── */
+  .math-result {
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    border-radius: var(--r); padding: 14px 20px;
+    margin: 16px 0; text-align: center;
+    font-family: Georgia, serif; font-size: 16px;
+    color: #92400E; font-weight: bold;
+  }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    text-align: left; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--navy); padding: 8px 14px;
+    background: var(--bg); border-bottom: 2px solid var(--navy);
+  }
+  td {
+    padding: 10px 14px; border-bottom: 1px solid var(--divider);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #F8FAFC; }
+  .num { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  /* ── Step list ── */
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 16px 0; }
+  .step {
+    counter-increment: step;
+    display: grid; grid-template-columns: 36px 1fr;
+    gap: 14px; margin-bottom: 18px; align-items: start;
+  }
+  .step::before {
+    content: counter(step);
+    width: 36px; height: 36px;
+    background: var(--navy); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-size: 14px; font-weight: bold;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .step-body strong { display: block; margin-bottom: 4px; }
+  .step-body p { margin: 0; font-size: 15px; }
+
+  /* ── Two-col grid ── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin: 16px 0;
+  }
+  .col-card {
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: var(--r); padding: 16px;
+  }
+  .col-card h5 {
+    margin: 0 0 10px; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--navy);
+  }
+  .col-card ul { margin: 0; font-size: 14px; padding-left: 18px; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px; margin: 16px 0;
+  }
+  .card {
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: var(--r); padding: 16px;
+  }
+  .card-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 6px;
+  }
+  .card-title { font-weight: 600; font-size: 15px; margin: 0 0 6px; }
+  .card-body { font-size: 13px; color: var(--text-secondary); margin: 0; }
+
+  /* ── Inline badge ── */
+  .badge {
+    display: inline-block;
+    background: var(--accent-light); color: var(--accent);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 7px; border-radius: 3px; vertical-align: middle;
+    margin-left: 4px;
+  }
+  .badge-up { background: #DCFCE7; color: #15803D; }
+  .badge-down { background: #FEE2E2; color: #B91C1C; }
+
+  /* ── MAGIC row ── */
+  .magic-row {
+    display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0;
+  }
+  .magic-item {
+    flex: 1 1 140px;
+    background: var(--surface); border: 1px solid var(--divider);
+    border-radius: var(--r); padding: 14px;
+  }
+  .magic-letter {
+    font-family: Georgia, serif; font-size: 28px; font-weight: bold;
+    color: var(--navy); display: block; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .magic-word { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+  .magic-desc { font-size: 12px; color: var(--text-secondary); }
+
+  /* ── Responsive ── */
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .two-col, .card-grid { grid-template-columns: 1fr; }
+    .page-header { padding: 36px 20px 32px; }
+    .magic-row { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<header class="page-header">
+  <div class="header-inner">
+    <p class="eyebrow">Book Summary — Full Notes</p>
+    <h1 class="book-title">$100M Offers</h1>
+    <p class="book-subtitle">How to Make Offers So Good People Feel Stupid Saying No</p>
+
+    <div class="book-stats">
+      <div>
+        <span class="stat-value">$36 : $1</span>
+        <span class="stat-label">Hormozi's lifetime ROAS on advertising</span>
+      </div>
+      <div>
+        <span class="stat-value">$120M</span>
+        <span class="stat-label">Revenue in first 24 months of Gym Launch</span>
+      </div>
+      <div>
+        <span class="stat-value">22.4×</span>
+        <span class="stat-label">Cash increase: commodity offer → Grand Slam Offer</span>
+      </div>
+      <div>
+        <span class="stat-value">5 Sections</span>
+        <span class="stat-label">16 chapters · ~44,000 words</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── LAYOUT ── -->
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <p class="sidebar-label">Contents</p>
+
+    <div class="nav-section">
+      <p class="nav-section-title">Section 1</p>
+      <a class="nav-link" href="#origin">Origin Story</a>
+      <a class="nav-link" href="#what-is-gso">What Is a Grand Slam Offer?</a>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-section-title">Section 2 — Pricing</p>
+      <a class="nav-link" href="#commodity">The Commodity Problem</a>
+      <a class="nav-link" href="#market">Finding the Right Market</a>
+      <a class="nav-link" href="#charge">Charge What It's Worth</a>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-section-title">Section 3 — Value</p>
+      <a class="nav-link" href="#value-eq">The Value Equation</a>
+      <a class="nav-link" href="#offer-creation">Creating the Offer</a>
+      <a class="nav-link" href="#trim-stack">Trim and Stack</a>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-section-title">Section 4 — Enhancing</p>
+      <a class="nav-link" href="#desire">Delicate Dance of Desire</a>
+      <a class="nav-link" href="#scarcity">Scarcity</a>
+      <a class="nav-link" href="#urgency">Urgency</a>
+      <a class="nav-link" href="#bonuses">Bonuses</a>
+      <a class="nav-link" href="#guarantees">Guarantees</a>
+      <a class="nav-link" href="#naming">Naming</a>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-section-title">Section 5</p>
+      <a class="nav-link" href="#execution">Execution &amp; Summary</a>
+    </div>
+  </nav>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="content">
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- SECTION 1 -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="book-section">
+      <div class="section-header">
+        <span class="section-num">Section 1</span>
+        <h2 class="section-title">How We Got Here</h2>
+      </div>
+
+      <!-- Ch 1: Origin -->
+      <div class="chapter" id="origin">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 1</span>The Origin Story</h3>
+
+        <p>Christmas Eve 2016. Hormozi sits in Leila's family playroom — no home of his own — after discovering his business partner drained their shared account of $46K. His mother is in critical care. He totaled his car that month. His bank balance: <strong>$1,036</strong>. He'd just wired his salesman a $22K commission on $120K in sales that a payment processor froze.</p>
+
+        <p>Two assets remained: a maxed-but-functional $100K business credit card and a grand slam offer he had perfected running his own chain of gyms. The next morning — the day after Christmas — he launched six gyms simultaneously at $3,300/day in expenses.</p>
+
+        <div class="framework">
+          <p class="framework-title">The Turnaround — By the Numbers</p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Timeframe</th><th>Result</th></tr>
+              <tr><td>Month 1 (Jan 2017)</td><td class="num">$100,117 revenue — broke even on the credit card burn</td></tr>
+              <tr><td>Month 12</td><td class="num">$1,500,000+ per month</td></tr>
+              <tr><td>Month 24</td><td class="num">$120M cumulative, $2M donated to charity</td></tr>
+              <tr><td>Month 36+</td><td class="num">Portfolio of 7–8 figure companies, ~$1.6M/week</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="pull-quote">
+          "All of this was because of a girl who believed in me, a credit card, and a grand slam offer."
+        </div>
+      </div>
+
+      <!-- Ch 2: What is a GSO -->
+      <div class="chapter" id="what-is-gso">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 2</span>What Is a Grand Slam Offer?</h3>
+
+        <p>The offer is the starting point of every transaction — what you provide in exchange for money. Most businesses have a <strong>commodity offer</strong> (compared on price) or no real offer at all. A Grand Slam Offer creates a category of one.</p>
+
+        <div class="framework">
+          <p class="framework-title">Grand Slam Offer — Definition</p>
+          <p>An offer you present to the marketplace that <strong>cannot be compared to any other product or service available</strong> — combining an attractive promotion, an unmatchable value proposition, a premium price, and an unbeatable guarantee with a money model that allows you to get paid to acquire new customers.</p>
+        </div>
+
+        <h4>The Offer Spectrum</h4>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Offer Quality</th><th>Business Result</th></tr>
+            <tr><td>No offer</td><td>No business, no life</td></tr>
+            <tr><td>Bad offer</td><td>Negative profit, miserable life</td></tr>
+            <tr><td>Decent offer</td><td>No profit, stagnating business</td></tr>
+            <tr><td>Good offer</td><td>Some profit, okay business</td></tr>
+            <tr><td><strong>Grand Slam Offer</strong></td><td><strong>Fantastic profit, insane business, freedom</strong></td></tr>
+          </table>
+        </div>
+
+        <h4>Three Effects of a Grand Slam Offer</h4>
+        <ol>
+          <li><strong>Increased response rates</strong> — more people click or act on your ads</li>
+          <li><strong>Higher conversion</strong> — more prospects become buyers</li>
+          <li><strong>Premium prices</strong> — you charge more for the same fulfillment</li>
+        </ol>
+
+        <h4>The Two Core Problems It Solves</h4>
+        <div class="two-col">
+          <div class="col-card">
+            <h5>Problem 1</h5>
+            <p style="font-size:14px; margin:0">Not enough clients. Acquiring them costs too much relative to the margin you make.</p>
+          </div>
+          <div class="col-card">
+            <h5>Problem 2</h5>
+            <p style="font-size:14px; margin:0">Not enough cash. Competing on price destroys margins and races everyone to the bottom.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- SECTION 2: PRICING -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="book-section">
+      <div class="section-header">
+        <span class="section-num">Section 2</span>
+        <h2 class="section-title">Pricing — How to Charge Lots of Money</h2>
+      </div>
+
+      <!-- Ch 3: Commodity -->
+      <div class="chapter" id="commodity">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 3</span>The Commodity Problem</h3>
+
+        <p>A commodity is available from many places and therefore purchased on price. Commoditization drives the market toward efficiency — the point where margins are just enough to keep the lights on. A Grand Slam Offer breaks you out of this entirely.</p>
+
+        <h4>Real-World Math: Commodity vs. Grand Slam</h4>
+        <p><em>Agency lead generation example (rounded for illustration; based on real client data):</em></p>
+
+        <div class="two-col">
+          <div class="col-card">
+            <h5>❌ Old Commoditized Way</h5>
+            <ul>
+              <li>$1K down + $1K/month retainer</li>
+              <li>0.5–1× ROAS: lose money on acquisition</li>
+              <li>Break even ~60 days after client starts</li>
+              <li>Identical to every other agency — price war</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <h5>✓ New Grand Slam Way</h5>
+            <ul>
+              <li>One-time fee, no recurring charge</li>
+              <li>Cover ad spend only; pay on results</li>
+              <li>Guarantee: 20 leads in 30 days or next month free</li>
+              <li>Plus daily coaching, scripts, best-practice playbook</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="math-result">
+          2.5× more responses × 2.5× higher close rate × 4× higher price<br>
+          = <span style="font-size:22px">22.4× more cash collected upfront</span>
+        </div>
+
+        <p>The fulfillment is identical. The difference is how the offer is framed and what it promises. One forces price comparison; the other makes comparison impossible.</p>
+      </div>
+
+      <!-- Ch 4: Market -->
+      <div class="chapter" id="market">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 4</span>Finding the Right Market — A Starving Crowd</h3>
+
+        <div class="pull-quote">
+          "A starving crowd. You could have the worst hot dogs, terrible prices, and be in a terrible location — but if you're the only hot dog stand when the college football game breaks out, you're going to sell out."
+        </div>
+
+        <h4>Four Criteria for a Good Market</h4>
+        <ol>
+          <li><strong>Massive pain</strong> — degree of pain is proportional to the price you can charge. <em>"The pain is the pitch."</em> If you can articulate a prospect's pain accurately, they will almost always buy.</li>
+          <li><strong>Purchasing power</strong> — your target must be able to afford what you charge. Unemployed people with resume problems are easy to find but can't pay.</li>
+          <li><strong>Easy to target</strong> — associations, mailing lists, Facebook groups, channels, subreddits. If you can't find them, a great offer falls on deaf ears regardless.</li>
+          <li><strong>Growing</strong> — growing markets are tailwinds; declining markets are headwinds. Lloyd sold great software to newspapers — a market shrinking 25%/year. Everything failed despite product quality.</li>
+        </ol>
+
+        <h4>The Three Timeless Markets</h4>
+        <p>There will always be pain when you lack these — so demand always exists:</p>
+        <div class="two-col" style="grid-template-columns: repeat(3,1fr)">
+          <div class="col-card"><h5>Health</h5><p style="font-size:14px;margin:0">Weight loss, pain relief, longevity, fitness, beauty</p></div>
+          <div class="col-card"><h5>Wealth</h5><p style="font-size:14px;margin:0">Business growth, investing, income, debt elimination</p></div>
+          <div class="col-card"><h5>Relationships</h5><p style="font-size:14px;margin:0">Dating, marriage, family, social status, networking</p></div>
+        </div>
+
+        <h4>Order of Importance</h4>
+        <div class="callout">
+          <p class="callout-title">Market &gt; Offer Strength &gt; Persuasion Skills</p>
+          <p>A <strong>great market</strong> overcomes a bad offer and bad salesmanship. A <strong>great offer</strong> in a normal market makes you tons of money even if you're a mediocre salesperson. A <strong>great persuader</strong> in a normal market with a normal offer can succeed — but it's the hardest path. This book is about maximizing offer strength so you don't need to be exceptional at persuasion.</p>
+        </div>
+
+        <h4>Niching Down — The Pricing Multiplier</h4>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Product</th><th>Price</th><th>Why</th></tr>
+            <tr><td>Time management (generic course)</td><td class="num">$19</td><td>Compared to every other course</td></tr>
+            <tr><td>Time management for sales professionals</td><td class="num">$99</td><td>One more sale could easily cover it</td></tr>
+            <tr><td>Time management for B2B outbound sales reps</td><td class="num">$499</td><td>A single deal = $500+ commission</td></tr>
+            <tr><td>Time management for B2B outbound power tools &amp; gardening reps</td><td class="num">$1,997</td><td>"This is made exactly for me" — feels bespoke</td></tr>
+          </table>
+        </div>
+
+        <p><strong>100× the price for essentially the same content</strong> — because specificity creates perceived relevance, and relevance drives willingness to pay.</p>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">Commit to the Niche</p>
+          <p>Hormozi calls niche-hopping "deserving a niche slap." Every market has unpleasant characteristics. Switching niches means starting over. Pick, then commit. Most entrepreneurs fail at an offer before they fail at a market — try 100 different offers in the same niche before concluding the market is bad.</p>
+        </div>
+      </div>
+
+      <!-- Ch 5: Premium Pricing -->
+      <div class="chapter" id="charge">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 5</span>Charge What It's Worth</h3>
+
+        <div class="pull-quote">
+          "Charge as high a price as you can say out loud without cracking a smile."
+        </div>
+
+        <h4>The Virtuous Cycle of Price</h4>
+        <div class="two-col">
+          <div class="col-card" style="border-top: 3px solid #EF4444;">
+            <h5 style="color:#B91C1C">↓ Lower Prices</h5>
+            <ul>
+              <li>Lower client emotional investment</li>
+              <li>Lower perceived value of service</li>
+              <li>Worse client results (not invested)</li>
+              <li>Attracts worst, cheapest clients</li>
+              <li>Destroys margin to improve</li>
+              <li>Business withers</li>
+            </ul>
+          </div>
+          <div class="col-card" style="border-top: 3px solid #16A34A;">
+            <h5 style="color:#15803D">↑ Higher Prices</h5>
+            <ul>
+              <li>Higher client emotional investment</li>
+              <li>Higher perceived value</li>
+              <li>Better results (more adherent)</li>
+              <li>Attracts ideal, easiest clients</li>
+              <li>More margin to reinvest</li>
+              <li>Business compounds</li>
+            </ul>
+          </div>
+        </div>
+
+        <p><strong>The wine study:</strong> Researchers gave subjects three wines — same wine, three price tags. Participants consistently rated the "expensive" wine best. Higher price literally increased the perceived (and neurologically measured) pleasure. Raising your price changes the value you deliver without changing the product.</p>
+
+        <h4>Why Charging Premium Is a Moral Position</h4>
+        <ul>
+          <li>Low-price businesses can't hire great people, invest in systems, or improve — they fail their clients</li>
+          <li>High-price businesses have margin to deliver exceptional results</li>
+          <li>Clients pay more attention and follow through more when they've paid more — better outcomes are the direct result</li>
+        </ul>
+
+        <div class="callout">
+          <p class="callout-title">Gym Lords Data Point</p>
+          <p>Hormozi charged $42,000/year — more than the average gym owner's <strong>entire take-home profit</strong> of $35K. Survey of 158 gyms showed that after 11 months, average improvements were: <strong>+$239K topline revenue</strong>, +$161K recurring revenue, profit tripled from $2,943 → $8,940/month. The conviction to charge that much came from outworking his self-doubt until he knew it worked.</p>
+        </div>
+
+        <p><strong>"99% of businesses need to raise their prices. Profit is oxygen. It fuels the fire of growth."</strong></p>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- SECTION 3: VALUE -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="book-section">
+      <div class="section-header">
+        <span class="section-num">Section 3</span>
+        <h2 class="section-title">Value — Create Your Offer</h2>
+      </div>
+
+      <!-- Ch 6: Value Equation -->
+      <div class="chapter" id="value-eq">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 6</span>The Value Equation</h3>
+
+        <div class="formula-box">
+          <p class="formula-label">The Value Equation</p>
+          <div class="formula-main">
+            <span>Value =</span>
+            <span class="fraction">
+              <span class="fnum">Dream Outcome &nbsp;×&nbsp; Perceived Likelihood of Achievement</span>
+              <span class="fbar"></span>
+              <span class="fden">Perceived Time Delay &nbsp;×&nbsp; Effort &amp; Sacrifice</span>
+            </span>
+          </div>
+          <p class="formula-note">Increase the numerator. Drive the denominator toward zero. If the denominator reaches zero, value approaches infinity.</p>
+        </div>
+
+        <h4>The Four Drivers — In Detail</h4>
+
+        <div class="framework">
+          <p class="framework-title">1. Dream Outcome <span class="badge badge-up">Increase</span></p>
+          <p>The experience and feeling the prospect envisions in their ideal future. People ultimately buy to <strong>increase their status</strong> — socially or professionally. The vehicle matters less than the destination.</p>
+          <p style="font-size:14px;color:var(--text-secondary)">Pro tip: Frame benefits in terms of status gained from the viewpoint of others. "Your golf buddy's jaw will drop when your drive sails 40 yards past theirs."</p>
+        </div>
+
+        <div class="framework">
+          <p class="framework-title">2. Perceived Likelihood of Achievement <span class="badge badge-up">Increase</span></p>
+          <p>How confident is the prospect that <em>they specifically</em> will get the result? Would you pay more to be a surgeon's 10,000th patient or their first? People pay for <strong>certainty</strong>. Build this through track record, testimonials, guarantees, and clear proof.</p>
+        </div>
+
+        <div class="framework">
+          <p class="framework-title">3. Time Delay <span class="badge badge-down">Decrease</span></p>
+          <p>The gap between purchase and receiving value. Two components:</p>
+          <ul>
+            <li><strong>Short-term experiences:</strong> early wins that confirm the decision — a first sale closed, 2 lbs lost, first lead generated. Get clients a "big emotional win" within 7 days. Backed by science: early victories predict long-term completion.</li>
+            <li><strong>Long-term outcome:</strong> the dream. The faster you can deliver it, the more valuable you are.</li>
+          </ul>
+          <p style="font-size:14px;color:var(--text-secondary)"><strong>Fast beats free.</strong> FedEx, Uber, Spotify Premium — all won in spaces where "free" already existed by being faster. If competing against free: double down on speed.</p>
+        </div>
+
+        <div class="framework">
+          <p class="framework-title">4. Effort &amp; Sacrifice <span class="badge badge-down">Decrease</span></p>
+          <p>Every ancillary cost along the way — time, discomfort, embarrassment, inconvenience. Compare fitness (5-10 hrs/week, hunger, soreness, meal prep, injury risk) vs. liposuction (fall asleep, wake up thin, 2 weeks of soreness). Identical dream outcome; orders-of-magnitude different prices.</p>
+          <p style="font-size:14px;color:var(--text-secondary)">Done-for-you services are almost always priced higher than DIY — because the effort drops to near zero.</p>
+        </div>
+
+        <h4>Logical vs. Psychological Solutions</h4>
+        <p>Logical solutions have usually been tried — they're logical, so everyone tries them. What remains are psychological gaps. Example:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Logical</th><th>Psychological</th><th>Cost Difference</th></tr>
+            <tr><td>Make trains faster</td><td>Add dotted arrival map (passengers know when train comes)</td><td>Billions vs. millions</td></tr>
+            <tr><td>Speed up elevator</td><td>Add floor-to-ceiling mirrors (people forget they're waiting)</td><td>10× less</td></tr>
+            <tr><td>Make it cheaper</td><td>Make fewer, raise price — creates desire through exclusivity</td><td>Higher margins</td></tr>
+          </table>
+        </div>
+
+        <h4>Case Study: Meditation vs. Xanax</h4>
+        <p>Both deliver the same dream outcome (relaxation, decreased anxiety). But on every other driver:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Driver</th><th>Meditation</th><th>Xanax</th></tr>
+            <tr><td>Dream outcome</td><td>✓ (1/1)</td><td>✓ (1/1)</td></tr>
+            <tr><td>Perceived likelihood</td><td>Low — most don't believe they'll stick with it (0/1)</td><td>High — pill works (1/1)</td></tr>
+            <tr><td>Time delay</td><td>Weeks to months (0.5/1)</td><td>15 minutes (1/1)</td></tr>
+            <tr><td>Effort &amp; sacrifice</td><td>Discomfort, boredom, daily time commitment (0/1)</td><td>Swallow a pill (1/1)</td></tr>
+            <tr><td><strong>Total value</strong></td><td><strong>1.5/4</strong></td><td><strong>4/4</strong></td></tr>
+          </table>
+        </div>
+        <p>That's why Xanax is a multi-billion dollar industry and there is almost no multi-billion dollar meditation business. Value ≠ what is good for you. Value = what is <em>perceived</em> as valuable.</p>
+      </div>
+
+      <!-- Ch 9-10: Creating the Offer -->
+      <div class="chapter" id="offer-creation">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 9</span>Creating the Grand Slam Offer — Problems &amp; Solutions</h3>
+
+        <p>Before building the offer, recognize that convergent thinking (one right answer) is what school trains you for — but offer creation requires <strong>divergent thinking</strong> (many possible answers to one problem). Generate possibilities first; edit later.</p>
+
+        <h4>The Five-Step Process</h4>
+        <ol class="steps">
+          <li class="step">
+            <div class="step-body">
+              <strong>Identify the Dream Outcome</strong>
+              <p>Stop selling the product; sell the destination. "Lose 20 lbs in 6 weeks" not "gym membership." You're selling the vacation, not the plane flight. Make it specific and time-bounded.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-body">
+              <strong>List Every Problem</strong>
+              <p>Write down every obstacle a prospect faces before, during, and after using your product. Think in the sequence they'll experience them. For each core step they must take, list every reason they might fail using the four value drivers as your guide (dream outcome, likelihood, effort, time). You should end up with 32–64+ problems. More problems = more opportunities to provide value.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-body">
+              <strong>Turn Problems into Solutions</strong>
+              <p>For each problem, write a solution statement: <em>"How to [reverse the obstacle] so that [specific avatar] can [outcome]."</em> This is the checklist of everything your offer must address. You must solve <strong>every</strong> problem — even one unanswered objection can kill a sale.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-body">
+              <strong>Create Delivery Vehicles (The How)</strong>
+              <p>Think of every possible way to deliver each solution. The more creative the better — you won't use everything, but ideation unlocks ideas you'd miss otherwise.</p>
+            </div>
+          </li>
+          <li class="step">
+            <div class="step-body">
+              <strong>Trim &amp; Stack</strong>
+              <p>Remove high-cost/low-value items. Keep high-value/low-cost items. Then bundle everything into a final deliverable. (See next chapter.)</p>
+            </div>
+          </li>
+        </ol>
+
+        <h4>Delivery Vehicle Cheat Codes</h4>
+        <div class="framework">
+          <p class="framework-title">Dimensions to Consider for Each Solution</p>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Dimension</th><th>Options</th></tr>
+              <tr><td><strong>Personal attention level</strong></td><td>1-on-1 → Small group → 1-to-many</td></tr>
+              <tr><td><strong>Client effort required</strong></td><td>Do it yourself (DIY) → Done with you (DWY) → Done for you (DFY)</td></tr>
+              <tr><td><strong>Delivery medium</strong></td><td>In-person, phone, email, text, Zoom, chat</td></tr>
+              <tr><td><strong>Format</strong></td><td>Live (real-time) → Recorded video → Written</td></tr>
+              <tr><td><strong>Response speed</strong></td><td>24/7 → Business hours → Within 5 min → Within 24 hrs</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">The 10× / ÷10 Test</p>
+          <p>If your customer paid <strong>10× your price</strong> — what would you provide? If they paid <strong>1/10th the price</strong> and you still had to make them successful, how would you do it cheaper/faster? Stretching in both directions unlocks delivery options you'd never think of at the status quo.</p>
+        </div>
+
+        <p><strong>Key insight:</strong> When Hormozi needed a sale to pay rent and a prospect said "I eat out every day," he improvised an eating-out guide on the spot. From that point on, he never lost that objection again. Never get romantic about <em>how</em> you want to solve the problem — find a way to solve every problem the prospect raises.</p>
+      </div>
+
+      <!-- Ch 10: Trim and Stack -->
+      <div class="chapter" id="trim-stack">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 10</span>Trim and Stack — Building the Final Deliverable</h3>
+
+        <h4>The Sales-to-Fulfillment Continuum</h4>
+        <p>Every business sits on a spectrum:</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>You do more</th><th>You do less</th></tr>
+            <tr><td>Easy to sell</td><td>Hard to sell</td></tr>
+            <tr><td>Hard to fulfill (time-intensive)</td><td>Easy to fulfill</td></tr>
+          </table>
+        </div>
+
+        <p>Hormozi's rule: <strong>"Create flow, monetize flow, then add friction."</strong> Get demand moving first. Add friction (efficiency, reduced fulfillment) only after you know what clients need and cash is coming in. Don't optimize a business with zero customers.</p>
+
+        <h4>What to Keep — What to Cut</h4>
+        <ul>
+          <li><strong>Keep:</strong> High value / Low cost items and High value / High cost items (when justified)</li>
+          <li><strong>Cut:</strong> High cost / Low value items first, then Low cost / Low value items</li>
+          <li>Focus especially on <strong>1-to-many solutions</strong> — high upfront cost to create, near-zero marginal cost to deliver</li>
+        </ul>
+
+        <h4>Stack Example: Gym Weight Loss Offer</h4>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Bundle Name</th><th>Perceived Value</th></tr>
+            <tr><td>Foolproof Bargain Grocery System</td><td class="num">$1,000</td></tr>
+            <tr><td>Busy Parent Cooking Guide (5-min meals)</td><td class="num">$600</td></tr>
+            <tr><td>Personalized "Lick Your Fingers Good" Meal Plan</td><td class="num">$500</td></tr>
+            <tr><td>Fat Burning Workouts (personalized to your level)</td><td class="num">$699</td></tr>
+            <tr><td>Ultimate Travel Eating &amp; Workout Blueprint</td><td class="num">$199</td></tr>
+            <tr><td>Never Fall Off Accountability System</td><td class="num">$1,000</td></tr>
+            <tr><td>Live It Up While Slimming Down Eating Out System</td><td class="num">$349</td></tr>
+            <tr><th>Total Perceived Value</th><th class="num">$4,351</th></tr>
+            <tr><td colspan="2"><strong>Price:</strong> $599</td></tr>
+          </table>
+        </div>
+
+        <p>Same gyms eventually sold this bundle for $2,400–$5,200 as they got better at communicating the value. The bundle achieves three things: (1) solves every perceived problem, (2) creates conviction in the seller, (3) makes comparison impossible.</p>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- SECTION 4: ENHANCING -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="book-section">
+      <div class="section-header">
+        <span class="section-num">Section 4</span>
+        <h2 class="section-title">Enhancing Your Offer</h2>
+      </div>
+
+      <!-- Desire -->
+      <div class="chapter" id="desire">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 11</span>The Delicate Dance of Desire</h3>
+
+        <p>All marketing artificially influences the supply-demand curve. To maximize profit: maximize demand, minimize perceived supply. The five enhancement tools — scarcity, urgency, bonuses, guarantees, and naming — do exactly this.</p>
+
+        <div class="pull-quote">
+          "Desire is a contract you make with yourself to be unhappy until you get what you want."
+          <cite>— Naval Ravikant</cite>
+        </div>
+
+        <p>Desire only exists for things you don't have. The moment desire is satisfied, it disappears. Therefore: sell fewer units than you can to keep desire elevated in your market.</p>
+
+        <div class="framework">
+          <p class="framework-title">Hormozi's Law</p>
+          <p><strong>The longer you delay the ask, the bigger the ask you can make.</strong> The longer the runway, the bigger the plane that can take off. Keep supply and satisfaction of desire slightly below the demand you generate. This maximizes profits and keeps desire ravenous.</p>
+        </div>
+
+        <p><strong>Fractal 80/20:</strong> Roughly 1/5 of your prospects are willing to pay 5× your asking price. If you sell 10 spots at $500, 2 of those people would have paid $5,000. A limited-supply scenario lets you skim the top and leave the others with increased desire — which makes the next launch even stronger.</p>
+      </div>
+
+      <!-- Scarcity -->
+      <div class="chapter" id="scarcity">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 12</span>Scarcity — Sold Out</h3>
+
+        <p>Scarcity limits <strong>quantity</strong>. The fear of missing out is a more powerful motivator than the desire for gain. Humans hoard scarce resources.</p>
+
+        <h4>Three Types of Scarcity</h4>
+        <ol>
+          <li>Limited supply of seats/slots (total or per period)</li>
+          <li>Limited supply of bonuses</li>
+          <li>Never available again</li>
+        </ol>
+
+        <h4>Service Business Scarcity Tactics</h4>
+
+        <div class="card-grid">
+          <div class="card">
+            <p class="card-eyebrow">Tactic 1</p>
+            <p class="card-title">Total Business Cap</p>
+            <p class="card-body">Only accept X clients total. Create a waitlist. When demand increases, bump cap by 10-20%, then cap again. Works especially well for high-ticket tiers.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Tactic 2</p>
+            <p class="card-title">Growth Rate Cap</p>
+            <p class="card-body">"We only accept 5 new clients per week. First 3 spots are taken." Tell prospects exactly how many openings remain — they'll act accordingly.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Tactic 3</p>
+            <p class="card-title">Cohort Cap</p>
+            <p class="card-body">Only X clients per class/cohort. Start clients monthly or quarterly. Creates operational choreography and legitimate sales urgency simultaneously.</p>
+          </div>
+        </div>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">Honest Scarcity</p>
+          <p>The simplest strategy: be truthful about your capacity. You can't handle 1,000 clients tomorrow — how many <em>can</em> you take this week? Advertise that number. "We're 81% to capacity" creates urgency and implies social proof simultaneously. You define where "full" is.</p>
+        </div>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">Always Sell Out</p>
+          <p>Better to sell out consistently than to over-order and destroy the scarcity narrative. Announce your sellouts — people on the fence see that others thought it was worth it, and their desire intensifies for next time. Chanel ships 1–2 pieces per store per style for exactly this reason.</p>
+        </div>
+      </div>
+
+      <!-- Urgency -->
+      <div class="chapter" id="urgency">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 13</span>Urgency — Deadlines Drive Decisions</h3>
+
+        <p>Scarcity limits quantity. <strong>Urgency limits time.</strong> A defined deadline or cutoff forces action from people who would otherwise defer indefinitely.</p>
+
+        <h4>Four Ethical Urgency Methods</h4>
+
+        <div class="card-grid">
+          <div class="card">
+            <p class="card-eyebrow">Method 1</p>
+            <p class="card-title">Rolling Cohorts</p>
+            <p class="card-body">"Our next group kicks off Monday. Sign up now or wait for the next start date." The less frequently you start cohorts, the more powerful this is.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Method 2</p>
+            <p class="card-title">Rolling Seasonal</p>
+            <p class="card-body">New Year promo → Valentine's promo → Spring promo. Same core offer; new name and date each cycle. "This promotion ends January 30th." Deadlines are real; just the wrapper changes.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Method 3</p>
+            <p class="card-title">Pricing/Bonus Urgency</p>
+            <p class="card-body">"I'm not sure how long we're running this promotion — we change them every 4 weeks." Creates FOMO around the deal, not the service. Maintains integrity.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Method 4</p>
+            <p class="card-title">Exploding Opportunity</p>
+            <p class="card-body">An arbitrage opportunity that decays with time (crypto windows, ad platform arbitrage, job offers). Every day they wait, the opportunity shrinks. True urgency, not manufactured.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <p class="callout-title">50–60% of Sales in the Last 4 Hours</p>
+          <p>In a week-long launch, the final 3% of the time period generates 50–60% of sales. Most people who seemed interested but didn't buy would never have bought without the deadline. The deadline converts the fence-sitters; the people who "miss out" were never going to buy anyway.</p>
+        </div>
+      </div>
+
+      <!-- Bonuses -->
+      <div class="chapter" id="bonuses">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 14</span>Bonuses — It's All Gravy, Baby</h3>
+
+        <div class="pull-quote">
+          "A single offer is less valuable than the same offer broken into its component parts and stacked as bonuses."
+        </div>
+
+        <p>This is how infomercials work. They price one knife at $38.95 — then stack 37 more knives, sharpeners, pans, and guarantees until the price-to-value gap is so wide the prospect snaps. We anchor to the core price, then expand perceived value with each bonus until it's irrational not to buy.</p>
+
+        <h4>Presenting Bonuses in 1:1 Sales</h4>
+        <ul>
+          <li>Ask for the sale first. If they say yes → reveal bonuses as a "wow" reinforcement of their decision</li>
+          <li>If they say no → present a bonus that directly addresses their specific objection, then ask again</li>
+          <li>Repeat. People struggle to refuse reciprocity</li>
+        </ul>
+
+        <h4>10 Rules for Powerful Bonuses</h4>
+        <ol>
+          <li>Always offer them — present the entire bundle</li>
+          <li>Give each a special name that contains a benefit ("Foolproof Bargain Grocery System," not "bonus 3")</li>
+          <li>Explain: what it is, how you discovered it, how it improves their life</li>
+          <li>Provide proof — statistic, past client, personal result</li>
+          <li>Paint a vivid mental image of life after using it</li>
+          <li>Always assign a dollar value and justify it</li>
+          <li><strong>Tools and checklists &gt; additional training</strong> (lower effort = higher perceived value)</li>
+          <li>Each should address a specific obstacle the prospect believes will stop them</li>
+          <li>Solve their <em>next</em> problem before they encounter it</li>
+          <li>The total value of bonuses should eclipse the core offer value — this subconsciously elevates the core's perceived worth</li>
+        </ol>
+
+        <h4>Advanced: Other People's Products (Free Bonuses)</h4>
+        <p>Approach adjacent businesses — chiropractors, supplement companies, pharmacists, health clubs. They give you their product/service as a bonus in exchange for exposure to your qualified clients. You get high-value bonuses at zero cost; they get warm referrals.</p>
+
+        <div class="framework">
+          <p class="framework-title">Pain Clinic Example</p>
+          <ul>
+            <li>Massage therapist: 1–2 free massages ($100+ value)</li>
+            <li>Chiropractor: 2 free adjustments ($100 value)</li>
+            <li>Low-inflammation food brand: product discount ($50 savings)</li>
+            <li>Local gym: free personal training session + 1 month membership ($100 value)</li>
+            <li>Pharmacy: drug discount cards ($100/month in savings)</li>
+          </ul>
+          <p>If the core offer is $400, these bonuses alone justify the price. Then negotiate affiliate commissions — <strong>the business you "gave away" referrals to now pays you per conversion</strong>, making each bonus a revenue stream.</p>
+        </div>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">Add Bonuses, Never Discount</p>
+          <p>Discounting teaches customers your prices are negotiable and signals weakness. Adding bonuses to close a deal signals strength and goodwill — and it protects your core offer price forever.</p>
+        </div>
+      </div>
+
+      <!-- Guarantees -->
+      <div class="chapter" id="guarantees">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 15</span>Guarantees — Reversing Risk</h3>
+
+        <p>The #1 objection for any product or service is risk — risk that it won't work for them. Reversing risk is the fastest way to increase conversions. Hormozi saw guarantees double-to-quadruple conversion in some markets.</p>
+
+        <h4>The Math on Guarantees</h4>
+        <div class="callout">
+          <p class="callout-title">Don't Be Emotional — Do the Math</p>
+          <p>If a guarantee increases closes by 30% but doubles your refund rate (5% → 10%):<br>
+          <strong>Without guarantee:</strong> 100 sales − 5 refunds = 95 net sales<br>
+          <strong>With guarantee:</strong> 130 sales − 13 refunds = 117 net sales<br>
+          117 ÷ 95 = <strong>1.23× — a 23% increase in net revenue.</strong><br>
+          For refunds to offset the gain, every additional sale would need to refund — mathematically almost impossible.</p>
+        </div>
+
+        <h4>Four Types of Guarantees</h4>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Type</th><th>How It Works</th><th>Best For</th></tr>
+            <tr><td><strong>Unconditional</strong></td><td>No questions asked refund. Full trial period. Highest conversion, highest risk.</td><td>Low-ticket B2C</td></tr>
+            <tr><td><strong>Conditional</strong></td><td>Refund/service/credit contingent on doing specific things. Ties guarantee to success behaviors.</td><td>Most businesses</td></tr>
+            <tr><td><strong>Anti-guarantee</strong></td><td>All sales final. Position with a compelling "reason why" — usually IP/knowledge exposure.</td><td>Consumable/IP products</td></tr>
+            <tr><td><strong>Implied</strong></td><td>Performance/rev-share model. If you don't perform, you don't get paid. Perfect alignment.</td><td>Quantifiable outcomes</td></tr>
+          </table>
+        </div>
+
+        <h4>Conditional Guarantee Examples — 10 Types</h4>
+        <div class="card-grid">
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">Outsized Refund</p>
+            <p class="card-body">2–3× money back if conditions not met. Jason Fladley: "If you follow the method and don't profit, I'll buy your store for $25K." Result: $3M in extra sales; only 10 payouts.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">Service Guarantee</p>
+            <p class="card-body">Keep working for free until they hit the result. Eliminates time pressure on the guarantee. Hormozi: no one has ever actually invoked it once they're close to their goal.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">Delayed 2nd Payment</p>
+            <p class="card-body">"We won't bill you again until you make your first sale." Focuses both sides on the first win — the activation event that predicts long-term retention.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">First Outcome</p>
+            <p class="card-body">"If you don't make your first sale in 14 days, we'll cover your ad spend until you do." Keeps everyone focused on the first dollar.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">Credit Guarantee</p>
+            <p class="card-body">Refund returns as credit toward any service. Best for upsells — worst case, they apply it to what they already love.</p>
+          </div>
+          <div class="card">
+            <p class="card-eyebrow">Conditional</p>
+            <p class="card-title">Personal Service</p>
+            <p class="card-body">"Alex will personally work with you until your offer converts." Add conditions (must spend $X on testing, etc.) to make it meaningful but achievable.</p>
+          </div>
+        </div>
+
+        <h4>Stacking Guarantees</h4>
+        <p>Layer multiple types together: an unconditional 30-day money-back + a conditional 90-day triple-your-money-back if you complete the program. The stack future-paces the prospect into believing the result is achievable and shows you're serious about it.</p>
+
+        <div class="pro-tip">
+          <p class="pro-tip-label">Name Your Guarantee</p>
+          <p>Instead of "30-day satisfaction guarantee," try: <em>"The Club a Baby Seal Guarantee — if after 30 days you wouldn't club a baby seal to stay on as a customer, you don't owe a penny."</em> Memorable names make guarantees more credible and more talked about.</p>
+        </div>
+      </div>
+
+      <!-- Naming -->
+      <div class="chapter" id="naming">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 16</span>Naming — The MAGIC Formula</h3>
+
+        <p>A grand slam offer that no one hears about makes no money. The name determines response rate. A great name on the same offer can get 2–10× the responses. And when offers fatigue in local markets, <strong>renaming the wrapper</strong> — not rebuilding the offer — is almost always the fix.</p>
+
+        <h4>The MAGIC Formula</h4>
+        <p>Use 3–5 components. Shorter and punchier generally outperforms. Test multiple names; keep the winner.</p>
+
+        <div class="magic-row">
+          <div class="magic-item">
+            <span class="magic-letter">M</span>
+            <p class="magic-word">Magnetic Reason Why</p>
+            <p class="magic-desc">Why this offer, why now? "Free," "88% off," "Grand Opening," "New Management," seasonal hook. Answers: why should I respond?</p>
+          </div>
+          <div class="magic-item">
+            <span class="magic-letter">A</span>
+            <p class="magic-word">Announce Your Avatar</p>
+            <p class="magic-desc">Call out exactly who this is for. Hyper-local beats generic: not "Baltimore moms" but "Towson moms." The more specific, the higher the response from the right people.</p>
+          </div>
+          <div class="magic-item">
+            <span class="magic-letter">G</span>
+            <p class="magic-word">Give Them a Goal</p>
+            <p class="magic-desc">The dream outcome in one phrase: "celebrity smile," "pain-free," "double your profit," "first client," "little black dress." Specific and tangible beats vague and inspirational.</p>
+          </div>
+          <div class="magic-item">
+            <span class="magic-letter">I</span>
+            <p class="magic-word">Indicate an Interval</p>
+            <p class="magic-desc">Duration of the program or time to result: "21-day," "6-week," "12-month." Note: platforms restrict quantified outcome + duration claims (implies guarantee). Use where compliant.</p>
+          </div>
+          <div class="magic-item">
+            <span class="magic-letter">C</span>
+            <p class="magic-word">Container Word</p>
+            <p class="magic-desc">Signals this is a bundled system, not a single service: Challenge, Blueprint, Intensive, Masterclass, Boot Camp, Sprint, Accelerator, Transformation, Shortcut, Deep Dive, Liftoff…</p>
+          </div>
+        </div>
+
+        <h4>Examples</h4>
+        <div class="table-wrap">
+          <table>
+            <tr><th>Industry</th><th>Named Offer</th></tr>
+            <tr><td>Fitness (local)</td><td>Venice Free 6-Week Lean by Halloween Challenge</td></tr>
+            <tr><td>Weight loss</td><td>88% Off 12-Week Bikini Blueprint</td></tr>
+            <tr><td>Dental</td><td>Lakeway Moms: $2,000 Off Celebrity Smile Transformation</td></tr>
+            <tr><td>Ortho</td><td>Back to School Free Braces Giveaway — 15 Families Only</td></tr>
+            <tr><td>Chiro</td><td>Bend Over Pain-Free in 42 Days — 81% Off Rapid Healing Intensive</td></tr>
+            <tr><td>Coaching</td><td>5 Clients in 5 Days Blueprint</td></tr>
+            <tr><td>Gym owners</td><td>Fill Your Gym in 30 Days — Free</td></tr>
+          </table>
+        </div>
+
+        <h4>When Offers Fatigue — What to Change (In Order)</h4>
+        <ol>
+          <li>Change the <strong>creative</strong> (images, video)</li>
+          <li>Change the <strong>body copy</strong> in ads</li>
+          <li>Change the <strong>headline / name</strong> of the offer</li>
+          <li>Change the <strong>seasonality</strong> (New Year → Valentine's → Spring)</li>
+          <li>Change the <strong>duration</strong> (6 weeks → 28 days → 8 weeks)</li>
+          <li>Change the <strong>free/discount component</strong></li>
+          <li>Change the <strong>entire monetization structure</strong> — last resort only</li>
+        </ol>
+        <p><em>The actual value stack rarely changes. Only the wrapper does.</em></p>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════ -->
+    <!-- SECTION 5: EXECUTION -->
+    <!-- ═══════════════════════════════════ -->
+    <div class="book-section">
+      <div class="section-header">
+        <span class="section-num">Section 5</span>
+        <h2 class="section-title">Execution — Your First $100,000</h2>
+      </div>
+
+      <div class="chapter" id="execution">
+        <h3 class="chapter-title"><span class="ch-tag">Ch. 17</span>Pulling It All Together</h3>
+
+        <p>March 2017. Hormozi stared at his bank account: $111,000. Personal savings. Real. "We could mess up and not make another dollar for three straight years and still be okay." Tens of millions of dollars later, this was still the richest he's ever felt. The first $100K is the inflection point — the proof that it works.</p>
+
+        <h4>The 11 Building Blocks of a Grand Slam Offer</h4>
+        <div class="framework">
+          <p class="framework-title">Complete Checklist</p>
+          <ol>
+            <li>You are not a commodity — your offer is differentiated and incomparable</li>
+            <li>You're in a normal or growing market, committed to a specific niche</li>
+            <li>You charge a premium price commensurate with the value you deliver</li>
+            <li>You understand and engineer all four drivers of the value equation</li>
+            <li>You've created your offer using the 5-step process (dream outcome → problems → solutions → delivery → trim)</li>
+            <li>You've stacked the value, priced it profitably, and can deliver it</li>
+            <li>You've built scarcity into the offer structure</li>
+            <li>You've added urgency with deadlines or cohort cadences</li>
+            <li>You've assembled bonuses that address every remaining objection</li>
+            <li>You've chosen a compelling, creative guarantee that reverses risk</li>
+            <li>You've named the offer using the MAGIC formula to attract the right avatar</li>
+          </ol>
+        </div>
+
+        <div class="pull-quote">
+          "Great marketing can't save a weak offer. But a great offer sells itself."
+        </div>
+
+        <h4>Key Principles to Take Forward</h4>
+        <ul>
+          <li><strong>The pain is the pitch.</strong> Articulate the prospect's pain so accurately they feel understood — and they'll almost always buy.</li>
+          <li><strong>Fast beats free.</strong> Speed is the underrated multiplier in the value equation.</li>
+          <li><strong>Virtuous cycle of price.</strong> Higher price → more adherence → better results → more referrals → higher prices.</li>
+          <li><strong>Hormozi's Law.</strong> The longer you delay the ask, the bigger the ask you can make.</li>
+          <li><strong>Never discount; add bonuses.</strong> Discounting trains buyers; bonuses reward them.</li>
+          <li><strong>Commit to the niche.</strong> If 100 offers in the same market haven't worked, you haven't tried enough — not that the market is wrong.</li>
+          <li><strong>You only need one grand slam offer</strong> to never need to work again. Hit one; the rest is compounding.</li>
+        </ul>
+
+        <div class="callout">
+          <p class="callout-title">What's Next — $100M Leads</p>
+          <p>The next book in the series covers how to acquire customers at a profit: structuring promotions so you never have to pay for new customers again. Once you have a Grand Slam Offer, the constraint becomes lead generation — and that's a solvable problem.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>

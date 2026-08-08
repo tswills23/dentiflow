@@ -1,0 +1,196 @@
+Sequences: 400
+conversations columns: id, practice_id, patient_id, channel, direction, message_body, service_context, ai_generated, automation_type, status, twilio_sid, metadata, created_at
+Total messages: 1078
+Inbound: 42, Outbound: 1036
+
+Unique repliers: 29
+
+================================================================================
+
+--- Debra M. | control_voice | stage=S1_INTENT | status=active | exit=null | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:58] Hey Debra, hope things are good. Team at Village Dental wanted to check in since you're due for a visit. You free to text?
+>>> IN  [05-12T14:59] Yes
+<<< OUT [05-12T15:33] Great — it's been about 6 months since your last visit. Why don't we get you back in for a checkup. Does earlier or later in the week work better for you?
+<<< OUT [05-13T15:01] Hey Debra, Village Dental again. You probably feel fine — most people do. That's actually when it's easiest to stay that way. Pick a time: https://dentiflow-production.up.railway.app/r/6494579e-2f66-416c-8801-9af29cf70f11
+<<< OUT [05-14T16:00] Hey Debra, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+<<< OUT [05-15T15:03] Hey Debra, last note from Village Dental. No pressure, no lecture — just an open spot and 30% off when you come back in. Grab it if you want it: undefined/r/6494579e-2f66-416c-8801-9af29cf70f11
+
+--- Jim G. | control_voice | stage=EXIT_DEFERRED | status=exited | exit=deferred | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:00] Hey Jim, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T15:01] Florida
+<<< OUT [05-12T15:33] Not sure I'm following — are you saying you moved to Florida? Just wanted to get you back in for a visit since it's been almost a year. Want me to find a time?
+>>> IN  [05-12T15:33] Vacation
+<<< OUT [05-13T15:37] Hey Jim, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/231e0892-b84f-4e18-8fb0-5dde84721127
+<<< OUT [05-15T16:00] Hey Jim, hygiene team one more time. The hardest part is booking. We're taking 30% off when you come back in. Everything else is easy: https://dentiflow-production.up.railway.app/r/231e0892-b84f-4e18-8fb0-5dde84721127
+>>> IN  [05-15T16:01] Told you I'm in Florida right now
+<<< OUT [05-15T16:01] Got it — enjoy the trip. When you're back, does earlier or later in the week work better to get you in?
+
+--- Maria M. | control_voice | stage=S1_INTENT | status=active | exit=null | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T15:00] Hey Maria, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T15:02] I'm working right now and can't make it but I do need to call soon and make my appointment. Thank you. Will get back soon as real busy at work right now.
+<<< OUT [05-13T15:38] Hey Maria, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/962de3c9-078c-4ac9-a073-93c6e80865ef
+<<< OUT [05-14T20:00] Hey Maria, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+<<< OUT [05-15T16:01] Hey Maria, hygiene team one more time. The hardest part is booking. We're taking 30% off when you come back in. Everything else is easy: https://dentiflow-production.up.railway.app/r/962de3c9-078c-4ac9-a073-93c6e80865ef
+
+--- Christine H. | control_voice | stage=S6_COMPLETED | status=completed | exit=completed | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:57] Hey Christine, this is hygiene team at Village Dental. Had a couple openings come up this week and wanted to reach out before they fill. You free to text for a sec?
+>>> IN  [05-12T15:13] I do need to schedule a cleaning. What is your first available appointment during the first week of June. It's summer break so that week is pretty open for me.
+<<< OUT [05-12T15:22] Great. Here is a link to our availability. Grab a time that works well for you! https://bookit.dentrixascend.com/soe/new/dental?pid=ASC13000000001048&amp;mode=externalLink
+<<< OUT [05-13T15:01] Hey Christine, hygiene team from Village Dental again. The patients we worry about most are the ones who feel fine and keep putting it off. Don't want that to be you. Grab a time: https://dentiflow-production.up.railway.app/r/675a1f42-8b9c-43e1-9501-da043ca7419c
+<<< OUT [05-14T18:00] Hey Christine, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+>>> IN  [05-14T18:00] Yes in June
+<<< OUT [05-14T18:00] Perfect, see you in June. Give us a call if anything changes.
+
+--- Michael G. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:02] Hey Michael, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+>>> IN  [05-12T15:39] Hello Doc. What's up?
+<<< OUT [05-12T15:39] Haven't seen you in over a year and a half — wanted to reach out personally to get you taken care of. Let's get you back in for a checkup. Does earlier or later in the week work better?
+>>> IN  [05-12T15:44] I really like you guys, but I don't work in Elk Grove any longer. Plus you know I'm a big baby. I got another one that should be pulled and need a cleaning.
+<<< OUT [05-12T15:44] I get it — we'll make it super simple and easy for you. Worth the drive to get you taken care of. Does this week or next work better to come back in? https://dentiflow-production.up.railway.app/r/9433bd93-04f7-4aad-9e70-1ed8c5033f77
+>>> IN  [05-12T15:45] Neither right now. Maybe at end of month.
+<<< OUT [05-12T15:45] Got it, you're off the list. If you ever need us, just give us a call.
+>>> IN  [05-12T15:56] I'll dew it sune.
+<<< OUT [05-12T17:53] Hey Michael — sorry, my last reply was off. End of the month works great. Want me to reach back out in a couple weeks to find a time, or feel free to call us at 847-364-5100 whenever you're ready.
+
+--- Marife D. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:57] Hey Marife, hope things are good. Team at Village Dental wanted to check in since you're due for a visit. You free to text?
+<<< OUT [05-13T15:00] Hey Marife, Village Dental again. You probably feel fine — most people do. That's actually when it's easiest to stay that way. Pick a time: https://dentiflow-production.up.railway.app/r/60006dd4-06d7-407c-b194-2aed88cb40ac
+>>> IN  [05-13T15:00] Stop
+
+--- Lorenzo C. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:02] Hey Lorenzo, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+<<< OUT [05-13T15:37] Hey Lorenzo, Dr. Philip again. I'd rather you come in and leave with good news than keep waiting. Grab a time: https://dentiflow-production.up.railway.app/r/0731a6d7-a1da-473e-b372-c798d68b2083
+>>> IN  [05-13T16:34] Stop
+
+--- Alice L. | control_voice | stage=S0_OPENING | status=active | exit=null | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:00] Hey Alice, Dr. Philip here from Village Dental. Had some time between patients this morning and was thinking about folks I haven't caught up with in a while — you came to mind. Got a sec to text?
+<<< OUT [05-13T15:37] Hey Alice, Dr. Philip again. I'd rather you come in and leave with good news than keep waiting. Grab a time: https://dentiflow-production.up.railway.app/r/3092da8f-79f6-4fa1-b975-91d55ce7dd30
+>>> IN  [05-14T15:02] 
+<<< OUT [05-14T15:02] Just to make sure — were you looking to come in for a cleaning?
+<<< OUT [05-15T16:00] Hey Alice, Village Dental one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in. Grab a time: https://dentiflow-production.up.railway.app/r/3092da8f-79f6-4fa1-b975-91d55ce7dd30
+
+--- Mariah F. | control_voice | stage=S6_COMPLETED | status=completed | exit=completed | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:58] Hey Mariah, hope things are good. Team at Village Dental wanted to check in since you're due for a visit. You free to text?
+<<< OUT [05-13T15:00] Hey Mariah, Village Dental again. You probably feel fine — most people do. That's actually when it's easiest to stay that way. Pick a time: https://dentiflow-production.up.railway.app/r/d2f04e7c-34db-481c-a550-1739577bdeae
+<<< OUT [05-14T16:00] Hey Mariah, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+>>> IN  [05-14T17:19] Yes
+<<< OUT [05-14T17:19] Perfect, see you then. Give us a call if anything changes.
+
+--- John F. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:57] Hey John, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T14:58] Hi! This is his wife's phone number. He is in Elgin today. You could try texting (847)812-5355.
+<<< OUT [05-12T15:33] Got it — thanks for letting me know. We'll reach out to him there.
+<<< OUT [05-13T15:00] Hey John, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/359d0d55-a9ab-41a1-a60e-4393e7449611
+<<< OUT [05-14T16:00] Hey John, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+>>> IN  [05-14T16:01] Stop
+
+--- Katherine M. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:59] Hey Katherine, this is hygiene team at Village Dental. Had a couple openings come up this week and wanted to reach out before they fill. You free to text for a sec?
+>>> IN  [05-12T15:02] Text her @ 847 873-3186
+<<< OUT [05-12T15:33] Hey Katherine — this is the hygiene team at Village Dental. Just wanted to reach out personally to get you back in for a visit. It's been over a year since we've seen you. Does this week or next work better?
+<<< OUT [05-13T15:01] Hey Katherine, hygiene team from Village Dental again. The patients we worry about most are the ones who feel fine and keep putting it off. Don't want that to be you. Grab a time: https://dentiflow-production.up.railway.app/r/4b20114a-3dff-4ab1-8c81-cdbfec9850c8
+>>> IN  [05-13T15:38] Stop
+
+--- Gayl K. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:57] Hey Gayl, quick note from Village Dental. We've been thinking about getting you back in. You around to chat for a sec?
+>>> IN  [05-12T16:20] Everything seems to be going well with my partial. I would like to stop in and talk to you about one thing. I have been waiting to see if I just need to get used to it a little more. Could I stop in on Thursday to have a chat? Thanks for reaching out.
+<<< OUT [05-12T16:20] Got it, you're off the list. If you ever need us, just give us a call.
+<<< OUT [05-12T17:47] Hey Gayl — sorry, my last message was wrong. Yes, please come in Thursday. Give us a quick call at 847-364-5100 and we'll get you on the schedule for whatever time works.
+
+--- Iliyana M. | control_voice | stage=EXIT_DECLINED | status=exited | exit=declined | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:02] Hey Iliyana, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+>>> IN  [05-12T17:21] Hi, yeah I'm around what's going on
+<<< OUT [05-12T17:21] It's been over a year and a half since you've been in — we wanted to reach out personally to get you taken care of. Let's get you back in for a checkup. Does earlier or later in the week work better?
+>>> IN  [05-12T17:23] I don't need any service right now, thanks
+<<< OUT [05-12T17:23] No worries — was it a timing thing or did you find somewhere else?
+>>> IN  [05-12T17:24] I'm going somewhere else
+
+--- Ibris L. | control_voice | stage=EXIT_DECLINED | status=exited | exit=declined | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:58] Hey Ibris, this is hygiene team at Village Dental. Had a couple openings come up this week and wanted to reach out before they fill. You free to text for a sec?
+>>> IN  [05-12T18:16] Wrong number
+<<< OUT [05-12T18:16] No worries. Is it a timing thing, or did you end up finding somewhere else?
+
+--- Shari L. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T15:00] Hey Shari, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+<<< OUT [05-13T15:00] Hey Shari, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/1bfa3a2e-f4ad-4399-aa29-5e7f57766b64
+<<< OUT [05-14T16:00] Hey Shari, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+>>> IN  [05-14T16:00] No. No AI. People for the win
+<<< OUT [05-14T16:00] Got it, you're off the list. If you ever need us, just give us a call.
+
+--- Addyson G. | control_voice | stage=EXIT_DECLINED | status=exited | exit=declined | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:57] Hey Addyson, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T14:59] We are not continuing with your office anymore.
+<<< OUT [05-12T15:33] No worries — was it a timing thing or did you find somewhere else?
+
+--- Kim L. | control_voice | stage=EXIT_DECLINED | status=exited | exit=declined | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:59] Hey Kim, this is hygiene team at Village Dental. Had a couple openings come up this week and wanted to reach out before they fill. You free to text for a sec?
+>>> IN  [05-12T15:01] Thanks but I'm good.
+<<< OUT [05-12T15:33] No worries — was it a timing thing or did you find somewhere else?
+>>> IN  [05-12T15:41] Neither
+
+--- Eleanor H. | control_voice | stage=S6_COMPLETED | status=completed | exit=completed | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:59] Hey Eleanor, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+>>> IN  [05-12T15:40] Hi Dr. Phillip, this is Eleanor's mom. Can I help you?
+<<< OUT [05-12T15:40] Hi — yes, I was reaching out to Eleanor about getting her back in for a checkup. It's been over a year since we've seen her. Is she available or would you prefer I text her directly?
+>>> IN  [05-12T15:41] I'll tell her to call to schedule an appointment. Thanks!
+<<< OUT [05-12T15:41] Perfect, appreciate it. We'll be here when she's ready to call in.
+
+--- Michael E. | control_voice | stage=EXIT_DECLINED | status=exited | exit=declined | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:00] Hey Michael, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T20:10] No
+<<< OUT [05-12T20:10] No worries — was it a timing thing or did you find somewhere else?
+
+--- Maiten F. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T15:00] Hey Maiten, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+<<< OUT [05-13T15:38] Hey Maiten, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/f0ee8d2a-b2ae-4556-9529-2f084a1785f5
+>>> IN  [05-13T15:39] Stop
+
+--- Kurian J. | control_voice | stage=S6_COMPLETED | status=completed | exit=completed | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T14:57] Hey Kurian, quick note from Village Dental. We've been thinking about getting you back in. You around to chat for a sec?
+<<< OUT [05-13T15:00] Hey Kurian, Village Dental again. Most things that turn into bigger issues don't hurt until they do. Worth a quick visit to make sure you're good: https://dentiflow-production.up.railway.app/r/1da50711-37a0-4fdd-95cf-7946b19777dc
+<<< OUT [05-14T17:00] Hey Kurian, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+<<< OUT [05-15T15:02] Hey Kurian, Village Dental one more time. If getting back on the schedule has just kept slipping — we get it. 30% off when you come back in. Grab a time: undefined/r/1da50711-37a0-4fdd-95cf-7946b19777dc
+>>> IN  [05-15T15:04] Yes
+<<< OUT [05-15T15:04] Perfect — see you soon. Give us a call if anything changes.
+
+--- Dayanna H. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T15:01] Hey Dayanna, hygiene team from Village Dental here. Had a cancellation this morning and you were one of the first we thought of. You around?
+>>> IN  [05-12T15:19] Darn I'm not
+<<< OUT [05-13T15:38] Hey Dayanna, hygiene team at Village Dental. We'd rather you come in and have nothing to find than not come in and miss something. Grab a spot: https://dentiflow-production.up.railway.app/r/19262559-43a5-42a4-abf5-862ef1413018
+<<< OUT [05-14T17:00] Hey Dayanna, were you able to grab a time at Village Dental Village Dental? Reply YES if you're all set, or let us know if you need help!
+
+--- George M. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=true ---
+<<< OUT [05-12T15:01] Hey George, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+<<< OUT [05-13T15:38] Hey George, Dr. Philip again. I'd rather you come in and leave with good news than keep waiting. Grab a time: https://dentiflow-production.up.railway.app/r/70035761-9591-4a87-9961-38e4708886d3
+>>> IN  [05-13T16:12] Stop
+
+--- Aric C. | control_voice | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:01] Hey Aric, it's Dr. Philip at Village Dental. I know it's been a while and that's totally fine. Had something I wanted to run by you though. You around?
+<<< OUT [05-13T15:38] Hey Aric, Dr. Philip again. I'd rather you come in and leave with good news than keep waiting. Grab a time: https://dentiflow-production.up.railway.app/r/79827eae-0372-4297-abaa-8b06a599b72a
+>>> IN  [05-13T16:26] Stop
+
+--- Nicole D. | offer_only | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:07] 32 Village Dental in Elk Grove Village has missed seeing your smile! For a limited time, we're offering 30% off your recommended treatment plan—call us today at 847.364.5100 or click to schedule your visit and get back on track with your dental health. undefined/r/01d96da8-9cf8-4440-b8f4-3a68947ae99
+<<< OUT [05-12T15:41] Sorry — link in our last text didn't work. Book your visit here: https://bookit.dentrixascend.com/soe/new/dental?pid=ASC13000000001048&mode=externalLink
+>>> IN  [05-12T15:42] STOP
+
+--- Shota F. | offer_only | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:56] 32 Village Dental in Elk Grove Village has missed seeing your smile! For a limited time, we're offering 30% off your recommended treatment plan—call us today at 847.364.5100 or click to schedule your visit and get back on track with your dental health. undefined/r/17b5509a-0ae5-45dd-a213-e5359543c1b
+>>> IN  [05-12T14:58] Unsubscribe
+
+--- Allan G. | offer_only | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:04] 32 Village Dental in Elk Grove Village has missed seeing your smile! For a limited time, we're offering 30% off your recommended treatment plan—call us today at 847.364.5100 or click to schedule your visit and get back on track with your dental health. undefined/r/b3adb232-b2e4-4069-8bbb-9f3b0d4fea2
+>>> IN  [05-12T15:05] Stop
+
+--- Patricia K. | offer_only | stage=S0_OPENING | status=completed | exit=no_response_auto_exit | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T14:56] 32 Village Dental in Elk Grove Village has missed seeing your smile! For a limited time, we're offering 30% off your recommended treatment plan—call us today at 847.364.5100 or click to schedule your visit and get back on track with your dental health. undefined/r/4abc26d8-0541-40eb-bd57-7d5d61014b5
+<<< OUT [05-12T15:38] Sorry — link in our last text didn't work. Book your visit here: https://bookit.dentrixascend.com/soe/new/dental?pid=ASC13000000001048&mode=externalLink
+>>> IN  [05-12T21:47] Why was the bill for my dentures submitted under Mark Klein? He is not a part of my dental insurance dr Phillips is
+<<< OUT [05-12T21:47] I'm not sure what happened there — let me have someone from billing call you to sort that out. What's the best number to reach you?
+>>> IN  [05-12T21:47] 8473640753
+<<< OUT [05-12T21:47] Perfect — someone from billing will give you a call shortly to get that sorted out. While I have you, it's been a bit since you've been in — want me to get you on the schedule for a checkup?
+
+--- Vesna K. | offer_only | stage=EXIT_OPT_OUT | status=exited | exit=opt_out | overdue=undefinedmo | link_clicked=false ---
+<<< OUT [05-12T15:04] 32 Village Dental in Elk Grove Village has missed seeing your smile! For a limited time, we're offering 30% off your recommended treatment plan—call us today at 847.364.5100 or click to schedule your visit and get back on track with your dental health. undefined/r/d9abf7da-5baa-4383-bcc5-ef68408c77c
+<<< OUT [05-12T15:39] Sorry — link in our last text didn't work. Book your visit here: https://bookit.dentrixascend.com/soe/new/dental?pid=ASC13000000001048&mode=externalLink
+>>> IN  [05-12T15:44] Cancel
