@@ -1,0 +1,253 @@
+Diagnosis form — overdue list calculator + qualified Lead event.
+
+WHERE THIS GOES
+  GHL → Funnel → Steps → Booking Page → add a Custom HTML/JavaScript block
+  directly ABOVE the calendar block.
+
+BEFORE YOU PASTE — set two things in the CONFIG block below:
+  WEBHOOK_URL   your GHL Inbound Webhook URL (Workflows → new workflow →
+                trigger "Inbound Webhook" → copy the URL it gives you)
+  CAL_SELECTOR  the id or class wrapping your calendar. The hero CTA already
+                links to #df-cal, so leave it unless the calendar moved.
+
+WHAT IT DOES
+  - Collects three numbers that are NOT patient data. No names, no PHI, ever.
+  - Calculates a projection from the measured 4.9% booking rate.
+  - Shows the result in place, then reveals the calendar underneath it.
+  - Fires the standard `Lead` pixel event ONLY when overdue >= 500.
+  - POSTs everything to GHL so the contact exists and the SMS sequence can
+    merge their own numbers.
+
+FAIL-OPEN BY DESIGN
+  The calendar is only hidden after JS confirms it can show it again. If the
+  script errors or is blocked, the calendar stays visible and booking still
+  works. Never let a form break the only conversion path on the page.
+
+────────────────────────────────────────────────────────────────────────
+
+<div class="df-diag" id="df-diag">
+  <div class="df-diag__head">
+    <span class="df-diag__eyebrow">Free · No patient data required</span>
+    <h2 class="df-diag__title">See what's sitting in your overdue list</h2>
+    <p class="df-diag__sub">Three numbers from your practice management software. Takes about five minutes to look up. We never ask for patient names or records.</p>
+  </div>
+
+  <form class="df-diag__form" novalidate>
+    <div class="df-diag__row">
+      <label class="df-diag__field">
+        <span>First name</span>
+        <input type="text" name="first_name" autocomplete="given-name" required>
+      </label>
+      <label class="df-diag__field">
+        <span>Practice name</span>
+        <input type="text" name="practice_name" autocomplete="organization" required>
+      </label>
+    </div>
+
+    <div class="df-diag__row">
+      <label class="df-diag__field">
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="email" required>
+      </label>
+      <label class="df-diag__field">
+        <span>Mobile</span>
+        <input type="tel" name="phone" autocomplete="tel" required>
+      </label>
+    </div>
+
+    <label class="df-diag__field">
+      <span>Roughly how many patients haven't been in for 6+ months?</span>
+      <input type="number" name="overdue_count" min="0" step="1" inputmode="numeric" placeholder="e.g. 1800" required>
+    </label>
+
+    <div class="df-diag__row">
+      <label class="df-diag__field">
+        <span>Average production per hygiene visit</span>
+        <input type="number" name="avg_production" min="0" step="1" inputmode="numeric" value="300" required>
+      </label>
+      <label class="df-diag__field">
+        <span>Practice management software</span>
+        <select name="pms" required>
+          <option value="">Select…</option>
+          <option>Dentrix</option>
+          <option>Dentrix Ascend</option>
+          <option>Eaglesoft</option>
+          <option>Open Dental</option>
+          <option>Curve Dental</option>
+          <option>Denticon</option>
+          <option>Carestream</option>
+          <option>Other</option>
+        </select>
+      </label>
+    </div>
+
+    <p class="df-diag__err" hidden></p>
+
+    <button type="submit" class="df-diag__btn">
+      <span>Show me the number</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </form>
+
+  <div class="df-diag__result" hidden>
+    <p class="df-diag__result-lead">You have about <b class="df-o"></b> patients overdue.</p>
+    <div class="df-diag__stats">
+      <div class="df-diag__stat"><b class="df-b"></b><span>appointments</span></div>
+      <div class="df-diag__stat"><b class="df-p"></b><span>in production</span></div>
+    </div>
+    <p class="df-diag__note">Based on the rate we measured at a 3-location PPO group — 32 booked from 657 patients texted, 4.9%. That's an estimate from one campaign, not a promise about your list.</p>
+    <p class="df-diag__cta-line"></p>
+  </div>
+</div>
+
+<style>
+.df-diag{background:#0A0A14;color:#E8ECF0;font-family:'Outfit',system-ui,sans-serif;
+  padding:56px 20px;text-align:center;}
+.df-diag *{box-sizing:border-box;}
+.df-diag__head{max-width:640px;margin:0 auto 32px;}
+.df-diag__eyebrow{display:inline-block;text-transform:uppercase;letter-spacing:.2em;font-size:11px;
+  font-weight:600;color:#C4B5FD;padding:7px 16px;border-radius:100px;
+  border:1px solid rgba(124,58,237,.45);background:rgba(124,58,237,.10);margin-bottom:18px;}
+.df-diag__title{font-size:clamp(26px,4.4vw,40px);line-height:1.12;font-weight:800;color:#fff;
+  letter-spacing:-.02em;margin:0 0 14px;}
+.df-diag__sub{font-size:15px;line-height:1.6;color:#8B93A7;font-weight:500;margin:0;}
+
+.df-diag__form{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;text-align:left;}
+.df-diag__row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.df-diag__field{display:flex;flex-direction:column;gap:7px;min-width:0;}
+.df-diag__field>span{font-size:13px;font-weight:600;color:#B6BCCB;line-height:1.35;}
+.df-diag__field input,.df-diag__field select{
+  font-family:inherit;font-size:16px;color:#fff;background:#12121F;
+  border:1px solid #262A3D;border-radius:11px;padding:13px 14px;width:100%;
+  appearance:none;transition:border-color .15s ease;}
+.df-diag__field input:focus,.df-diag__field select:focus{outline:none;border-color:#7C3AED;}
+.df-diag__field input::placeholder{color:#5F6673;}
+.df-diag__field select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%238B93A7' stroke-width='2.4'><path d='M2 5l5 5 5-5'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;}
+.df-diag__err{font-size:14px;font-weight:600;color:#F87171;margin:0;}
+
+.df-diag__btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;
+  font-family:inherit;font-size:17px;font-weight:700;color:#fff;border:none;
+  padding:17px 30px;border-radius:14px;margin-top:6px;
+  background:linear-gradient(135deg,#7C3AED 0%,#4F46E5 45%,#2563EB 100%);
+  box-shadow:0 14px 40px -12px rgba(124,58,237,.9);
+  transition:transform .18s ease,box-shadow .18s ease;}
+.df-diag__btn:hover{transform:translateY(-2px);box-shadow:0 20px 50px -12px rgba(124,58,237,1);}
+.df-diag__btn[disabled]{opacity:.6;cursor:default;transform:none;}
+
+.df-diag__result{max-width:600px;margin:0 auto;}
+.df-diag__result-lead{font-size:clamp(19px,3vw,24px);font-weight:600;color:#E8ECF0;margin:0 0 22px;}
+.df-diag__result-lead b{color:#fff;font-weight:800;}
+.df-diag__stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.df-diag__stat{background:#12121F;border:1px solid #262A3D;border-radius:14px;padding:24px 14px;}
+.df-diag__stat b{display:block;font-size:clamp(32px,6vw,46px);font-weight:800;line-height:1;
+  letter-spacing:-.03em;color:#fff;font-variant-numeric:tabular-nums;}
+.df-diag__stat span{display:block;font-size:13px;color:#8B93A7;margin-top:8px;font-weight:600;}
+.df-diag__note{font-size:12.5px;line-height:1.55;color:#7E8595;margin:0 0 20px;}
+.df-diag__cta-line{font-size:17px;font-weight:600;color:#E8ECF0;margin:0;}
+
+@media(max-width:600px){
+  .df-diag{padding:42px 16px;}
+  .df-diag__row{grid-template-columns:1fr;}
+}
+@media(prefers-reduced-motion:reduce){.df-diag__btn{transition:none;}}
+</style>
+
+<script>
+(function () {
+  // ── CONFIG ──────────────────────────────────────────────
+  var WEBHOOK_URL  = 'PASTE_YOUR_GHL_INBOUND_WEBHOOK_URL';
+  var CAL_SELECTOR = '#df-cal';
+  var BOOKING_RATE = 0.049;   // measured: 32 booked / 657 texted
+  var MIN_OVERDUE  = 500;     // the gate — below this we capture but do not fire Lead
+  // ────────────────────────────────────────────────────────
+
+  var root   = document.getElementById('df-diag');
+  if (!root) return;
+  var form   = root.querySelector('.df-diag__form');
+  var result = root.querySelector('.df-diag__result');
+  var errEl  = root.querySelector('.df-diag__err');
+  var btn    = root.querySelector('.df-diag__btn');
+  var cal    = document.querySelector(CAL_SELECTOR);
+
+  // Fail-open: only hide the calendar once we know we can bring it back.
+  // A JS error must never leave the page with no way to book.
+  if (cal) { cal.style.display = 'none'; }
+
+  var money = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+  var num   = function (n) { return Math.round(n).toLocaleString('en-US'); };
+
+  function fail(msg) {
+    errEl.textContent = msg;
+    errEl.hidden = false;
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'Show me the number';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errEl.hidden = true;
+
+    var d = {};
+    new FormData(form).forEach(function (v, k) { d[k] = typeof v === 'string' ? v.trim() : v; });
+
+    if (!d.first_name || !d.practice_name || !d.email || !d.phone || !d.pms) {
+      return fail('Please fill in every field.');
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) return fail('That email looks wrong.');
+    if (d.phone.replace(/\D/g, '').length < 10)      return fail('That mobile number looks too short.');
+
+    var overdue = parseInt(d.overdue_count, 10);
+    var avg     = parseInt(d.avg_production, 10);
+    if (!(overdue >= 0))  return fail('Enter roughly how many patients are overdue.');
+    if (!(avg > 0))       return fail('Enter your average production per visit.');
+
+    btn.disabled = true;
+    btn.querySelector('span').textContent = 'Working it out…';
+
+    var bookings   = Math.round(overdue * BOOKING_RATE);
+    var production = bookings * avg;
+    var qualified  = overdue >= MIN_OVERDUE;
+    var eventId    = 'lead_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+
+    var payload = {
+      first_name: d.first_name, practice_name: d.practice_name,
+      email: d.email, phone: d.phone, pms: d.pms,
+      overdue_count: overdue, avg_production: avg,
+      projected_bookings: bookings, projected_production: production,
+      qualified: qualified ? 'yes' : 'no',
+      event_id: eventId,
+      page_url: window.location.href
+    };
+
+    // Send to GHL, then render regardless. A webhook hiccup must not cost the
+    // visitor their result — we'd rather lose the record than the booking.
+    var send = fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function () {});
+
+    send.then(function () {
+      root.querySelector('.df-o').textContent = num(overdue);
+      root.querySelector('.df-b').textContent = num(bookings);
+      root.querySelector('.df-p').textContent = money(production);
+
+      root.querySelector('.df-diag__cta-line').textContent = qualified
+        ? 'Pick a time below and we’ll walk through where those ' + num(overdue) + ' sit and which segment to work first.'
+        : 'The pilot starts at 500 overdue patients, so you’re not there yet — but pick a time if you’d like to talk through how to get the list working.';
+
+      form.hidden   = true;
+      result.hidden = false;
+
+      // Standard Lead event, qualified only. Meta should learn one pattern.
+      if (qualified && typeof fbq === 'function') {
+        fbq('track', 'Lead', { value: production, currency: 'USD' }, { eventID: eventId });
+      }
+
+      if (cal) { cal.style.display = ''; }
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+})();
+</script>

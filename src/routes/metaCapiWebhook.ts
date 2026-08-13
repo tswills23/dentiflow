@@ -54,6 +54,15 @@ router.post('/', async (req: Request, res: Response) => {
 
   const b = req.body || {};
 
+  // Only these two. An unrecognised name would be silently ignored by Meta and
+  // we'd never know the server-side copy stopped arriving.
+  const ALLOWED = ['Lead', 'Schedule'] as const;
+  const eventName = String(b.event_name || 'Schedule');
+  if (!ALLOWED.includes(eventName as (typeof ALLOWED)[number])) {
+    res.status(400).json({ error: `event_name must be one of ${ALLOWED.join(', ')}` });
+    return;
+  }
+
   // GHL field names vary by workflow mapping, so accept the common aliases.
   const email = b.email || b.contact_email || b.Email;
   const phone = b.phone || b.contact_phone || b.Phone;
@@ -88,12 +97,14 @@ router.post('/', async (req: Request, res: Response) => {
   const payload: Record<string, unknown> = {
     data: [
       {
-        event_name: 'Schedule',
+        event_name: eventName,
         event_time: Math.floor(Date.now() / 1000),
         event_id: eventId,
         action_source: 'website',
         event_source_url: b.event_source_url || process.env.META_LANDING_URL,
         user_data: userData,
+        // Lead carries the projected production so Meta can weight by value.
+        custom_data: b.value ? { value: Number(b.value), currency: 'USD' } : undefined,
       },
     ],
     access_token: CAPI_TOKEN,
@@ -116,7 +127,7 @@ router.post('/', async (req: Request, res: Response) => {
       return;
     }
 
-    console.log(`[metaCapi] Schedule sent — event_id=${eventId} received=${j.events_received}`);
+    console.log(`[metaCapi] ${eventName} sent — event_id=${eventId} received=${j.events_received}`);
     res.json({ ok: true, event_id: eventId, events_received: j.events_received });
   } catch (err) {
     console.error('[metaCapi] Send failed:', err);
