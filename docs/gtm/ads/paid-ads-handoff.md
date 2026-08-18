@@ -86,10 +86,14 @@ Two pre-existing URL-rule custom conversions still run as a cross-check: `Lead -
 Plugin` and `Booked Call - ChatGPT Plugin`. Disagreement between those and `Schedule` means
 something broke.
 
-**Written, type-checks clean, NOT deployed:**
-- `src/routes/metaCapiWebhook.ts` — server-side CAPI, accepts `Lead` or `Schedule`, carries
-  `value` for Lead
-- `src/routes/legalRoutes.ts` — privacy policy at `/privacy` (needed to publish the Meta app)
+**Deployed 12 Aug (commit `e2044f5`), verified live:**
+- `src/routes/metaCapiWebhook.ts` → `POST /webhooks/meta-capi?secret=…` — server-side CAPI,
+  accepts `Lead` or `Schedule`, carries `value` for Lead. Returns 401 unauthenticated.
+- `src/routes/legalRoutes.ts` → `GET /privacy` — returns 200, renders. Needed to publish the
+  Meta app.
+
+Not yet wired: nothing calls the CAPI endpoint. The GHL workflow that POSTs to it is step 2
+of [funnel-v2-build-steps.md](funnel-v2-build-steps.md).
 
 ---
 
@@ -177,6 +181,20 @@ Files:
 - [funnel/diagnosis-form-PASTE.txt](../../../funnel/diagnosis-form-PASTE.txt) — the block
 
 Launch after the current test ends (~25 Aug). **Needs new budget.**
+
+---
+
+## 7b. Scope — ads stay recall-led
+
+Nothing in this work touches full-system ads or offer. Per
+[dentiflow-offer-master.md](../offer/dentiflow-offer-master.md) §2, ads lead with dormant-patient
+reactivation only, because it is the sole component with a receipt rather than a promise. §10
+pre-designs the full build-out but gates it behind all six modules being live plus per-module
+expected-value math — neither gate is close.
+
+Small confirmation from this round: the earlier Instant Form ads ran a general SGS-based offer,
+and the one prospect who showed up "wanted everything under the sun" and could not be narrowed.
+That is the exact failure §2 exists to prevent.
 
 ---
 
